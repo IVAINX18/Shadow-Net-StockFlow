@@ -1,0 +1,38 @@
+# Dependencias de terceros: se reinstalan desde los manifiestos, no se versionan.
+vendor/
+node_modules/
+
+# Artefactos de construccion del frontend y del backend.
+dist/
+build/
+*.tsbuildinfo
+
+# Variables de entorno y secretos: nunca se versionan valores reales.
+# Solo se permite versionar archivos de ejemplo sin credenciales.
+.env
+.env.*
+!.env.example
+
+# Registros de aplicacion y de integracion continua.
+*.log
+storage/logs/*
+!storage/logs/.gitignore
+
+# Resultados de pruebas y cobertura.
+coverage/
+.phpunit.result.cache
+.phpunit.cache/
+
+# Archivos temporales de sistema y de editores.
+.DS_Store
+.idea/
+.vscode/
+
+# Documentacion de tareas en curso: uso interno, no se publica.
+# Se ignora el contenido pero se preserva el directorio con .gitkeep.
+docs/tasks/*
+!docs/tasks/.gitkeep
+
+# Herramientas de agentes de desarrollo locales.
+.omo/
+.codegraph/
