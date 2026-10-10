@@ -32,7 +32,7 @@ El detalle y la justificación de cada elección están en [docs/architecture/ar
 | Node.js | 20.19.2 (EOL) | Subir a Node 22 LTS o 24 LTS (ver ADR-006). |
 | MySQL 8.4 LTS | No instalado | Instalar localmente o usar el contenedor de Docker Compose. |
 | Docker / Compose | Instalado (26.1.5 / v5.6.0) | Ninguna. |
-| Angular CLI | No instalado | Se instala en la Fase 1. |
+| Angular CLI | No instalado | Se instala en la Fase 0 (fundaciones). |
 
 ## Cómo leer la documentación
 

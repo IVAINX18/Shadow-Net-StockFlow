@@ -151,7 +151,7 @@ Los riesgos principales son las condiciones de carrera en el inventario (mitigad
 Quedan tres decisiones que requieren confirmación de Master porque cambian el entorno o el alcance:
 - **ADR-006 (entorno Node):** subir Node a 22/24 LTS y usar Angular 22, o mantener Node 20 con Angular 21. Recomendación: subir Node.
 - **ADR-010 (ejecutor de pruebas):** Pest 5 (recomendado) o PHPUnit 13.
-- **Confirmación general del alcance del MVP** antes de abrir la Fase 1.
+- **Confirmación general del alcance del MVP** antes de abrir la Fase 0.
 
 Detalle completo en las [decisiones de arquitectura](./architecture/architecture-decisions.md) y el [acta de constitución](./planning/project-charter.md) (§7).
 
