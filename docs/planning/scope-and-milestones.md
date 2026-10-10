@@ -19,20 +19,20 @@ La tabla siguiente es coherente con el alcance del MVP y las exclusiones del act
 | Dashboard | Totales de productos activos, existencias por almacén, productos bajo stock mínimo, movimientos recientes y valorización, alimentado por la API real | Alertas configurables y tableros por rol | Tableros comparativos entre organizaciones | — |
 | Reportes | Existencias por almacén, historial de movimientos, valorización, exportación a PDF y Excel, con colas de base de datos cuando el volumen lo justifique | Reportes programados y plantillas personalizadas | Consolidación multi-organización | Generación de reportes en el frontend duplicando la lógica [DECISIÓN] Fuente: docs/architecture/architecture-decisions.md §ADR-015 |
 | Auditoría | Responsable, acción, fecha y hora, entidad y referencia, sin secretos | Retención y purga configurables de la bitácora [HIPÓTESIS] Fuente: requisitos legales por confirmar con Master | Correlación de auditoría entre organizaciones | Borrado de evidencias de auditoría [DECISIÓN] Fuente: docs/architecture/database-design.md §4 |
-| Calidad y operación | Paginación, filtros, errores uniformes, registros, pruebas automatizadas, documentación y despliegue reproducible con Docker Compose | Cobertura ampliada y pruebas de carga | Operación multi-región | Redis, microservicios, Kubernetes y event sourcing [DECISIÓN] Fuente: docs/planning/project-charter.md §6; facturación fiscal, contabilidad integral y aplicación móvil nativa quedan como trabajo futuro, no del MVP |
+| Calidad y operación | Paginación, filtros, errores uniformes, registros, pruebas automatizadas, documentación y despliegue reproducible con Podman (podman-compose) | Cobertura ampliada y pruebas de carga | Operación multi-región | Redis, microservicios, Kubernetes y event sourcing [DECISIÓN] Fuente: docs/planning/project-charter.md §6; facturación fiscal, contabilidad integral y aplicación móvil nativa quedan como trabajo futuro, no del MVP |
 | Costeo | Promedio ponderado móvil | FIFO por capas, condicionado a la existencia de lotes [DECISIÓN] Fuente: docs/architecture/architecture-decisions.md §ADR-007 | Métodos mixtos por organización | Tipos flotantes para dinero o cantidades [DECISIÓN] Fuente: docs/architecture/inventory-domain.md §8.3 |
 
 ## 2. Fases e hitos
 
 Las duraciones indicadas son [ESTIMACIÓN] Fuente: juicio del equipo de planificación, sujetas a la velocidad real del desarrollo. Ninguna fase se considera cerrada sin cumplir todos sus criterios de salida.
 
-### Fase 0. Fundaciones (repo, Docker Compose, migraciones base, esqueleto Laravel y Angular, CI)
+### Fase 0. Fundaciones (repo, Podman, migraciones base, esqueleto Laravel y Angular, CI)
 
 Duración: [ESTIMACIÓN] 1 semana. Fuente: juicio del equipo de planificación.
 
 - **Objetivo:** dejar un monorepo documentación-primero compilable, reproducible y verificado por integración continua antes de escribir lógica de negocio.
-- **Entregables:** estructura `docs/`, `backend/` (Laravel 13 sobre PHP 8.4) y `frontend/` (Angular 22) según ADR-016 y ADR-002; `docker-compose.yml` con MySQL 8.4, backend y frontend según ADR-011; migraciones base de usuarios y catálogos según el orden de docs/architecture/database-design.md §7; especificación OpenAPI inicial según ADR-012; flujo de CI que ejecuta estilo (Pint), tipos y pruebas vacías en verde.
-- **Criterios de salida:** un clon limpio levanta todo el entorno con un solo comando documentado; `docker compose up` expone backend, frontend y MySQL sin errores; la CI pasa en la rama principal; la API responde su ruta de salud y la especificación OpenAPI es válida.
+- **Entregables:** estructura `docs/`, `backend/` (Laravel 13 sobre PHP 8.4) y `frontend/` (Angular 22) según ADR-016 y ADR-002; `compose.yaml` con MySQL 8.4, backend y frontend según ADR-017; migraciones base de usuarios y catálogos según el orden de docs/architecture/database-design.md §7; especificación OpenAPI inicial según ADR-012; flujo de CI que ejecuta estilo (Pint), tipos y pruebas vacías en verde.
+- **Criterios de salida:** un clon limpio levanta todo el entorno con un solo comando documentado; `podman-compose up -d --build` expone backend, frontend y MySQL sin errores; la CI pasa en la rama principal; la API responde su ruta de salud y la especificación OpenAPI es válida.
 - **Dependencias:** ninguna, salvo la confirmación de la versión de Node para Angular 22 (ADR-006, pendiente de Master).
 - **Riesgos:** herramientas locales ausentes (R-07) y RAM ajustada al construir contenedores y frontend (R-10). Fuente: docs/planning/project-charter.md §7.
 

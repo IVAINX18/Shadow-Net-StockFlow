@@ -22,7 +22,7 @@ No hay código todavía: el repositorio contiene únicamente la especificación 
 | Backlog | Épicas, tareas técnicas, dependencias y orden de implementación | [./planning/backlog.md](./planning/backlog.md) | ingeniero |
 | Criterios de aceptación | Criterios verificables (AC-###) por módulo e historia | [./planning/acceptance-criteria.md](./planning/acceptance-criteria.md) | ingeniero |
 | Arquitectura del sistema | Componentes, flujos, patrones y despliegue lógico | [./architecture/system-architecture.md](./architecture/system-architecture.md) | ingeniero |
-| Decisiones de arquitectura | Registro ADR-001..ADR-016 con versiones fijadas | [./architecture/architecture-decisions.md](./architecture/architecture-decisions.md) | ingeniero |
+| Decisiones de arquitectura | Registro ADR-001..ADR-017 con versiones fijadas | [./architecture/architecture-decisions.md](./architecture/architecture-decisions.md) | ingeniero |
 | Diseño de base de datos | Tablas, tipos, índices, restricciones y migraciones | [./architecture/database-design.md](./architecture/database-design.md) | ingeniero |
 | Diagrama entidad-relación | Modelo ER en Mermaid y cardinalidades | [./architecture/er-diagram.md](./architecture/er-diagram.md) | ingeniero |
 | Dominio de inventario | Reglas, estados, transacciones, concurrencia y valorización | [./architecture/inventory-domain.md](./architecture/inventory-domain.md) | ingeniero |
@@ -30,7 +30,7 @@ No hay código todavía: el repositorio contiene únicamente la especificación 
 | Seguridad | Modelo de amenazas, controles y checklist pre-lanzamiento | [./architecture/security-design.md](./architecture/security-design.md) | ingeniero |
 | Arquitectura backend | Capas Laravel, casos de uso y ciclo de petición | [./architecture/backend-architecture.md](./architecture/backend-architecture.md) | ingeniero |
 | Arquitectura frontend | Angular standalone, Signals, interceptores y guardias | [./architecture/frontend-architecture.md](./architecture/frontend-architecture.md) | ingeniero |
-| Arquitectura de despliegue | Docker Compose, entornos, CI/CD y respaldos | [./architecture/deployment-architecture.md](./architecture/deployment-architecture.md) | ingeniero |
+| Arquitectura de despliegue | Podman, entornos, CI/CD y respaldos | [./architecture/deployment-architecture.md](./architecture/deployment-architecture.md) | ingeniero |
 | Estándares de código | Convenciones PHP/TypeScript y política de comentarios | [./development/coding-standards.md](./development/coding-standards.md) | ingeniero |
 | Estrategia de pruebas | Pirámide, pruebas de inventario y concurrencia | [./development/testing-strategy.md](./development/testing-strategy.md) | ingeniero |
 | Flujo de trabajo | Ramas, commits, entornos y definición de terminado | [./development/development-workflow.md](./development/development-workflow.md) | ingeniero |

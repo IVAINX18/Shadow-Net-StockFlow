@@ -82,7 +82,7 @@ Detalle completo en la [arquitectura del sistema](./architecture/system-architec
 
 ## 11. Stack tecnológico
 
-El stack aprobado, con versiones estables verificadas el 10/10/2026: PHP 8.4 y Laravel 13.35 para el backend; Laravel Sanctum 4.3 para autenticación; MySQL 8.4 LTS con InnoDB para persistencia; Angular 22.2 con TypeScript 6.0, Signals y Reactive Forms para el frontend; Pest 5 sobre PHPUnit 13 para pruebas; Laravel Pint para estilo; barryvdh/laravel-dompdf 3.1 y maatwebsite/excel 4.0 para exportación; Docker Compose para el entorno; GitHub Actions para integración continua; y OpenAPI para el contrato de la API.
+El stack aprobado, con versiones estables verificadas el 10/10/2026: PHP 8.4 y Laravel 13.35 para el backend; Laravel Sanctum 4.3 para autenticación; MySQL 8.4 LTS con InnoDB para persistencia; Angular 22.2 con TypeScript 6.0, Signals y Reactive Forms para el frontend; Pest 5 sobre PHPUnit 13 para pruebas; Laravel Pint para estilo; barryvdh/laravel-dompdf 3.1 y maatwebsite/excel 4.0 para exportación; Podman 5.4.2 con Buildah 1.39.3 y podman-compose 1.6.0 para el entorno local sin demonio (ADR-017); GitHub Actions para integración continua; y OpenAPI para el contrato de la API.
 
 Cada elección documenta su alternativa evaluada y su razón. Se descartaron `spatie/laravel-permission` (se prefirió RBAC nativo por el alcance por almacén y por valor pedagógico), Redis (se usa la cola de base de datos), SQLite para pruebas de concurrencia (no reproduce el bloqueo de InnoDB) y tipos flotantes para dinero (se usan DECIMAL). **Existe una incompatibilidad de entorno pendiente de confirmación:** Angular 22 exige Node 22/24 LTS, pero el equipo tiene Node 20.19.2, que alcanzó fin de soporte el 30/04/2026.
 
@@ -126,7 +126,7 @@ Detalle completo en la [arquitectura backend](./architecture/backend-architectur
 
 ## 17. Despliegue y operación
 
-El entorno canónico es Docker Compose con servicios de MySQL, backend y frontend, con Dockerfiles ligeros, entornos local/staging/producción, integración continua en tres etapas (lint con Pint, pruebas con Pest, build de Angular) y despliegue condicionado. Los secretos se inyectan por variables de entorno, hay respaldos de base de datos y observabilidad por logs. Se documenta la restricción de recursos del equipo local (RAM ajustada) como consideración operativa.
+El entorno canónico es Podman con podman-compose (`compose.yaml`) y servicios de MySQL, backend y frontend, con Dockerfiles ligeros construidos por Buildah, entornos local/staging/producción, integración continua en tres etapas (lint con Pint, pruebas con Pest, build de Angular) y despliegue condicionado. Los secretos se inyectan por variables de entorno, hay respaldos de base de datos y observabilidad por logs. Se documenta la restricción de recursos del equipo local (RAM ajustada) como consideración operativa.
 
 Detalle completo en la [arquitectura de despliegue](./architecture/deployment-architecture.md) y el [flujo de trabajo de desarrollo](./development/development-workflow.md).
 
@@ -138,7 +138,7 @@ Detalle completo en la [estrategia de pruebas](./development/testing-strategy.md
 
 ## 19. Fases, backlog y orden de implementación
 
-El trabajo se ordena en ocho fases: Fase 0 fundaciones (repositorio, Docker, esqueleto, CI); Fase 1 autenticación, RBAC y almacenes; Fase 2 catálogo (categorías, unidades, productos); Fase 3 inventario (documentos, movimientos, kardex, reversos); Fase 4 tablero; Fase 5 reportes y exportación; Fase 6 auditoría; Fase 7 calidad y despliegue. Cada fase define criterios de salida medibles. Las duraciones son `[ESTIMACIÓN]`, sin fechas calendario comprometidas.
+El trabajo se ordena en ocho fases: Fase 0 fundaciones (repositorio, Podman, esqueleto, CI); Fase 1 autenticación, RBAC y almacenes; Fase 2 catálogo (categorías, unidades, productos); Fase 3 inventario (documentos, movimientos, kardex, reversos); Fase 4 tablero; Fase 5 reportes y exportación; Fase 6 auditoría; Fase 7 calidad y despliegue. Cada fase define criterios de salida medibles. Las duraciones son `[ESTIMACIÓN]`, sin fechas calendario comprometidas.
 
 El backlog descompone el alcance en once épicas (EP-001 a EP-011) con tareas técnicas, dependencias y prioridad MoSCoW. El orden recomendado comienza por autenticación y almacenes, porque todo lo demás exige autorización por almacén, y culmina con el inventario, que es el núcleo de mayor riesgo.
 
@@ -146,7 +146,7 @@ Detalle completo en [alcance y hitos](./planning/scope-and-milestones.md) y el [
 
 ## 20. Riesgos y decisiones pendientes de confirmación
 
-Los riesgos principales son las condiciones de carrera en el inventario (mitigadas con bloqueo en orden consistente y pruebas), los interbloqueos (reintento y orden global), la duplicación por reintentos (idempotencia), la deriva kardex-saldo (transacción única y consulta de verificación), el sobrediseño (regla explícita contra infraestructura por moda), los errores de valorización (DECIMAL y estrategia de redondeo) y las herramientas locales ausentes (Docker como entorno canónico).
+Los riesgos principales son las condiciones de carrera en el inventario (mitigadas con bloqueo en orden consistente y pruebas), los interbloqueos (reintento y orden global), la duplicación por reintentos (idempotencia), la deriva kardex-saldo (transacción única y consulta de verificación), el sobrediseño (regla explícita contra infraestructura por moda), los errores de valorización (DECIMAL y estrategia de redondeo) y las herramientas locales ausentes (Podman como entorno canónico, sin demonio).
 
 Quedan tres decisiones que requieren confirmación de Master porque cambian el entorno o el alcance:
 - **ADR-006 (entorno Node):** subir Node a 22/24 LTS y usar Angular 22, o mantener Node 20 con Angular 21. Recomendación: subir Node.
@@ -159,6 +159,6 @@ Detalle completo en las [decisiones de arquitectura](./architecture/architecture
 
 El proyecto está en fase de planificación. El repositorio contiene únicamente esta especificación en `docs/`, sin código de aplicación, sin `backend/` ni `frontend/` y sin repositorio Git inicializado todavía. La bitácora de esta fase está en [la bitácora](./logbook/development-log.md).
 
-El siguiente paso recomendado es que Master revise y apruebe esta documentación, confirme las decisiones pendientes de la sección 20, y autorice el inicio de la Fase 0 (fundaciones) con la instalación de Composer y MySQL 8.4 LTS (o el uso de Docker Compose), la subida de Node a 22/24 LTS y la inicialización del repositorio Git.
+El siguiente paso recomendado es que Master revise y apruebe esta documentación, confirme las decisiones pendientes de la sección 20, y autorice el inicio de la Fase 0 (fundaciones) con la instalación de Composer y MySQL 8.4 LTS (o el uso de podman-compose con Podman), la subida de Node a 22/24 LTS y la inicialización del repositorio Git.
 
 Índice completo de la documentación en [docs/README.md](./README.md).

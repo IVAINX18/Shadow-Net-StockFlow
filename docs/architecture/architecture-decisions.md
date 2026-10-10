@@ -28,7 +28,7 @@ Versiones estables verificadas (Packagist, npm, docs oficiales) el 10/10/2026:
 | RxJS | 7.4.x | `^6.5.3 || ^7.4.0` | — |
 | @angular/material | 22.2.x | `~22.2.0` | UI accesible. |
 | MySQL | 8.4 LTS (8.4.11) | `8.4.x` | InnoDB, ACID, bloqueo a nivel de fila. |
-| Docker / Compose | 26.1.5 / v5.6.0 | — | Entorno canónico reproducible. |
+| Podman / Buildah / podman-compose | 5.4.2 / 1.39.3 / 1.6.0 | — | Entorno canónico reproducible, sin demonio (ADR-017). Docker 26.1.5 sigue instalado en el host pero su demonio está apagado y no se usa. |
 
 ## 3. Registro de decisiones
 
@@ -104,6 +104,7 @@ Versiones estables verificadas (Packagist, npm, docs oficiales) el 10/10/2026:
 
 ### ADR-011. Docker Compose como entorno canónico
 
+- **Estado:** Reemplazada por ADR-017.
 - **Contexto:** faltan localmente Composer y MySQL; se quiere un entorno reproducible.
 - **Decisión:** `docker-compose.yml` con servicios de MySQL, backend (PHP-FPM/artisan) y frontend (Node). El desarrollo puede hacerse en el host o en contenedores, pero el entorno de referencia es el contenedor.
 - **Alternativas:** instalar todo en el host.
@@ -143,6 +144,14 @@ Versiones estables verificadas (Packagist, npm, docs oficiales) el 10/10/2026:
 - **Decisión:** un solo repositorio con `docs/` (esta especificación), `backend/` (Laravel) y `frontend/` (Angular) en fases posteriores. Ahora solo existe `docs/`.
 - **Alternativas:** dos repositorios separados (backend y frontend).
 - **Consecuencias:** una sola historia de versiones y una bitácora única; coherente con los demás proyectos Shadow-Net. El detalle de carpetas está en [../development/development-workflow.md](../development/development-workflow.md).
+
+### ADR-017. Podman en lugar de Docker (entorno sin demonio)
+
+- **Estado:** Vigente. Reemplaza a ADR-011, cuyo texto original se conserva por historia.
+- **Contexto:** el host (Debian 13) tiene Docker 26.1.5 instalado pero su demonio está apagado y no puede arrancarse sin privilegios interactivos, por lo que `docker compose up` no es verificable. Se necesita un motor de contenedores que funcione sin demonio en segundo plano.
+- **Decisión:** usar **Podman 5.4.2** con **Buildah 1.39.3** como constructor e imágenes OCI, y orquestar el entorno local con **podman-compose 1.6.0** (instalado vía pipx) sobre el fichero **`compose.yaml`** (autodescubierto por podman-compose). Los comandos canónicos son `podman-compose up -d --build`, `podman-compose exec -T backend php artisan migrate --force` y `podman-compose down`, tras copiar `.env.example` a `.env`. La composición exige tres ajustes propios de Podman: (a) `image: docker.io/library/mysql:8.4` con nombre de registro completo porque Podman no resuelve nombres cortos en tiempo de ejecución; (b) límites de memoria con `mem_limit:` porque es la clave que podman-compose aplica directamente, en lugar de `deploy.resources.limits.memory`; (c) `COPY --from=docker.io/library/composer:2` con registro completo en el Dockerfile del backend porque Buildah no resuelve nombres cortos en `COPY --from`.
+- **Alternativas:** arrancar el demonio de Docker con privilegios (descartado por no disponible); instalar todo en el host (pierde reproducibilidad).
+- **Consecuencias:** entorno local reproducible sin demonio y verificado el 10/10/2026: imágenes de backend (848 MB) y frontend (667 MB) construidas, contenedores `shadow-net-stockflow_mysql_1` (sano), `_backend_1` (puerto 8000) y `_frontend_1` (puerto 4200) en ejecución, `GET /api/v1/health` con `{"status":"ok","service":"shadow-net-stockflow-api","version":"v1",...}`, `php artisan migrate --force` contra MySQL real con 10 tablas incluida `personal_access_tokens`, y frontend con HTTP 200 y título "Shadow-Net StockFlow". La integración continua no cambia: sigue con setup-php y setup-node y no depende de un demonio local.
 
 ## 4. Decisiones descartadas (resumen)
 

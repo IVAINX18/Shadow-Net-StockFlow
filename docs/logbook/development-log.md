@@ -10,6 +10,7 @@ Esta bitácora registra cada unidad de trabajo del proyecto: fecha, fase, archiv
 | --- | --- | --- | --- |
 | 1 | 10/10/2026 | Fase 0 - Planificación | Completada |
 | 2 | 10/10/2026 | Fase 0 - Fundaciones | Completada (verificación de `docker compose up` pendiente del demonio Docker) |
+| 3 | 10/10/2026 | Fase 0 - Fundaciones | Completada (entorno verificado con Podman; ADR-017 reemplaza ADR-011) |
 
 ---
 
@@ -113,3 +114,39 @@ Esta bitácora registra cada unidad de trabajo del proyecto: fecha, fase, archiv
 - Migrar las pruebas de integración a MySQL real y añadir el servicio MySQL al CI cuando existan pruebas de base de datos (Fase 3).
 
 **Nota:** se registran comandos y resultados realmente ejecutados; no se declara verificada ninguna operación que no se ejecutó.
+
+---
+
+## Entrada 3 - 10/10/2026 - Cambio de Docker a Podman
+
+**Fase:** Fase 0 - Fundaciones.
+
+**Archivos afectados (creados o modificados):**
+- `compose.yaml` (renombrado desde `docker-compose.yml`, con nombre de registro completo `docker.io/library/mysql:8.4` y límites con `mem_limit`).
+- `backend/Dockerfile` (`COPY --from=docker.io/library/composer:2` con registro completo para Buildah).
+- `.env.example` (comentarios adaptados a podman-compose).
+- Documentación: `docs/architecture/architecture-decisions.md` (nueva ADR-017), `docs/architecture/deployment-architecture.md`, `docs/architecture/system-architecture.md`, `docs/architecture/security-design.md`, `docs/development/development-workflow.md`, `docs/planning/backlog.md`, `docs/planning/project-charter.md`, `docs/planning/scope-and-milestones.md`, `docs/README.md`, `docs/SHADOW_NET_STOCKFLOW_SPECIFICATION.md`, `README.md` y esta bitácora.
+
+**Cambios efectuados:**
+- Motivo: el demonio de Docker está apagado en el host (Debian 13) y no puede arrancarse sin privilegios interactivos, por lo que `docker compose up` no era verificable. Podman no requiere demonio en segundo plano.
+- Entorno usado: Podman 5.4.2, Buildah 1.39.3 y podman-compose 1.6.0 (instalado vía pipx). Docker 26.1.5 sigue instalado en el host pero su demonio está apagado y no se usa.
+- Renombre de `docker-compose.yml` a `compose.yaml`, que podman-compose descubre automáticamente.
+- Ajustes propios de Podman: (a) `image: docker.io/library/mysql:8.4` con registro completo porque Podman no resuelve nombres cortos en tiempo de ejecución; (b) límites de memoria con `mem_limit:` porque es la clave que podman-compose aplica directamente, en lugar de `deploy.resources.limits.memory`; (c) `COPY --from=docker.io/library/composer:2` con registro completo en el Dockerfile del backend porque Buildah no resuelve nombres cortos en `COPY --from`.
+- Comandos canónicos: copiar `.env.example` a `.env`, luego `podman-compose up -d --build`, `podman-compose exec -T backend php artisan migrate --force` y `podman-compose down`.
+- La integración continua no cambia: sigue con setup-php y setup-node sobre corredores alojados por GitHub y no depende de un demonio local.
+
+**Pruebas ejecutadas (resultados reales):**
+- Construcción de imágenes: backend 848 MB y frontend 667 MB.
+- Contenedores en ejecución: `shadow-net-stockflow_mysql_1` (sano), `_backend_1` (puerto 8000) y `_frontend_1` (puerto 4200).
+- `GET /api/v1/health` → `{"status":"ok","service":"shadow-net-stockflow-api","version":"v1",...}`.
+- `php artisan migrate --force` contra MySQL real: 10 tablas creadas, incluida `personal_access_tokens`.
+- Frontend con HTTP 200 y título "Shadow-Net StockFlow".
+
+**Resultado:** el entorno local quedó verificado con Podman; la decisión quedó registrada en ADR-017, que reemplaza a ADR-011 sin borrar su texto original.
+
+**Pendientes:**
+- Crear los `environment` de Angular con `apiBaseUrl` (Fase 1).
+- Migrar las pruebas de integración a MySQL real y añadir el servicio MySQL al CI cuando existan pruebas de base de datos (Fase 3).
+- Decidir sobre `laravel/boost`, sugerido por el `AGENTS.md` generado por el esqueleto; no se instaló y el PHP se mantiene en 8.4, no en 8.5.
+
+**Nota:** esta entrada no modifica la Entrada 2, que se conserva como historia; la verificación pendiente del demonio Docker quedó resuelta por el cambio a Podman.

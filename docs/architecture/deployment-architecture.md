@@ -2,23 +2,23 @@
 
 **Estado del documento:** v1.0 (planificación). **Fecha:** 10/10/2026. **Autor:** Shadow-Net Technologies.
 
-Este documento describe cómo se construye, se prueba, se despliega y se opera el ERP Shadow-Net StockFlow: servicios de contenedores, entornos, integración continua, secretos, respaldos y observabilidad. La visión del sistema está en [system-architecture.md](./system-architecture.md), las decisiones de entorno en [architecture-decisions.md](./architecture-decisions.md) (ADR-011 y ADR-006), el backend en [backend-architecture.md](./backend-architecture.md) y el frontend en [frontend-architecture.md](./frontend-architecture.md). El acta del proyecto está en [../planning/project-charter.md](../planning/project-charter.md).
+Este documento describe cómo se construye, se prueba, se despliega y se opera el ERP Shadow-Net StockFlow: servicios de contenedores, entornos, integración continua, secretos, respaldos y observabilidad. La visión del sistema está en [system-architecture.md](./system-architecture.md), las decisiones de entorno en [architecture-decisions.md](./architecture-decisions.md) (ADR-017 y ADR-006), el backend en [backend-architecture.md](./backend-architecture.md) y el frontend en [frontend-architecture.md](./frontend-architecture.md). El acta del proyecto está en [../planning/project-charter.md](../planning/project-charter.md).
 
 ## 1. Principios
 
-- Docker Compose como entorno canónico y reproducible: el desarrollo puede hacerse en el host, pero la referencia es el contenedor. [DECISIÓN]
+- Podman con podman-compose como entorno canónico y reproducible, sin necesidad de un demonio en segundo plano: el desarrollo puede hacerse en el host, pero la referencia es el contenedor. [DECISIÓN]
 - Un solo comando documentado levanta todo el sistema (criterio CG-04 del acta).
 - Imágenes ligeras y límites de recursos explícitos por la restricción de memoria del equipo local (riesgo R-10 del acta). [DECISIÓN]
 - Secretos solo por variables de entorno; nunca confirmados en el repositorio.
 - La integración continua ejecuta estilo, pruebas y construcción antes de cualquier despliegue.
 
-Versiones aplicables (ver [architecture-decisions.md](./architecture-decisions.md)): Docker 26.1.5 con Compose v5.6.0, MySQL 8.4 LTS (8.4.11), PHP 8.4.x con Laravel 13.35.x, Node 22 LTS o 24 LTS para Angular 22.2.x.
+Versiones aplicables (ver [architecture-decisions.md](./architecture-decisions.md)): Podman 5.4.2 con Buildah 1.39.3 y podman-compose 1.6.0 (instalado vía pipx), MySQL 8.4 LTS (8.4.11), PHP 8.4.x con Laravel 13.35.x, Node 22 LTS o 24 LTS para Angular 22.2.x. Docker 26.1.5 sigue instalado en el host pero su demonio está apagado y no se usa.
 
-## 2. Servicios de `docker-compose`
+## 2. Servicios de `compose.yaml` (podman-compose)
 
 ```mermaid
 flowchart LR
-    DEV["Desarrollador\nun comando"] --> COMP["Docker Compose"]
+    DEV["Desarrollador\nun comando"] --> COMP["podman-compose"]
     COMP --> MYSQL[("mysql:8.4\nInnoDB\nvolumen de datos")]
     COMP --> BE["backend\nPHP 8.4-FPM + artisan\nLaravel 13 API"]
     COMP --> FE["frontend\nNode 22\nAngular 22 build + serve"]
@@ -35,9 +35,9 @@ flowchart LR
 Esqueleto ilustrativo de la composición (sin valores secretos):
 
 ```yaml
-services: # ver docker-compose.yml (esqueleto)
+services: # ver compose.yaml (esqueleto)
   mysql:
-    image: mysql:8.4
+    image: docker.io/library/mysql:8.4 # nombre de registro completo: Podman no resuelve nombres cortos
     environment:
       MYSQL_DATABASE: ${DB_DATABASE}
       MYSQL_USER: ${DB_USERNAME}
@@ -58,7 +58,7 @@ volumes:
   mysql-data:
 ```
 
-## 3. Dockerfiles
+## 3. Imágenes OCI construidas por Buildah (Dockerfiles)
 
 - `backend/Dockerfile`: parte de una imagen PHP 8.4 ligera, instala solo las extensiones necesarias, copia `composer.json` primero para aprovechar la caché de capas, instala dependencias sin paquetes de desarrollo en la imagen de ensayo y fija permisos del almacenamiento de Laravel. [DECISIÓN]
 - `frontend/Dockerfile`: usa Node 22 LTS en una etapa de construcción para compilar Angular y sirve los estáticos resultantes; en desarrollo monta el código como volumen para recarga en caliente. Se evita cualquier imagen con navegadores o herramientas pesadas para respetar la memoria disponible. [DECISIÓN]
@@ -68,7 +68,7 @@ volumes:
 | Aspecto | Local | Ensayo (staging) | Producción |
 | --- | --- | --- | --- |
 | Propósito | Desarrollo diario y pruebas de concurrencia contra MySQL real | Verificación previa al pase con datos de prueba | Operación real |
-| Composición | `docker compose up` con volúmenes de código | Construcción limpia sin volúmenes de código; imagen versionada | Imagen versionada e inmutable; migraciones aplicadas por paso controlado |
+| Composición | `podman-compose up -d` con volúmenes de código | Construcción limpia sin volúmenes de código; imagen versionada | Imagen versionada e inmutable; migraciones aplicadas por paso controlado |
 | Base de datos | Contenedor MySQL con volumen local | Instancia separada; restaurable desde respaldo | Instancia gestionada o dedicada; respaldos programados |
 | Configuración | Fichero `.env` local no confirmado | Variables del entorno de ensayo | Variables del gestor de secretos del proveedor |
 | Frontend | `ng serve` o estáticos locales con `apiBaseUrl` al backend local | Estáticos construidos con el `environment.staging` | Estáticos construidos con el `environment.prod` |
@@ -93,6 +93,7 @@ flowchart LR
 - `tests (Pest)`: ejecuta la suite Pest 5.3.x contra un servicio MySQL 8.4 real (las pruebas de concurrencia exigen bloqueo de filas InnoDB; SQLite está descartado según las decisiones).
 - `build (Angular)`: instala con Node 22 LTS y compila la SPA; falla ante errores de tipado estricto.
 - `deploy`: etapa separada que construye las imágenes versionadas, las publica en el registro y las despliega en el entorno de ensayo; la producción se despliega por aprobación manual tras validar el ensayo.
+- El flujo usa setup-php y setup-node sobre corredores alojados por GitHub, con su propio soporte de contenedores: no depende de un demonio Docker local ni ejecuta Podman.
 
 ## 6. Secretos y configuración
 
@@ -121,8 +122,8 @@ flowchart LR
 [DECISIÓN] El procedimiento canónico local es:
 
 1. Copiar `.env.example` a `.env` y completar las variables requeridas.
-2. Ejecutar `docker compose up --build` (o el comando documentado equivalente).
-3. Aplicar migraciones y semillas dentro del contenedor del backend.
+2. Ejecutar `podman-compose up -d --build`.
+3. Aplicar migraciones y semillas con `podman-compose exec -T backend php artisan migrate --force`.
 4. Abrir la SPA en la URL documentada y verificar el indicador de salud de la API.
 
 Este procedimiento satisface el criterio CG-04 del acta y se mantiene probado en integración continua. La consideración de hardware limitado (riesgo R-10) obliga a documentar los requisitos mínimos, a fijar límites de memoria por servicio en la composición y a preferir imágenes ligeras; si la construcción del frontend excede la memoria local, la construcción se traslada al flujo de CI y el equipo local consume el artefacto resultante.

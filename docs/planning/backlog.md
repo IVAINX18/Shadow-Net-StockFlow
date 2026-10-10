@@ -79,7 +79,7 @@ Convención de este backlog: cada épica implementa el rango de RF indicado; la 
 ## EP-011. Calidad, pruebas y despliegue (RF-116 a RF-125)
 
 - **Módulo:** Calidad. **Prioridad:** Must (MVP, Fases 0 y 7).
-- **Tareas técnicas:** suite Pest con pruebas unitarias, de integración, de autorización y de concurrencia según ADR-010; pruebas de extremo a extremo de entrada, salida, transferencia y reversión; informe de cobertura; guía de despliegue reproducible con Docker Compose y un solo comando documentado; verificación de los criterios CG-01 a CG-06 del acta.
+- **Tareas técnicas:** suite Pest con pruebas unitarias, de integración, de autorización y de concurrencia según ADR-010; pruebas de extremo a extremo de entrada, salida, transferencia y reversión; informe de cobertura; guía de despliegue reproducible con Podman (podman-compose) y un solo comando documentado; verificación de los criterios CG-01 a CG-06 del acta.
 - **Dependencias:** todas las épicas anteriores (cierra el MVP); entorno de pruebas sobre MySQL real, nunca SQLite para concurrencia [DECISIÓN] Fuente: docs/architecture/architecture-decisions.md §ADR-005.
 - **Referencia de aceptación:** criterios de los RF-116 a RF-125 en requirements.md y las historias de usuario del módulo Calidad (definidas en requirements.md).
 

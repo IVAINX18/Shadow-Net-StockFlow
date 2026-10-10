@@ -17,7 +17,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Reutilizo el binario oficial de Composer en vez de descargarlo en cada build.
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+# Uso el nombre completo del registro porque Buildah (Podman) no resuelve
+# nombres cortos en una instruccion COPY --from; con "composer:2" falla.
+COPY --from=docker.io/library/composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 

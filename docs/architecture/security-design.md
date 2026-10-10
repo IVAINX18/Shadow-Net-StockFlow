@@ -83,7 +83,7 @@ Alcance: SPA Angular, API `/api/v1`, base MySQL 8.4 con InnoDB, sesiones Sanctum
 
 - TLS obligatorio en todo el tráfico HTTP; las cookies de sesión exigen canal seguro. [DECISIÓN]
 - Cabeceras de seguridad estándar en las respuestas (tipo de contenido, encuadre y políticas básicas según el despliegue documentado en la fase de operación).
-- Docker Compose como entorno canónico reproducible; la configuración sensible viaja por entorno, no en imágenes ni en el repositorio (ADR-011 de [architecture-decisions.md](./architecture-decisions.md)).
+- Podman con podman-compose como entorno canónico reproducible y sin demonio; la configuración sensible viaja por entorno, no en imágenes ni en el repositorio (ADR-017 de [architecture-decisions.md](./architecture-decisions.md)).
 
 ## 5. Correspondencia con OWASP Top 10 (2021)
 

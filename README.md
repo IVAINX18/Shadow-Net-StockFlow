@@ -19,7 +19,7 @@ Nota: todavía NO hay código de aplicación en este repositorio. No existen `ba
 - **Backend:** PHP 8.4, Laravel 13.35, Laravel Sanctum 4.3, API REST versionada en `/api/v1`.
 - **Frontend:** Angular 22.2 (standalone, zoneless), TypeScript 6.0, Signals, Reactive Forms.
 - **Base de datos:** MySQL 8.4 LTS con InnoDB.
-- **Calidad y despliegue:** Pest 5, Laravel Pint, Docker Compose, GitHub Actions, OpenAPI.
+- **Calidad y despliegue:** Pest 5, Laravel Pint, Podman con podman-compose, GitHub Actions, OpenAPI.
 
 El detalle y la justificación de cada elección están en [docs/architecture/architecture-decisions.md](docs/architecture/architecture-decisions.md).
 
@@ -30,8 +30,8 @@ El detalle y la justificación de cada elección están en [docs/architecture/ar
 | PHP 8.4 | Instalado (8.4.26) | Ninguna. |
 | Composer 2.10 | No instalado | Instalar con el instalador oficial. |
 | Node.js | 20.19.2 (EOL) | Subir a Node 22 LTS o 24 LTS (ver ADR-006). |
-| MySQL 8.4 LTS | No instalado | Instalar localmente o usar el contenedor de Docker Compose. |
-| Docker / Compose | Instalado (26.1.5 / v5.6.0) | Ninguna. |
+| MySQL 8.4 LTS | No instalado | Instalar localmente o usar el contenedor de Podman (podman-compose). |
+| Podman / podman-compose | Instalado (5.4.2 / 1.6.0 vía pipx) | Ninguna (Docker 26.1.5 sigue instalado pero su demonio está apagado y no se usa). |
 | Angular CLI | No instalado | Se instala en la Fase 0 (fundaciones). |
 
 ## Cómo leer la documentación

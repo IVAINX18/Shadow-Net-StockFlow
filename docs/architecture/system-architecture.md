@@ -23,7 +23,7 @@ Regla permanente heredada del dominio: ninguna interfaz protege el inventario; s
 | Base de datos | MySQL 8.4 LTS con InnoDB (ADR-005) | Transacciones ACID, integridad referencial, bloqueo pesimista de filas, restricciones UNIQUE y CHECK. Tablas documento-línea-movimiento, saldo materializado y auditoría. |
 | Contrato de API | Especificación OpenAPI versionada (ADR-012) | Contrato único entre frontend y backend; base para documentación servida y futuros clientes o simuladores. |
 | Exportación | `barryvdh/laravel-dompdf` 3.1.x y `maatwebsite/excel` 4.0.x (ADR-015) | Generación de reportes PDF y Excel en el backend, bajo las mismas reglas de autorización. |
-| Entorno y despliegue | Docker Compose (ADR-011) | Servicios MySQL, backend y frontend reproducibles con un solo comando. Detalle en [deployment-architecture.md](./deployment-architecture.md). |
+| Entorno y despliegue | Podman con podman-compose (ADR-017) | Servicios MySQL, backend y frontend reproducibles con un solo comando, sin demonio. Detalle en [deployment-architecture.md](./deployment-architecture.md). |
 
 ## 3. Diagrama de componentes
 

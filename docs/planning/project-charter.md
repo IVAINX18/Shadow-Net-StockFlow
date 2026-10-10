@@ -96,10 +96,10 @@ Quedan explícitamente fuera del MVP. Algunas se planifican para versiones poste
 | R-04 | Deriva entre el kardex y las existencias. | Baja | Alto | Escritura de movimientos y actualización de existencias en la misma transacción; verificación por prueba que suma el kardex. |
 | R-05 | Sobrediseño prematuro (complejidad innecesaria). | Media | Medio | Regla explícita: nada de Redis, Kubernetes, microservicios ni event sourcing en el MVP. |
 | R-06 | Errores de valorización por redondeo o tipos incorrectos. | Media | Medio | DECIMAL (nunca flotantes) para cantidades, costos y totales; estrategia de redondeo documentada. |
-| R-07 | Dependencia de herramientas locales ausentes (Composer, MySQL, Angular CLI). | Alta | Bajo | Docker Compose reproducible como entorno canónico; documentar la instalación local. |
+| R-07 | Dependencia de herramientas locales ausentes (Composer, MySQL, Angular CLI). | Alta | Bajo | Podman con podman-compose como entorno canónico reproducible, sin demonio; documentar la instalación local. |
 | R-08 | Brechas de seguridad por confiar en validaciones del frontend. | Media | Alto | Toda regla de negocio y validación se aplica en el backend; el frontend solo mejora la experiencia. |
 | R-09 | Sobreajuste al aprendizaje: código correcto pero no profesional. | Baja | Medio | Criterios de calidad y pruebas obligatorias por fase; revisión de arquitectura por el mentor. |
-| R-10 | Recursos de hardware limitados (RAM ajustada) al construir frontend y contenedores. | Media | Bajo | Configurar límites en Docker; documentar requisitos; evitar imágenes pesadas. |
+| R-10 | Recursos de hardware limitados (RAM ajustada) al construir frontend y contenedores. | Media | Bajo | Configurar límites de memoria por servicio en la composición (`mem_limit`); documentar requisitos; evitar imágenes pesadas. |
 
 ## 8. Criterios generales de éxito
 

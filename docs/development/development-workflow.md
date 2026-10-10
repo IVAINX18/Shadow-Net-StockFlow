@@ -2,7 +2,7 @@
 
 **Estado del documento:** v1.0 (planificación). **Fecha:** 10/10/2026. **Autor:** Shadow-Net Technologies.
 
-Este documento define cómo organizo el repositorio, cómo trabajo por ramas, cómo propongo y reviso cambios, en qué entornos ejecuto el sistema, cómo preparo mi máquina, cómo corre la integración continua y cuándo una tarea queda terminada. Complementa los estándares de [coding-standards.md](./coding-standards.md) y la estrategia de [testing-strategy.md](./testing-strategy.md). Las decisiones que lo sustentan están en [architecture-decisions.md](../architecture/architecture-decisions.md) (ADR-011, ADR-016) y el marco general en [project-charter.md](../planning/project-charter.md).
+Este documento define cómo organizo el repositorio, cómo trabajo por ramas, cómo propongo y reviso cambios, en qué entornos ejecuto el sistema, cómo preparo mi máquina, cómo corre la integración continua y cuándo una tarea queda terminada. Complementa los estándares de [coding-standards.md](./coding-standards.md) y la estrategia de [testing-strategy.md](./testing-strategy.md). Las decisiones que lo sustentan están en [architecture-decisions.md](../architecture/architecture-decisions.md) (ADR-017, ADR-016) y el marco general en [project-charter.md](../planning/project-charter.md).
 
 ## 1. Estructura del repositorio
 
@@ -38,21 +38,21 @@ Fusiono con squash hacia `main` para dejar un historial lineal y legible, un com
 
 ## 4. Entornos
 
-- **Local.** Mi máquina o contenedores Docker Compose en mi máquina. Datos de prueba desechables, credenciales de desarrollo por variables de entorno.
+- **Local.** Mi máquina o contenedores Podman con podman-compose en mi máquina. Datos de prueba desechables, credenciales de desarrollo por variables de entorno.
 - **Staging.** Réplica del despliegue productivo con datos de prueba. Aquí verifico cada pull request fusionado antes de considerar la fase estable.
 - **Producción.** Despliegue documentado con un solo comando, según CG-04 del acta. Solo recibe lo que ya pasó por staging con la suite en verde.
 
-La paridad entre entornos la garantiza Docker Compose como entorno canónico (ADR-011). Las diferencias inevitables (puertos, credenciales, volúmenes) viven en variables de entorno, nunca en el código.
+La paridad entre entornos la garantiza Podman con podman-compose como entorno canónico (ADR-017): funciona sin demonio en segundo plano. Las diferencias inevitables (puertos, credenciales, volúmenes) viven en variables de entorno, nunca en el código.
 
 ## 5. Preparación del entorno local
 
-Necesito tres piezas en el host, con las versiones fijadas en [architecture-decisions.md](../architecture/architecture-decisions.md): PHP 8.4 con Composer instalado mediante el instalador oficial, Node 22 LTS y MySQL 8.4. Como alternativa, Docker Compose provee las tres sin tocar el host, opción recomendada si la máquina tiene limitaciones de memoria o si Master prefiere no modificar el entorno (ADR-006, riesgo R-07 y R-10 del acta).
+Necesito tres piezas en el host, con las versiones fijadas en [architecture-decisions.md](../architecture/architecture-decisions.md): PHP 8.4 con Composer 2.10.3 instalado a nivel de usuario mediante el instalador oficial, Node 22 LTS instalado vía nvm y MySQL 8.4 servido por Podman. Como alternativa, podman-compose 1.6.0 (instalado vía pipx) provee las tres sin tocar el host, opción recomendada si la máquina tiene limitaciones de memoria o si Master prefiere no modificar el entorno (ADR-006, riesgo R-07 y R-10 del acta). La composición vive en `compose.yaml` y los comandos canónicos son `podman-compose up -d --build`, `podman-compose exec -T backend php artisan migrate --force` y `podman-compose down`, tras copiar `.env.example` a `.env`.
 
 Pasos de preparación:
 
 1. Instalo Composer con el instalador oficial de getcomposer.org y verifico con `composer --version`.
 2. Instalo Node 22 LTS y verifico con `node --version`; el proyecto exige Node 22 o superior para Angular 22.
-3. Levanto MySQL 8.4, bien en el host o bien con `docker compose up -d mysql`, y creo la base y el usuario de desarrollo.
+3. Levanto MySQL 8.4, bien en el host o bien con `podman-compose up -d mysql`, y creo la base y el usuario de desarrollo.
 4. En `backend/`, ejecuto `composer install`, copio `.env.example` a `.env`, genero la clave y ejecuto migraciones y seeders en el orden de [database-design.md](../architecture/database-design.md) (§7).
 5. En `frontend/`, ejecuto `npm install` y `ng serve` para comprobar que la aplicación compila.
 
