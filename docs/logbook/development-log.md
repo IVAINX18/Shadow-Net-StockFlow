@@ -9,6 +9,7 @@ Esta bitácora registra cada unidad de trabajo del proyecto: fecha, fase, archiv
 | # | Fecha | Fase | Resultado |
 | --- | --- | --- | --- |
 | 1 | 10/10/2026 | Fase 0 - Planificación | Completada |
+| 2 | 10/10/2026 | Fase 0 - Fundaciones | Completada (verificación de `docker compose up` pendiente del demonio Docker) |
 
 ---
 
@@ -68,3 +69,47 @@ Esta bitácora registra cada unidad de trabajo del proyecto: fecha, fase, archiv
 - Comenzar la Fase 1 (fundaciones) tras la aprobación de la documentación.
 
 **Nota:** esta entrada no registra pruebas de funcionalidad porque, por diseño de esta fase, no existe todavía código ejecutable. Se evita declarar verificaciones no realizadas.
+
+---
+
+## Entrada 2 - 10/10/2026 - Fase 0: fundaciones (esqueleto backend/frontend, Docker y CI)
+
+**Fase:** Fase 0 - Fundaciones.
+
+**Archivos afectados (creados o modificados):**
+- `backend/` (Laravel 13.35.0 con Sanctum 4.3.3, Pest 5.3.1 y Pint 1.32.1; `HealthController`, `routes/api.php`, `tests/Feature/HealthTest.php`, `.env.example`, `Dockerfile`, `.dockerignore`).
+- `frontend/` (Angular 22.2.2, TypeScript 6.0.3, standalone y zoneless; `Dockerfile`, `.dockerignore`).
+- `docker-compose.yml`.
+- `.env.example` (raíz).
+- `.github/workflows/ci.yml`.
+- `README.md` y `docs/SHADOW_NET_STOCKFLOW_SPECIFICATION.md` (corrección de numeración de fases).
+- Esta bitácora.
+
+**Cambios efectuados:**
+- Instalación a nivel de usuario de Composer 2.10.3 (en `~/.local/bin`, firma SHA-384 verificada) y de Node v22.23.3 mediante nvm (checksum SHA-256 verificado), sin `sudo`.
+- Creación del backend Laravel 13 con `composer create-project`, Sanctum vía `install:api`, Pest y Pint, y un endpoint versionado `GET /api/v1/health` con su prueba.
+- Creación del frontend Angular 22 con componentes standalone y zoneless por defecto; build de producción correcto.
+- `docker-compose.yml` con los servicios `mysql` (8.4, InnoDB, volumen persistente), `backend` (PHP 8.4) y `frontend` (Node 22), con límites de memoria por servicio.
+- Dockerfiles: backend en PHP 8.4 CLI (extensiones `pdo_mysql`, `mbstring`, `bcmath`, `intl`, `zip`) y frontend en Node 22 con etapas de desarrollo, construcción y producción (nginx).
+- Flujo de integración continua con Pint, Pest y build de Angular.
+- Corrección de la numeración de fases (Fase 0 = fundaciones) en `README.md` y la especificación maestra.
+
+**Motivo:** cerrar las fundaciones técnicas antes de los módulos funcionales, con un entorno reproducible de un solo comando (criterio CG-04 del acta) y una línea base de calidad verificada.
+
+**Pruebas ejecutadas (resultados reales):**
+- `php artisan --version` → Laravel Framework 13.35.0.
+- `php artisan route:list --path=api` → incluye `GET api/v1/health`.
+- `php artisan test` → 3 pruebas, 3 correctas, 6 aserciones.
+- `./vendor/bin/pint --test` → sin diferencias de estilo.
+- `npm run build` (Angular) → correcto; salida en `frontend/dist/frontend/browser`.
+- `docker compose config -q` → composición válida; YAML del CI validado.
+
+**Resultado:** la Fase 0 quedó completada en todo lo verificable localmente. No se pudo verificar `docker compose up` porque el demonio de Docker no está activo y su arranque requiere `sudo` (no disponible de forma no interactiva).
+
+**Pendientes:**
+- Iniciar el demonio de Docker (`sudo systemctl start docker`) y verificar `docker compose up` (acción de Master).
+- Decidir sobre `laravel/boost`, sugerido por el `AGENTS.md` generado por el esqueleto; no se instaló y el PHP se mantiene en 8.4, no en 8.5.
+- Crear los `environment` de Angular con `apiBaseUrl` (Fase 1).
+- Migrar las pruebas de integración a MySQL real y añadir el servicio MySQL al CI cuando existan pruebas de base de datos (Fase 3).
+
+**Nota:** se registran comandos y resultados realmente ejecutados; no se declara verificada ninguna operación que no se ejecutó.

@@ -1,0 +1,103 @@
+# Composicion de desarrollo de Shadow-Net StockFlow.
+#
+# Levanta MySQL, la API Laravel y la SPA Angular con un solo comando.
+# Los valores sensibles se leen de un archivo .env local (no versionado) que
+# se construye copiando .env.example. Este archivo solo declara la estructura.
+# Referencia: docs/architecture/deployment-architecture.md
+
+name: shadow-net-stockflow
+
+services:
+  # Base de datos InnoDB. El kardex y la auditoria son inmutables, por eso el
+  # volumen de datos es persistente y no se recrea al levantar los servicios.
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_0900_ai_ci
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-stockflow}
+      MYSQL_USER: ${DB_USERNAME:-stockflow}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?define DB_PASSWORD en .env}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?define DB_ROOT_PASSWORD en .env}
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      # Compruebo que MySQL acepte conexiones antes de que el backend arranque;
+      # asi el backend no falla por una base de datos que aun no esta lista.
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    # Limito la memoria por servicio porque el equipo local tiene RAM ajustada
+    # (riesgo R-10 del acta). Ver deployment-architecture.md, seccion 9.
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+
+  # API Laravel 13. En desarrollo sirve con artisan y monta el codigo como
+  # volumen para recarga. El vendor vive en un volumen propio para no mezclar
+  # dependencias del contenedor con las del host.
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    working_dir: /var/www/html
+    command: php artisan serve --host=0.0.0.0 --port=8000
+    volumes:
+      - ./backend:/var/www/html
+      - backend-vendor:/var/www/html/vendor
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: http://localhost:8000
+      APP_KEY: ${APP_KEY:?define APP_KEY en .env}
+      # Dentro de la red de Compose la base se resuelve por el nombre del servicio.
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE:-stockflow}
+      DB_USERNAME: ${DB_USERNAME:-stockflow}
+      DB_PASSWORD: ${DB_PASSWORD:?define DB_PASSWORD en .env}
+    ports:
+      - "8000:8000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  # SPA Angular 22. Sirve con ng serve en desarrollo; el backend se alcanza por
+  # http://localhost:8000 desde el navegador del host.
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: dev
+    working_dir: /app
+    command: npm start -- --host 0.0.0.0 --poll 1000
+    volumes:
+      - ./frontend:/app
+      # Volumen anonimo para conservar las dependencias instaladas en la imagen
+      # y no sombrearlas con el node_modules (vacio o distinto) del host.
+      - frontend-node-modules:/app/node_modules
+    ports:
+      - "4200:4200"
+    depends_on:
+      - backend
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+
+volumes:
+  mysql-data:
+  backend-vendor:
+  frontend-node-modules:
