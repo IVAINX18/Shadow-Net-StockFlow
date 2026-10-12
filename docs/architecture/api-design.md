@@ -95,7 +95,7 @@ Salvo indicación contraria, todos los endpoints requieren autenticación. La co
 | GET | `/api/v1/users` | `users.view` | Paginación; filtros `is_active`, `role`, `warehouse_id`; búsqueda `q` (nombre, correo); `sort` por `name`, `email`, `created_at`. | Colección paginada de usuarios con roles. | 401, 403, 422 filtro u orden inválido. |
 | POST | `/api/v1/users` | `users.create` | `name` requerido (máx. 150); `email` requerido, único y válido; `password` requerida con longitud mínima; `role_ids` existentes; `warehouse_ids` existentes. | `201` con el usuario creado. | 401, 403, 422, 404 rol o almacén inexistente. |
 | GET | `/api/v1/users/{id}` | `users.view` | `id` numérico. | Objeto usuario con roles y almacenes. | 401, 403, 404. |
-| PUT | `/api/v1/users/{id}` | `users.update` | `name`, `email` (único excepto propio), `role_ids`, `warehouse_ids`; el cambio de contraseña usa endpoint o campo dedicado con confirmación. | Usuario actualizado. | 401, 403, 404, 422. |
+| PUT | `/api/v1/users/{id}` | `users.update` | `name`, `email` (único excepto propio), `role_ids`, `warehouse_ids`; `password` no se acepta aquí y responde 422 si llega con valor (el cambio de contraseña tendrá su propio endpoint con confirmación, RF-014). | Usuario actualizado. | 401, 403, 404, 422. |
 | POST | `/api/v1/users/{id}/activate` | `users.update` | Sin cuerpo. | Usuario con `is_active` en verdadero. | 401, 403, 404, 409 si ya estaba activo. |
 | POST | `/api/v1/users/{id}/deactivate` | `users.update` | Sin cuerpo; no se permite autodesactivación del último administrador. | Usuario con `is_active` en falso. | 401, 403, 404, 409 si es el último administrador. |
 

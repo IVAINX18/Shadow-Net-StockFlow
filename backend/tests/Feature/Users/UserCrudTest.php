@@ -205,6 +205,29 @@ test('AC-005: actualizar sustituye roles y almacenes con sync', function (): voi
     $this->assertDatabaseHas('warehouse_user', ['user_id' => $usuario->id, 'warehouse_id' => $almacenNuevo->id]);
 });
 
+// El PUT no es la vía del cambio de contraseña (RF-014): si el campo viaja con
+// valor lo rechazo en vez de responder 200 sin cambiarla, para que ningún
+// cliente crea que la contraseña se modificó. Un campo vacío sí se tolera,
+// porque un formulario puede enviarlo sin contenido.
+test('AC-005: el PUT rechaza una contraseña con valor y no la modifica', function (): void {
+    $admin = administradorUsuarios();
+    $usuario = User::factory()->create(['password' => Hash::make('ClaveOriginal1')]);
+    actuarComo($admin);
+
+    $this->putJson("/api/v1/users/{$usuario->id}", ['password' => 'ClaveNueva123'])
+        ->assertUnprocessable()
+        ->assertJsonPath('error.code', 'VALIDACION')
+        ->assertJsonPath('error.details.0.field', 'password')
+        ->assertJsonPath('error.details.0.message', 'La contraseña no se cambia por este endpoint.');
+
+    expect(Hash::check('ClaveOriginal1', $usuario->fresh()->password))->toBeTrue();
+
+    // Un campo vacío no es un intento de cambio: el resto de la actualización procede.
+    $this->putJson("/api/v1/users/{$usuario->id}", ['name' => 'Renombrada', 'password' => ''])
+        ->assertOk()
+        ->assertJsonPath('data.name', 'Renombrada');
+});
+
 // Activación, desactivación y la guarda del último administrador.
 test('activar y desactivar conmutan el estado y repetir da 409', function (): void {
     $admin = administradorUsuarios();
