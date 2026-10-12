@@ -7,8 +7,10 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-// Expongo solo id, nombre y slug porque la Unidad 2 solo necesita identificar
-// el rol; los permisos viajan agregados en el usuario, no aquí.
+// Expongo id, nombre, slug y descripción, más los permisos como detalle mínimo
+// (PermissionResource) solo cuando la relación viene cargada: el RoleController
+// siempre la precarga, así que el listado y el detalle de roles incluyen
+// permisos sin que los resúmenes de usuario paguen esa carga cuando no la piden.
 class RoleResource extends JsonResource
 {
     public function toArray(Request $request): array
@@ -17,6 +19,8 @@ class RoleResource extends JsonResource
             'id' => $this->resource->id,
             'name' => $this->resource->name,
             'slug' => $this->resource->slug,
+            'description' => $this->resource->description,
+            'permissions' => PermissionResource::collection($this->whenLoaded('permissions')),
         ];
     }
 }

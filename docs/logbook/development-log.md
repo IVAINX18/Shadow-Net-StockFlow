@@ -18,6 +18,7 @@ Esta bitácora registra cada unidad de trabajo del proyecto: fecha, fase, archiv
 | 8 | 12/10/2026 | Tooling - Base de conocimiento de agentes | Completada |
 | 9 | 12/10/2026 | Planificación - Importación y carga inicial | Completada (revisión de coherencia; pendiente confirmación de Master) |
 | 10 | 12/10/2026 | Fase 1 - U5: escritura de almacenes y usuarios autorizados | Completada (pruebas contra MySQL real) |
+| 11 | 12/10/2026 | Fase 1 - U6 y U7: CRUD de usuarios y de roles, más reactivación de almacenes | Completada (pruebas contra MySQL real) |
 
 ---
 
@@ -479,3 +480,56 @@ Esta bitácora registra cada unidad de trabajo del proyecto: fecha, fase, archiv
 - Los cambios de las unidades 1 a 5 siguen sin confirmar en Git, a la espera de autorización.
 
 **Nota:** la base de pruebas se reconstruye en cada ejecución; la base de desarrollo no se tocó en esta unidad.
+
+---
+
+## Entrada 11 - 12/10/2026 - Fase 1, Unidades 6 y 7: CRUD de usuarios y de roles, más reactivación de almacenes
+
+**Fase:** Fase 1 - Autenticación, RBAC y almacenes (Unidades 6 y 7 de 8).
+
+**Archivos afectados (creados o modificados):**
+- `backend/app/Http/Controllers/Api/V1/UserController.php` (nuevo): `index`, `show`, `store`, `update`, `activate` y `deactivate`.
+- `backend/app/Http/Controllers/Api/V1/RoleController.php` (nuevo): `index`, `store`, `show` y `update`.
+- `backend/app/Http/Controllers/Api/V1/PermissionController.php` (nuevo): `index` del catálogo.
+- `backend/app/Http/Controllers/Api/V1/WarehouseController.php` (modificado): `activate`.
+- `backend/app/Http/Requests/User/IndexUserRequest.php`, `StoreUserRequest.php` y `UpdateUserRequest.php` (nuevos).
+- `backend/app/Http/Requests/Role/IndexRoleRequest.php`, `StoreRoleRequest.php`, `UpdateRoleRequest.php` e `IndexPermissionRequest.php` (nuevos).
+- `backend/app/Http/Resources/PermissionResource.php` (nuevo): detalle mínimo del permiso.
+- `backend/app/Http/Resources/RoleResource.php` (modificado): descripción y permisos cuando vienen cargados.
+- `backend/app/Http/Resources/UserResource.php` (modificado): precarga completa de permisos anidados.
+- `backend/app/Http/Controllers/Api/V1/WarehouseController.php` (modificado): precarga de descripción en autorizados.
+- `backend/app/Policies/WarehousePolicy.php` (modificado): acción `activate`.
+- `backend/routes/api/v1/users.php` y `roles.php` (nuevos); `backend/routes/api.php` y `routes/api/v1/warehouses.php` (modificados).
+- `backend/tests/Feature/Users/UserCrudTest.php` (nuevo): 13 pruebas de usuarios.
+- `backend/tests/Feature/Roles/RoleCrudTest.php` (nuevo): 10 pruebas de roles y catálogo.
+- `backend/tests/Feature/Warehouses/WarehouseActivateTest.php` (nuevo): 3 pruebas de reactivación.
+- `docs/architecture/api-design.md` (modificado): fila de `POST /api/v1/warehouses/{id}/activate` en el §7.4.
+- Esta bitácora.
+
+**Cambios efectuados:**
+- Se crearon los seis endpoints de usuarios del §7.2: listado paginado con filtros (`is_active`, `role` por slug, `warehouse_id`), búsqueda `q` y orden cerrado; alta con `is_active = true` y 201; detalle con 404; actualización con `sync` de roles y almacenes; activación y desactivación con 409 `ESTADO_INVALIDO` al repetir y al desactivar al último administrador activo.
+- Se crearon los cinco endpoints del §7.3: listado y detalle de roles con permisos, alta con 201, actualización sin tocar el `slug`, y catálogo de permisos paginado con filtro `module`.
+- Se añadió la reactivación de almacenes (`POST /api/v1/warehouses/{id}/activate`, 409 si ya estaba activo), que el contrato no tenía como inverso de la desactivación.
+- Las rutas se dividen por permiso (`users.view`, `users.create`, `users.update`, `roles.view`, `roles.create`, `roles.update`); el alcance por almacén no aplica a cuentas ni roles, que son globales.
+
+**Motivo:** cerrar la administración de cuentas y roles (RF-005 a RF-015) con su matriz de permisos y alcance (AC-003, AC-005, AC-006, AC-055).
+
+**Decisiones tomadas:**
+- El listado de usuarios usa `UserSummaryResource` (ligero, para terceros); `UserResource` queda reservado al propio autenticado y al detalle, como ya hacía el listado de autorizados por almacén.
+- El `PUT` de usuario aplica roles y almacenes con `sync` (sustitución completa), mientras el endpoint de autorizados por almacén sigue acumulativo (`syncWithoutDetaching`): son contratos distintos y no se mezclan.
+- El `slug` del rol no se edita porque es su identificador estable (semillas y Policies lo usan como clave) y el contrato no lo lista.
+- Los roles exponen sus permisos como detalle mínimo (`PermissionResource`: id, nombre, slug y módulo) solo cuando la relación viene cargada; el `RoleController` siempre la precarga.
+- La guarda del último administrador cuenta activos con el rol `administrador` y responde 409 `ESTADO_INVALIDO`, código ya previsto para transiciones no permitidas.
+- No se implementaron cambio de contraseña (RF-014, unidad de cuenta propia), borrado de usuarios ni borrado de roles: el contrato no los contempla en estas unidades.
+
+**Pruebas ejecutadas (resultados reales):**
+- `php artisan test` (host, contra MySQL) → 75 pruebas, 75 correctas, 414 aserciones; 26 de ellas de estas unidades.
+- `./vendor/bin/pint` → sin diferencias pendientes; `./vendor/bin/pint --test` → sin diferencias.
+
+**Pendientes:**
+- Unidad 8: cierre de la Fase 1 (verificación integral y criterios de salida).
+- Riesgo detectado sin corregir (1): un Administrador puede quitarse a sí mismo el permiso de administración (vía `PUT /users/{id}` sobre su propio `role_ids` o vía `PUT /roles/{id}` sobre el rol `administrador`) y quedarse sin acceso; el sistema lo permite y no avisa.
+- Riesgo detectado sin corregir (2): el rol `administrador` puede perder el permiso `users.update` (vía `PUT /roles/{id}` con una lista reducida) y bloquear toda la gestión de cuentas; el sistema lo permite y no avisa.
+- Los cambios de las unidades 1 a 7 siguen sin confirmar en Git, a la espera de autorización.
+
+**Nota:** no se modificaron el esquema ni las migraciones; la base de desarrollo no se tocó en esta unidad.

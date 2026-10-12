@@ -22,6 +22,7 @@ Route::middleware(['auth:sanctum', 'account.active', 'permission:warehouses.upda
     ->group(function (): void {
         Route::put('/warehouses/{warehouse}', [WarehouseController::class, 'update']);
         Route::post('/warehouses/{warehouse}/deactivate', [WarehouseController::class, 'deactivate']);
+        Route::post('/warehouses/{warehouse}/activate', [WarehouseController::class, 'activate']);
         Route::post('/warehouses/{warehouse}/users', [WarehouseController::class, 'attachUsers']);
         Route::delete('/warehouses/{warehouse}/users/{user}', [WarehouseController::class, 'detachUser']);
     });

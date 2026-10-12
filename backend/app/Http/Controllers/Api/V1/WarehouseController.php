@@ -137,11 +137,31 @@ class WarehouseController extends Controller
         return new WarehouseResource($warehouse->refresh());
     }
 
+    public function activate(Warehouse $warehouse): WarehouseResource|JsonResponse
+    {
+        $this->authorize('activate', $warehouse);
+
+        // La desactivación no tenía inverso en el contrato y un almacén
+        // desactivado por error quedaba sin retorno; esta acción lo completa
+        // con la misma guarda de estado que su inversa.
+        if ($warehouse->is_active) {
+            return ApiErrorResponse::make(
+                'ESTADO_INVALIDO',
+                'El almacén ya se encuentra activo.',
+                409
+            );
+        }
+
+        $warehouse->update(['is_active' => true]);
+
+        return new WarehouseResource($warehouse->refresh());
+    }
+
     public function users(Warehouse $warehouse): AnonymousResourceCollection
     {
         $this->authorize('view', $warehouse);
 
-        $users = $warehouse->users()->with('roles:id,name,slug')->paginate(15)->withQueryString();
+        $users = $warehouse->users()->with('roles:id,name,slug,description')->paginate(15)->withQueryString();
 
         return UserSummaryResource::collection($users);
     }
@@ -157,7 +177,7 @@ class WarehouseController extends Controller
         // silencio violaría RF-023; la retirada tiene su propio endpoint.
         $warehouse->users()->syncWithoutDetaching($request->validated()['user_ids']);
 
-        $autorizados = $warehouse->users()->with('roles:id,name,slug')->orderBy('users.id')->get();
+        $autorizados = $warehouse->users()->with('roles:id,name,slug,description')->orderBy('users.id')->get();
 
         return UserSummaryResource::collection($autorizados);
     }

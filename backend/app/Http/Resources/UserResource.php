@@ -17,7 +17,9 @@ class UserResource extends JsonResource
         /** @var User $user */
         $user = $this->resource;
 
-        $user->loadMissing(['roles.permissions:id,slug', 'warehouses:id,code,name,is_active']);
+        // Precargo roles con sus permisos completos porque RoleResource los
+        // expone como detalle mínimo cuando la relación viene cargada.
+        $user->loadMissing(['roles.permissions:id,name,slug,module', 'warehouses:id,code,name,is_active']);
 
         $permissions = $user->roles
             ->flatMap(fn ($role) => $role->permissions->pluck('slug'))

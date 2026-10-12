@@ -118,6 +118,7 @@ Salvo indicación contraria, todos los endpoints requieren autenticación. La co
 | GET | `/api/v1/warehouses/{id}` | `warehouses.view` + alcance | `id` numérico. | Almacén con responsable y usuarios autorizados. | 401, 403 sin permiso de almacén, 404. |
 | PUT | `/api/v1/warehouses/{id}` | `warehouses.update` + alcance | `code` opcional y único (máx. 30); `name`, `address`, `city`, `manager_user_id` existente. | Almacén actualizado. | 401, 403, 404, 422. |
 | POST | `/api/v1/warehouses/{id}/deactivate` | `warehouses.update` + alcance | Sin cuerpo; rechaza si tiene existencias positivas pendientes de traslado según regla de negocio. | Almacén desactivado. | 401, 403, 404, 409 con existencias. |
+| POST | `/api/v1/warehouses/{id}/activate` | `warehouses.update` + alcance | Sin cuerpo. | Almacén con `is_active` en verdadero. | 401, 403, 404, 409 si ya estaba activo. |
 | GET | `/api/v1/warehouses/{id}/users` | `warehouses.view` + alcance | Paginación. | Usuarios autorizados del almacén. | 401, 403, 404. |
 | POST | `/api/v1/warehouses/{id}/users` | `warehouses.update` + alcance | `user_ids` existentes y activos. | Lista actualizada de autorizados. | 401, 403, 404, 422. |
 | DELETE | `/api/v1/warehouses/{id}/users/{userId}` | `warehouses.update` + alcance | Ambos identificadores numéricos. | `204` sin contenido. | 401, 403, 404. |

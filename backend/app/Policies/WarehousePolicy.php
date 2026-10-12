@@ -39,6 +39,13 @@ class WarehousePolicy
         return $this->conPermisoYAlcance($user, $warehouse, PermissionSlug::WarehousesUpdate->value);
     }
 
+    // La reactivación exige el mismo permiso y alcance que la desactivación,
+    // porque ambas mutan el ciclo de vida del almacén (RF-020).
+    public function activate(User $user, Warehouse $warehouse): bool
+    {
+        return $this->conPermisoYAlcance($user, $warehouse, PermissionSlug::WarehousesUpdate->value);
+    }
+
     public function manageUsers(User $user, Warehouse $warehouse): bool
     {
         return $this->conPermisoYAlcance($user, $warehouse, PermissionSlug::WarehousesUpdate->value);
