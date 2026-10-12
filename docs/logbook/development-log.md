@@ -13,6 +13,9 @@ Esta bitácora registra cada unidad de trabajo del proyecto: fecha, fase, archiv
 | 3 | 10/10/2026 | Fase 0 - Fundaciones | Completada (entorno verificado con Podman; ADR-017 reemplaza ADR-011) |
 | 4 | 12/10/2026 | Fase 1 - U1: esquema RBAC y almacenes | Completada (pruebas contra MySQL real) |
 | 5 | 12/10/2026 | Fase 1 - U2: errores uniformes y autenticación | Completada (flujo SPA verificado por HTTP) |
+| 6 | 12/10/2026 | Fase 1 - U3: autorización y alcance por almacén | Completada (403 y alcance verificados por HTTP) |
+| 7 | 12/10/2026 | Fase 1 - U4: semillas de permisos, roles y admin | Completada (login real con el admin sembrado) |
+| 8 | 12/10/2026 | Tooling - Base de conocimiento de agentes | Completada |
 
 ---
 
@@ -254,3 +257,133 @@ Esta bitácora registra cada unidad de trabajo del proyecto: fecha, fase, archiv
 - Los cambios de las unidades 1 y 2 siguen sin confirmar en Git, a la espera de autorización.
 
 **Nota:** las pruebas unitarias no detectaron los defectos 1 y 4 porque solo se manifiestan en el entorno contenedorizado y con errores HTTP fuera del camino feliz; se encontraron con la verificación por HTTP real, tal como exige el estándar de calidad del proyecto.
+
+---
+
+## Entrada 6 - 12/10/2026 - Fase 1, Unidad 3: autorización (Gates, Policies y alcance por almacén)
+
+**Fase:** Fase 1 - Autenticación, RBAC y almacenes (Unidad 3 de 8).
+
+**Archivos afectados (creados o modificados):**
+- `backend/app/Domain/Enums/PermissionSlug.php` (nuevo): catálogo de 19 permisos.
+- `backend/app/Http/Middleware/EnsurePermission.php` (nuevo): exige un permiso concreto.
+- `backend/app/Exceptions/OutsideWarehouseScopeException.php` (nuevo): alcance insuficiente.
+- `backend/app/Policies/WarehousePolicy.php`, `UserPolicy.php` y `RolePolicy.php` (nuevos).
+- `backend/app/Http/Requests/Warehouse/IndexWarehouseRequest.php` (nuevo).
+- `backend/app/Http/Controllers/Api/V1/WarehouseController.php` (nuevo) y `backend/routes/api/v1/warehouses.php` (nuevo).
+- `backend/app/Providers/AppServiceProvider.php` y `backend/routes/api.php` (modificados).
+- `backend/app/Models/User.php` (modificado): `canAccessWarehouse()`.
+- `backend/app/Http/Resources/WarehouseResource.php` (modificado): dirección, ciudad, responsable y usuarios autorizados cuando vienen cargados.
+- `backend/tests/Feature/Authorization/WarehouseAuthorizationTest.php` (nuevo).
+- `docs/architecture/security-design.md` (modificado): catálogo de permisos del MVP.
+
+**Cambios efectuados:**
+- Se definió el catálogo de permisos como una enumeración tipada y, a partir de ella, un Gate por permiso; no se usó `Gate::before` para que ningún rol pueda saltarse el alcance por almacén.
+- Se crearon las Policies de almacenes, usuarios y roles, y el middleware `permission`, más la excepción de alcance que responde 403 con el código `FUERA_DE_ALCANCE`.
+- Se añadieron los dos endpoints de lectura de almacenes del contrato: el listado, que acota el alcance en la consulta y pagina, filtra, busca y ordena; y el detalle, que verifica permiso y alcance.
+
+**Motivo:** aplicar en el servidor quién puede hacer qué y sobre qué almacén (RF-009, RF-011, RF-012), que es el criterio de salida de la fase: 403 para el almacén ajeno y auditor en solo lectura.
+
+**Decisiones tomadas:**
+- Se incorporaron a esta unidad los dos endpoints de lectura de almacenes (listado y detalle) porque sin superficie HTTP no es posible comprobar por petición real el 403 de alcance. La escritura de almacenes sigue en la unidad 5.
+- La autorización no usa un atajo de superusuario: el Administrador recibe el permiso `warehouses.view_all` para ver todos los almacenes, pero sus demás acciones siguen sujetas a permisos y al alcance que corresponda.
+- El alcance se resuelve en la consulta, nunca filtrando en memoria después de cargar todo.
+
+**Pruebas ejecutadas (resultados reales):**
+- `php artisan test` (host, contra MySQL) → 27 pruebas, 27 correctas, 157 aserciones; 12 de ellas de autorización.
+- `./vendor/bin/pint --test` → sin diferencias.
+- Verificación por HTTP real contra el contenedor, con datos temporales creados y eliminados al terminar:
+  - El Administrador (con `warehouses.view_all`) lista los dos almacenes; el Operador lista solo el suyo.
+  - El Operador consulta un almacén ajeno → `403 FUERA_DE_ALCANCE`.
+  - Un usuario sin permisos lista almacenes → `403 SIN_PERMISO` (AC-005).
+  - Tras retirar al Operador del almacén, su listado queda vacío y el detalle responde `403 FUERA_DE_ALCANCE` (AC-011).
+
+**Resultado:** Unidad 3 completada y verificada.
+
+**Pendientes:**
+- Unidad 4: semillas de roles, permisos y administrador de desarrollo.
+- Unidad 5: escritura de almacenes y asociación de usuarios autorizados.
+- Los cambios de las unidades 1 a 3 siguen sin confirmar en Git, a la espera de autorización.
+
+**Nota:** la base de desarrollo quedó limpia tras la verificación (sin usuarios, almacenes, roles ni permisos temporales).
+
+---
+
+## Entrada 7 - 12/10/2026 - Fase 1, Unidad 4: semillas de permisos, roles y administrador de desarrollo
+
+**Fase:** Fase 1 - Autenticación, RBAC y almacenes (Unidad 4 de 8).
+
+**Archivos afectados (creados o modificados):**
+- `backend/database/seeders/PermissionSeeder.php` (nuevo): los 19 permisos desde la enumeración.
+- `backend/database/seeders/RoleSeeder.php` (nuevo): los cuatro roles base con su matriz.
+- `backend/database/seeders/DevAdminUserSeeder.php` (nuevo): administrador de desarrollo.
+- `backend/database/seeders/DatabaseSeeder.php` (modificado): los ejecuta en orden.
+- `backend/.env.example` (modificado): variables del administrador de desarrollo, vacías.
+- `backend/.env` (local, ignorado por Git): valores del administrador de desarrollo.
+- `backend/tests/Feature/Seeders/SeedersTest.php` (nuevo).
+- `docs/architecture/security-design.md` (modificado): matriz de rol a permiso.
+
+**Cambios efectuados:**
+- Se sembró el catálogo de permisos desde la enumeración tipada, de modo que la semilla y la autorización no pueden divergir.
+- Se crearon los cuatro roles con su matriz exacta, usando `sync` para que reejecutar la semilla corrija desviaciones en lugar de acumular permisos.
+- Se añadió el administrador de desarrollo, que solo se crea si las variables de entorno están presentes y el entorno no es producción.
+
+**Motivo:** cumplir RF-015 (roles base precargados) y el apartado de semillas del modelo físico, para que el sistema sea usable y verificable sin crear datos a mano.
+
+**Decisiones tomadas:**
+- La matriz de permisos se define para los módulos ya construidos y para los planificados; los permisos de módulos futuros quedan concedidos en la semilla y surten efecto cuando su módulo llegue, sin volver a tocar el seeder.
+- El Auditor queda estrictamente en solo lectura, sin `inventory.confirm`, conforme a AC-006.
+- Las unidades de medida y las categorías iniciales se difieren a la Fase 2 por pertenecer a ese módulo, según lo acordado en el modelo físico.
+- El administrador de desarrollo nunca se crea en producción y sus credenciales viven solo en variables de entorno; el seeder avisa y continúa cuando faltan.
+
+**Pruebas ejecutadas (resultados reales):**
+- `php artisan test` (host, contra MySQL) → 37 pruebas, 37 correctas, 177 aserciones; 10 de ellas de semillas.
+- `./vendor/bin/pint --test` → sin diferencias.
+- `php artisan db:seed --force` ejecutado dos veces en el contenedor: los conteos quedaron idénticos (4 roles, 19 permisos, 1 usuario administrador), lo que demuestra la idempotencia.
+- Verificación por HTTP real: inicio de sesión con el administrador sembrado → 200, con el rol `administrador` y 19 permisos; `GET /api/v1/warehouses` → 200.
+- Comprobado que no hay credenciales escritas en el código.
+
+**Resultado:** Unidad 4 completada y verificada. El sistema ya es operable con un usuario real.
+
+**Pendientes:**
+- Unidad 5: escritura de almacenes (crear, actualizar, desactivar) y asociación de usuarios autorizados.
+- Unidades 6 y 7: CRUD de usuarios y de roles.
+- Los cambios de las unidades 1 a 4 siguen sin confirmar en Git, a la espera de autorización.
+
+**Nota:** la base de desarrollo conserva las semillas (roles, permisos y administrador), que es su estado esperado; la base de pruebas se reconstruye en cada ejecución de pruebas.
+
+---
+
+## Entrada 8 - 12/10/2026 - Base de conocimiento de agentes (AGENTS.md)
+
+**Fase:** Tooling (no pertenece a ninguna fase del producto).
+
+**Archivos afectados (creados o modificados):**
+- `AGENTS.md` (nuevo, raíz): mapa del proyecto, dónde buscar, mapa de código, convenciones, anti-patrones, comandos y notas.
+- `backend/AGENTS.md` (reemplazado): base de conocimiento de la API Laravel.
+- `backend/CLAUDE.md` (reemplazado): puntero a `AGENTS.md`.
+
+**Cambios efectuados:**
+- Se generó la base de conocimiento jerárquica de agentes: exploración en paralelo con cinco agentes, análisis estructural, mapa de código y puntuación de directorios.
+- Se sustituyeron las dos plantillas autogeneradas por Laravel Boost, que ordenaban instalar `laravel/boost` y subir a PHP 8.5, en contradicción con las decisiones fijadas (ADR-002 y ADR-017).
+
+**Motivo:** dar a cualquier agente un mapa real del proyecto y sus reglas, sin duplicar la especificación que ya vive en `docs/`.
+
+**Decisiones tomadas:**
+- Solo se crearon dos archivos: raíz y `backend/`. Se omitieron `frontend/` (andamiaje, lo cubre la raíz) y `docs/` (ya tiene su propio índice en `docs/README.md`); crear más habría duplicado contenido.
+- El contenido está en español, con los encabezados canónicos en inglés, para que coincidan con el resto de la documentación y sigan siendo localizables por las herramientas.
+- No hay indexador (`.codegraph/` vacío) ni servidor de lenguaje PHP, así que la centralidad del código queda marcada como no medida en lugar de inventarse.
+
+**Pruebas ejecutadas (resultados reales):**
+- Recuento de líneas dentro de los límites previstos: raíz 99, backend 67, puntero 8.
+- Un único encabezado H1 real por archivo (los conteos iniciales incluían comentarios `#` dentro de bloques de código).
+- Sin emojis: los caracteres no ASCII son tipográficos (flechas, viñetas de árbol, acentos) y coinciden con los que ya usan los documentos del proyecto.
+- Enlaces cruzados `./AGENTS.md` y `../AGENTS.md` verificados; sin duplicar las reglas del archivo global de instrucciones.
+
+**Resultado:** base de conocimiento de agentes completada y verificada.
+
+**Pendientes:**
+- Los cambios de las unidades 1 a 4 y este siguen sin confirmar en Git, a la espera de autorización.
+- Deriva detectada entre documentación y código, registrada en las notas del `AGENTS.md` de la raíz para corregirla al tocar esos documentos: `development-workflow.md` afirma que `backend/` y `frontend/` aún no existen, y ADR-006 figura como pendiente aunque Node 22 ya está instalado.
+
+**Nota:** no se modificó ningún documento de la especificación; la bitácora es el único documento actualizado.
