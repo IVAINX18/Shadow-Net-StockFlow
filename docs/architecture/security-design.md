@@ -42,6 +42,45 @@ Alcance: SPA Angular, API `/api/v1`, base MySQL 8.4 con InnoDB, sesiones Sanctum
 - El rol Auditor solo recibe permisos de lectura; nunca confirma, revierte ni administra.
 - La desactivación de usuarios, almacenes, productos y categorías exige el permiso correspondiente y respeta la estrategia de preservación del historial de [database-design.md](./database-design.md).
 
+### Catálogo de permisos del MVP (Fase 1)
+
+El catálogo es la fuente única de los permisos RBAC del MVP y vive como enum respaldado por cadena en el backend (`App\Domain\Enums\PermissionSlug`); de él se derivan los Gates y los slugs que exige cada endpoint de [api-design.md](./api-design.md).
+
+| Slug | Módulo | Qué autoriza |
+| --- | --- | --- |
+| users.view | users | Leer usuarios y su detalle. |
+| users.create | users | Crear cuentas de usuario. |
+| users.update | users | Editar, activar y desactivar cuentas. |
+| roles.view | users | Leer roles y el catálogo de permisos. |
+| roles.create | users | Crear roles. |
+| roles.update | users | Editar roles y sus permisos. |
+| warehouses.view | warehouses | Leer los almacenes dentro del alcance del usuario. |
+| warehouses.view_all | warehouses | Conceder visibilidad global de almacenes. |
+| warehouses.create | warehouses | Crear almacenes. |
+| warehouses.update | warehouses | Editar, desactivar y administrar autorizados de un almacén. |
+| catalog.create | catalog | Crear categorías, unidades y productos. |
+| catalog.update | catalog | Editar y desactivar categorías, unidades y productos. |
+| inventory.view | inventory | Leer documentos de inventario y kardex dentro del alcance. |
+| inventory.create | inventory | Crear y descartar documentos de inventario. |
+| inventory.confirm | inventory | Confirmar documentos de inventario. |
+| inventory.reverse | inventory | Revertir documentos confirmados. |
+| reports.view | reports | Consultar reportes dentro del alcance. |
+| reports.export | reports | Exportar reportes a PDF o Excel. |
+| audit.view | audit | Leer la bitácora de auditoría. |
+
+`warehouses.view_all` es el único slug que concede visibilidad global de almacenes: excede el alcance `warehouse_user` y solo lo recibe el rol Administrador; no es un atajo que salte la autorización de otras acciones (por eso no existe `Gate::before`). La asignación de cada slug a cada rol (Administrador, Jefe de almacén, Operador, Auditor) se siembra en la Unidad 4; este catálogo solo define los slugs.
+
+### Matriz de rol a permiso (Fase 1)
+
+| Rol | Permisos |
+| --- | --- |
+| Administrador | Los 19 slugs del catálogo (incluye `warehouses.view_all`). |
+| Jefe de almacén | `warehouses.view`, `warehouses.update`, `catalog.create`, `catalog.update`, `inventory.view`, `inventory.create`, `inventory.confirm`, `inventory.reverse`, `reports.view`, `reports.export`, `audit.view`. |
+| Operador | `warehouses.view`, `inventory.view`, `inventory.create`, `inventory.confirm`. |
+| Auditor | `warehouses.view`, `inventory.view`, `reports.view`, `audit.view` (solo lectura: nunca recibe `inventory.confirm`). |
+
+El administrador de desarrollo se crea solo desde las variables de entorno `DEV_ADMIN_NAME`, `DEV_ADMIN_EMAIL` y `DEV_ADMIN_PASSWORD`, y nunca en producción.
+
 ### C-03. Limitación de peticiones
 
 - El login tiene un límite estricto de intentos por dirección y cuenta, con bloqueo temporal y respuesta `429`. [DECISIÓN]

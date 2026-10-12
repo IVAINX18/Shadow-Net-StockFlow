@@ -1,7 +1,9 @@
 <?php
 
+use App\Exceptions\OutsideWarehouseScopeException;
 use App\Http\Errors\ApiErrorResponse;
 use App\Http\Middleware\EnsureAccountIsActive;
+use App\Http\Middleware\EnsurePermission;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -37,6 +39,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'account.active' => EnsureAccountIsActive::class,
+            'permission' => EnsurePermission::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
@@ -100,6 +103,21 @@ return Application::configure(basePath: dirname(__DIR__))
             return ApiErrorResponse::make(
                 'SIN_PERMISO',
                 'No tiene permiso para realizar esta acción.',
+                403
+            );
+        });
+
+        // Separo el acceso fuera de alcance del SIN_PERMISO genérico: el
+        // usuario tiene el permiso pero el almacén no está en su warehouse_user,
+        // y el §5 exige distinguirlo con el código FUERA_DE_ALCANCE.
+        $exceptions->render(function (OutsideWarehouseScopeException $e, Request $request) {
+            if (! $request->is('api/*')) {
+                return null;
+            }
+
+            return ApiErrorResponse::make(
+                'FUERA_DE_ALCANCE',
+                $e->getMessage(),
                 403
             );
         });

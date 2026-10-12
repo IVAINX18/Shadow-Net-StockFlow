@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Domain\Enums\PermissionSlug;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -94,5 +95,18 @@ class User extends Authenticatable
         }
 
         return $this->warehouses()->pluck('warehouses.id')->all();
+    }
+
+    // Decido el acceso a un almacén concreto sin cachear la pertenencia: leo
+    // la asignación en cada llamada porque AC-011 exige que retirar a un
+    // usuario de un almacén le quite el acceso en la petición inmediatamente
+    // siguiente. El permiso global `warehouses.view_all` salta el alcance.
+    public function canAccessWarehouse(int $warehouseId): bool
+    {
+        if ($this->hasPermission(PermissionSlug::WarehousesViewAll->value)) {
+            return true;
+        }
+
+        return in_array($warehouseId, $this->accessibleWarehouseIds(), true);
     }
 }

@@ -9,4 +9,5 @@ Route::prefix('v1')->group(function (): void {
     Route::get('/health', HealthController::class);
 
     require __DIR__.'/api/v1/auth.php';
+    require __DIR__.'/api/v1/warehouses.php';
 });
