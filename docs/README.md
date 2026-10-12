@@ -30,6 +30,7 @@ La **Fase 0 (fundaciones)** está completada y verificada: existen `backend/` (L
 | Seguridad | Modelo de amenazas, controles y checklist pre-lanzamiento | [./architecture/security-design.md](./architecture/security-design.md) | ingeniero |
 | Arquitectura backend | Capas Laravel, casos de uso y ciclo de petición | [./architecture/backend-architecture.md](./architecture/backend-architecture.md) | ingeniero |
 | Arquitectura frontend | Angular standalone, Signals, interceptores y guardias | [./architecture/frontend-architecture.md](./architecture/frontend-architecture.md) | ingeniero |
+| Sistema de diseno | Tokens, temas claro y oscuro, tipografia, densidad, estados y verificacion visual | [./architecture/design-system.md](./architecture/design-system.md) | ingeniero |
 | Arquitectura de despliegue | Podman, entornos, CI/CD y respaldos | [./architecture/deployment-architecture.md](./architecture/deployment-architecture.md) | ingeniero |
 | Estándares de código | Convenciones PHP/TypeScript y política de comentarios | [./development/coding-standards.md](./development/coding-standards.md) | ingeniero |
 | Estrategia de pruebas | Pirámide, pruebas de inventario y concurrencia | [./development/testing-strategy.md](./development/testing-strategy.md) | ingeniero |

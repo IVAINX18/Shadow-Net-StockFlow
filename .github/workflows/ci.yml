@@ -89,5 +89,13 @@ jobs:
       - name: Instalar dependencias
         run: npm ci
 
+      - name: Verificar estilo (ESLint)
+        run: npm run lint
+
+      - name: Ejecutar pruebas (Vitest)
+        # El runner corre en jsdom sin navegador; --no-watch evita que se quede
+        # esperando cambios en un entorno no interactivo.
+        run: npm test -- --no-watch
+
       - name: Compilar (tipado estricto)
         run: npm run build

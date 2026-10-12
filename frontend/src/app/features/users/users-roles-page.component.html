@@ -1,0 +1,46 @@
+<app-page-header
+  title="Usuarios y roles"
+  subtitle="Cuentas y roles con su catalogo de permisos."
+/>
+
+<section class="section">
+  <h2 class="section__title">Usuarios</h2>
+  <app-data-table
+    [columns]="userColumns"
+    [rows]="userRows()"
+    [total]="userTotal()"
+    [page]="userPage()"
+    [pageSize]="userPageSize()"
+    [loading]="userLoading()"
+    [error]="userErrorMessage()"
+    [errorId]="userErrorId()"
+    [sortKey]="userSortKey()"
+    [sortDirection]="userSortDirection()"
+    emptyIcon="person_off"
+    emptyTitle="Sin usuarios"
+    emptyMessage="No hay cuentas que mostrar con su rol actual."
+    (sortChange)="onUserSort($event)"
+    (pageChange)="onUserPage($event)"
+  />
+</section>
+
+<section class="section">
+  <h2 class="section__title">Roles</h2>
+  <app-data-table
+    [columns]="roleColumns"
+    [rows]="roleRows()"
+    [total]="roleTotal()"
+    [page]="rolePage()"
+    [pageSize]="rolePageSize()"
+    [loading]="roleLoading()"
+    [error]="roleErrorMessage()"
+    [errorId]="roleErrorId()"
+    [sortKey]="roleSortKey()"
+    [sortDirection]="roleSortDirection()"
+    emptyIcon="badge"
+    emptyTitle="Sin roles"
+    emptyMessage="Todavia no hay roles definidos en el sistema."
+    (sortChange)="onRoleSort($event)"
+    (pageChange)="onRolePage($event)"
+  />
+</section>

@@ -1,0 +1,76 @@
+<div class="login">
+  <mat-card class="login__card" appearance="outlined">
+    <div class="login__brand">
+      <mat-icon aria-hidden="true">inventory</mat-icon>
+      <div>
+        <h1 class="login__title">Shadow-Net StockFlow</h1>
+        <p class="login__subtitle">Gestion de inventarios y logistica</p>
+      </div>
+    </div>
+
+    @if (submitting()) {
+      <mat-progress-bar mode="indeterminate" aria-label="Iniciando sesion" />
+    }
+
+    @if (banner(); as notice) {
+      <div class="login__banner" [class.login__banner--warning]="notice.kind === 'warning'" role="alert">
+        <mat-icon aria-hidden="true">{{ notice.kind === 'warning' ? 'warning' : 'error' }}</mat-icon>
+        <span>{{ notice.message }}</span>
+      </div>
+    }
+
+    <form class="login__form" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+      <mat-form-field appearance="outline">
+        <mat-label>Correo electronico</mat-label>
+        <input
+          matInput
+          type="email"
+          formControlName="email"
+          autocomplete="username"
+          aria-describedby="email-help"
+          required
+        />
+        <mat-hint id="email-help">Use el correo con el que fue registrado.</mat-hint>
+        <mat-error>
+          @if (emailControl.hasError('required')) {
+            El correo es obligatorio.
+          } @else if (emailControl.hasError('email')) {
+            El correo no tiene un formato valido.
+          } @else if (emailControl.hasError('backend')) {
+            {{ emailControl.getError('backend') }}
+          }
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Contrasena</mat-label>
+        <input
+          matInput
+          type="password"
+          formControlName="password"
+          autocomplete="current-password"
+          aria-describedby="password-help"
+          required
+        />
+        <mat-hint id="password-help">Minimo exigido por el administrador de su cuenta.</mat-hint>
+        <mat-error>
+          @if (passwordControl.hasError('required')) {
+            La contrasena es obligatoria.
+          } @else if (passwordControl.hasError('backend')) {
+            {{ passwordControl.getError('backend') }}
+          }
+        </mat-error>
+      </mat-form-field>
+
+      <button
+        mat-flat-button
+        color="primary"
+        type="submit"
+        class="login__submit"
+        [disabled]="submitting()"
+      >
+        {{ submitting() ? 'Ingresando' : 'Ingresar' }}
+      </button>
+    </form>
+  </mat-card>
+</div>

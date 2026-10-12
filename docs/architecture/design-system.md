@@ -1,0 +1,189 @@
+# Sistema de diseno - Shadow-Net StockFlow
+
+**Estado del documento:** v1.0 (decisiones cerradas). **Fecha:** 12/10/2026. **Autor:** Shadow-Net Technologies.
+
+Este documento es la **fuente unica** de la identidad visual de la SPA: sistema de componentes, tokens, temas, tipografia, color, forma, densidad, estados de interfaz y la lista de verificacion que una pantalla debe pasar antes de darse por terminada. La arquitectura de la SPA (carpetas, estado, interceptores, rutas) esta en [frontend-architecture.md](./frontend-architecture.md); los requisitos de accesibilidad en [../planning/non-functional-requirements.md](../planning/non-functional-requirements.md) (RNF-024, RNF-025, RNF-026); los contratos de presentacion de datos en [api-design.md](./api-design.md).
+
+## 1. Lectura de diseno y alcance
+
+[DECISION] **Lectura de diseno:** back-office ERP para operadores de bodega, jefes de almacen, auditores y administradores, en escritorio y en pantallas reducidas de bodega, con un lenguaje de informacion densa, confianza y accesibilidad critica, apoyado en **Angular Material 3** como sistema oficial.
+
+[DECISION] **Diales de interfaz:** `DESIGN_VARIANCE 3` (rejilla predecible, simetria, alineacion estricta), `MOTION_INTENSITY 2` (interfaz estatica, solo transiciones breves y estados de `:hover` y `:active`) y `VISUAL_DENSITY 7` (tablas y datos operativos densos). Los tres valores se derivan del caracter del producto: software de operacion, no de promocion.
+
+[DECISION] La guia de gusto visual usada para cerrar estas decisiones declara explicitamente que los paneles de administracion, las tablas de datos y los formularios de varios pasos quedan **fuera de su alcance**. Por eso de este documento se excluye toda la maquinaria de paginas de marketing (hero, cuadriculas tipo bento, marquesinas, rotulaciones decorativas, prohibiciones de paleta para consumo premium) y se adopta unicamente lo que si transfiere a un panel de administracion: protocolo de temas, disciplina de color, consistencia de forma, ciclos completos de estado, patrones de formulario, tipografia para datos, contraste, rendimiento, respeto al movimiento reducido y verificacion previa a la entrega.
+
+## 2. Sistema de componentes
+
+[DECISION] **Angular Material 22.2.x y Angular CDK** son el unico sistema de componentes. No se incorpora Tailwind CSS ni ninguna otra biblioteca visual.
+
+Motivos: la documentacion del proyecto ya fija Material 22.2.x para tablas, formularios, dialogos y navegacion accesible (ADR-006, [frontend-architecture.md](./frontend-architecture.md) seccion 10); mezclar dos sistemas obliga a mantener dos escalas de espaciado, dos paletas y dos modelos de accesibilidad; y la regla del proyecto prohibe anadir infraestructura por moda. Una biblioteca de estado global (NgRx) tambien queda descartada por sobredimensionada.
+
+No se anaden dependencias visuales sin justificarlo en este documento y en la bitacora.
+
+## 3. Tokens
+
+[DECISION] Todo color, tipografia, radio, espaciado y elevacion proviene de los **tokens de sistema de Material 3** que genera `mat.theme()` (familia `--mat-sys-*`), expuestos como propiedades personalizadas de CSS. Los componentes no declaran colores literales, ni hexadecimales, ni `rgb()`, ni transparencias inventadas.
+
+Reglas de uso de la jerarquia de superficie:
+
+| Rol | Uso |
+| --- | --- |
+| `surface` | Fondo general de la aplicacion. |
+| `surface-container-low` | Barra de navegacion lateral y agrupaciones de fondo. |
+| `surface-container` | Tarjetas de indicadores y contenedores de contenido. |
+| `surface-container-high` | Elementos elevados sobre una tarjeta: menus, encabezados fijos de tabla. |
+| `outline-variant` | Divisores y bordes de 1 px entre filas y secciones. |
+| `primary` / `on-primary` | Acento unico, acciones principales y estado activo de la navegacion. |
+| `error`, `tertiary`, `secondary` y sus variantes | Solo estado semantico (error, advertencia, exito, informacion). Nunca decoracion. |
+
+## 4. Color
+
+[DECISION] **Semilla de paleta: verde azulado profundo.** Material 3 deriva de esa unica semilla toda la paleta tonal y asigna los roles semanticos, de modo que el proyecto no mantiene una lista de colores a mano.
+
+- Un solo acento (el primario) en toda la aplicacion y en todas las pantallas; queda bloqueado por coherencia.
+- Los colores semanticos comunican estado y nunca se usan para decorar.
+- Sin gradientes decorativos, sin saturaciones altas, sin acentos innecesarios.
+- Sin negro puro ni blanco puro como superficie general: la paleta tonal de Material 3 entrega grises y blancos sucios, que conservan profundidad.
+- El color nunca es el unico portador de informacion (ver seccion 13).
+- Todo contraste se verifica sobre los valores reales de los tokens, en tema claro y en tema oscuro.
+
+## 5. Temas claro y oscuro
+
+[DECISION] La aplicacion nace con **tema claro y tema oscuro**, resueltos con los tokens de Material 3. El tema inicial sigue la preferencia del sistema operativo (`prefers-color-scheme`) y existe un conmutador manual que persiste la eleccion del usuario.
+
+- Una pantalla tiene **un solo tema**: ninguna seccion invierte su fondo respecto al resto. Las superficies de la seccion 3 dan la diferenciacion sin cambiar de tema.
+- La jerarquia visual debe funcionar igual en ambos temas: lo que destaca en claro destaca en oscuro.
+- Ninguna pantalla se da por terminada sin haberla visto en los dos temas.
+
+## 6. Tipografia
+
+[DECISION] **Roboto** para texto general y **Roboto Mono** para identificadores y datos donde la alineacion monoespaciada ayuda a comparar (codigos de almacen, claves de documento, SKU). Ambas se autoalojan desde el paquete del proyecto, sin depender de un CDN y sin `<link>` a servicios de fuentes.
+
+- Se usa la escala tipografica de Material 3; no se inventan tamanos fuera de ella.
+- **Numeros tabulares activados** en toda celda numerica, en los valores de las tarjetas de indicadores y en las columnas de cantidades, costos y valores: es lo que permite comparar cifras en vertical.
+- Texto en espanol; codigo y nombres tecnicos en ingles (SD-06).
+- No se reduce el tamano del texto hasta perjudicar la legibilidad, ni siquiera para ganar densidad.
+- No se usa tipografia con serifa: es una interfaz de datos.
+
+## 7. Forma, elevacion y separacion
+
+[DECISION] Radios y elevaciones se toman de los roles de Material 3, sin sobrescribirlos, con esta regla explicita: botones y chips redondeados, tarjetas con radio medio, campos de formulario con radio pequeno. La regla es unica para todo el proyecto.
+
+- Sombras discretas y entintadas con el tono del fondo; nunca negro puro sobre fondo claro.
+- La separacion por defecto entre filas y bloques es un divisor de 1 px (`outline-variant`) o espacio en blanco, no una tarjeta.
+- Las tarjetas se usan solo cuando la elevacion comunica jerarquia real; no se envuelve todo en tarjetas.
+
+## 8. Densidad y espaciado
+
+[DECISION] Las vistas de datos (tablas, listados, kardex, existencias) usan **densidad compacta** de Material (`density: -2`), con divisores sutiles y alineacion consistente, para alcanzar la densidad visual 7 declarada en la seccion 1.
+
+[DECISION] En las pantallas de operacion de bodega se mantienen **objetivos tactiles de al menos 44 px** y la densidad compacta no se aplica: ahi mandan RNF-024 y la accesibilidad por encima de la densidad.
+
+El espaciado sigue la escala de Material 3; no se usan margenes arbitrarios.
+
+## 9. Estados de interfaz
+
+Toda vista que obtiene datos del backend implementa los cuatro estados, no solo el camino feliz:
+
+| Estado | Como se resuelve |
+| --- | --- |
+| Carga | Esqueleto con la forma del contenido final (filas de tabla, tarjetas), no un indicador circular generico. |
+| Vacio | Estado compuesto que explica que falta y como poblarlo, con la accion disponible si el usuario tiene permiso. |
+| Error | Mensaje en espanol junto al contenido afectado; en formularios, por campo. Se distingue el error de validacion, el de permisos y el de servidor. |
+| Exito | Confirmacion breve y no intrusiva; el resultado de una operacion se refleja en los datos, no en un aviso permanente. |
+
+Las acciones interactivas dan respuesta fisica al pulsarse. Las confirmaciones y reversiones usan dialogos, nunca un `confirm` del navegador.
+
+## 10. Formularios
+
+[DECISION] Etiqueta **arriba** del campo, texto de ayuda cuando aporte, y mensaje de error **debajo** del campo al que pertenece. Nunca se usa el marcador de posicion como etiqueta.
+
+- Formularios reactivos tipados (ADR-014); el formulario valida la presentacion, nunca sustituye la validacion del backend.
+- Los errores 422 del backend se mapean campo por campo usando el detalle del contrato (`{field, code, message}`), que ya llega en el sobre de error.
+- Los campos deshabilitados y los de solo lectura se distinguen con claridad.
+
+## 11. Contratos de presentacion de datos
+
+Reglas que la interfaz no puede romper porque el contrato de la API ya las fijo en [api-design.md](./api-design.md):
+
+- **Decimales como cadenas:** cantidades, costos y valores llegan como `"12.500"`. Se presentan a partir de la cadena; **no se convierten a `float`** en ningun punto de la presentacion.
+- **Fechas en UTC ISO-8601:** la presentacion en la zona `America/Bogota` es responsabilidad del cliente.
+- **Paginacion:** `page` y `per_page` con `meta` y `links`; el tamano de pagina maximo lo impone el contrato.
+- **Ninguna cifra inventada:** no se muestran cifras, tendencias ni variaciones porcentuales que no provengan de datos reales del backend. Si no hay periodo de comparacion, no se muestra variacion.
+
+## 12. Copy de interfaz
+
+- Todo el texto visible va en espanol.
+- **Sin guiones largos** ( `—` ni `–` ) en el texto de la interfaz: se usan guion corto, punto, coma o parentesis.
+- Todo mensaje de error identifica el campo o el producto afectado y sugiere la correccion (RNF-026).
+- No se inventan nombres de persona, empresas, ni cifras de relleno. En los datos de demostracion se usan nombres realistas y coherentes con el contexto colombiano.
+- No se usan verbos de relleno ni promesas de producto.
+- Antes de entregar una pantalla, se relee cada cadena visible: titulos, etiquetas de boton, ayudas, textos de error y de estado vacio.
+
+## 13. Accesibilidad
+
+RNF-025 exige **WCAG 2.1 nivel AA**. Se verifica:
+
+- Contraste de texto y de controles en ambos temas.
+- Foco visible en todos los elementos interactivos y orden de tabulacion coherente.
+- Navegacion completa por teclado, incluidas tablas, menus y dialogos.
+- Etiquetas accesibles y mensajes de error asociados a su campo.
+- Tablas con estructura semantica (encabezados de columna declarados, no solo celdas con estilo).
+- Ningun estado depende exclusivamente del color: siempre acompanado de texto o icono.
+- Respeto a la preferencia de movimiento reducido del sistema operativo.
+- Adaptacion a escritorio, tableta y movil. En pantallas pequenas se priorizan acciones operativas, legibilidad y accesibilidad; no se comprime la interfaz de escritorio.
+
+## 14. Rendimiento y capas
+
+- Objetivos: LCP menor a 2.5 s, INP menor a 200 ms, CLS menor a 0.1.
+- Los presupuestos del compilador estan fijados en `angular.json` (inicial 500 kB de aviso y 1 MB de error; estilos por componente 4 kB y 8 kB). Se miden y se documentan al cerrar cada unidad; si se revisan, se hace con la medicion delante.
+- Carga perezosa por funcionalidad, como ya establece la arquitectura.
+- Las fuentes se autoalojan, se precargan y no bloquean el primer render.
+- Los indices de apilamiento se declaran en una escala unica del proyecto; no se usan valores sueltos por pantalla.
+
+## 15. Adaptacion de la referencia visual
+
+La composicion de referencia aporta el armazon, no la piel. Lo que se adopta y lo que se corrige:
+
+| Rasgo de la referencia | Decision |
+| --- | --- |
+| Navegacion lateral fija con jerarquia, iconos y seccion activa resaltada | Se adopta. Grupo de opciones relacionadas y contraccion en pantallas apropiadas. |
+| Barra superior con marca, busqueda, notificaciones, tema y perfil | Se adopta, sin controles decorativos que aparenten funcionar. |
+| Fila de tarjetas de indicadores con icono discreto y valor destacado | Se adopta la composicion. |
+| Tarjetas de indicador con relleno de color saturado distinto en cada una | Se corrige: las tarjetas comparten un unico tratamiento de superficie y el acento se reserva al icono, porque la saturacion por bloques y los acentos multiples van contra la disciplina de color del proyecto. |
+| Barra lateral oscura dentro de un tema claro | Se corrige: la navegacion usa una superficie diferenciada del mismo tema. Invertir una zona de la pantalla es cambiar de tema a mitad de la pagina, lo que rompe la coherencia y el contraste. |
+| Graficos integrados en el contenido, con proposito operativo | Se adopta, pero solo con datos reales y solo los que respondan a una decision de operacion. |
+| Tablas con encabezados claros, estados y acciones por fila | Se adopta, con paginacion, ordenamiento, filtros, estados de carga, vacio y error. |
+| Etiquetas pequenas en mayusculas sobre cada bloque | Se adopta como titulo funcional de tarjeta, no como rotulo decorativo, y con moderacion. |
+| Panel flotante superpuesto con un anillo de porcentaje | No se adopta: es decoracion superpuesta que compite con el contenido y no responde a una necesidad operativa. |
+| Fondo neutro con superficies diferenciadas | Se adopta mediante los roles de superficie de la seccion 3. |
+
+## 16. Verificacion antes de entregar una pantalla
+
+Ninguna pantalla se declara terminada si alguna casilla no se puede marcar con honestidad:
+
+- [ ] Usa solo tokens; no hay colores literales ni tamanos inventados.
+- [ ] Se ve y se recorre correctamente en tema claro y en tema oscuro.
+- [ ] Contraste AA verificado en texto, botones, campos, ayudas y foco.
+- [ ] Ningun boton ni campo queda ilegible sobre su fondo.
+- [ ] Estados de carga, vacio y error implementados, ademas del camino feliz.
+- [ ] Los numeros usan cifras tabulares y los decimales se presentan desde la cadena del contrato.
+- [ ] Las fechas se muestran en America/Bogota.
+- [ ] Los iconos son de Material Symbols; no hay iconos dibujados a mano.
+- [ ] Radios, sombras y espaciado coherentes con las secciones 7 y 8.
+- [ ] Sin guiones largos ni cifras inventadas en el texto visible.
+- [ ] La tabla tiene estructura semantica, es navegable por teclado y sus acciones respetan permisos.
+- [ ] El movimiento reducido del sistema se respeta.
+- [ ] La pantalla se sostiene en 1440, 1024, 768 y 375 px.
+- [ ] El peso compilado se midio y esta documentado.
+- [ ] Ninguna regla de negocio del inventario vive en el componente.
+- [ ] Ningun control decorativo aparenta funcionar.
+- [ ] Una sola biblioteca de componentes: no hay mezcla de sistemas.
+
+## 17. Referencias
+
+- Arquitectura de la SPA: [frontend-architecture.md](./frontend-architecture.md).
+- Decisiones de version: [architecture-decisions.md](./architecture-decisions.md).
+- Contrato de la API y presentacion de datos: [api-design.md](./api-design.md).
+- Requisitos de accesibilidad y usabilidad: [../planning/non-functional-requirements.md](../planning/non-functional-requirements.md).
+- Estandares de codigo: [../development/coding-standards.md](../development/coding-standards.md).

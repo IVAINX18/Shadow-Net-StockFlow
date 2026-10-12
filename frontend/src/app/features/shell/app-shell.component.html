@@ -1,0 +1,101 @@
+<mat-sidenav-container class="shell">
+  <mat-sidenav
+    class="shell__sidenav"
+    [mode]="isCompact() ? 'over' : 'side'"
+    [opened]="opened()"
+    [fixedInViewport]="isCompact()"
+    (closedStart)="opened.set(false)"
+  >
+    <div class="shell__brand">
+      <mat-icon aria-hidden="true">inventory</mat-icon>
+      <span class="shell__brand-name">StockFlow</span>
+    </div>
+
+    <mat-nav-list class="shell__nav">
+      @for (group of navGroups(); track group.label) {
+        <div class="shell__group">
+          <span class="shell__group-label">{{ group.label }}</span>
+          @for (item of group.items; track item.route) {
+            <a
+              mat-list-item
+              [routerLink]="item.route"
+              routerLinkActive="shell__nav-item--active"
+              [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }"
+              (click)="onNavigate()"
+            >
+              <mat-icon matListItemIcon aria-hidden="true">{{ item.icon }}</mat-icon>
+              <span matListItemTitle>{{ item.label }}</span>
+            </a>
+          }
+        </div>
+      }
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="shell__content">
+    <mat-toolbar class="shell__toolbar">
+      <button
+        mat-icon-button
+        type="button"
+        (click)="toggleSidenav()"
+        aria-label="Mostrar u ocultar la navegacion"
+      >
+        <mat-icon aria-hidden="true">menu</mat-icon>
+      </button>
+
+      <nav class="shell__crumbs" aria-label="Ruta de navegacion">
+        @for (crumb of crumbs(); track crumb.url; let last = $last) {
+          <span class="shell__crumb">
+            <a [routerLink]="crumb.url" [class.shell__crumb--current]="last">{{ crumb.label }}</a>
+            @if (!last) {
+              <mat-icon class="shell__crumb-sep" aria-hidden="true">chevron_right</mat-icon>
+            }
+          </span>
+        }
+      </nav>
+
+      <span class="shell__spacer"></span>
+
+      <button
+        mat-icon-button
+        type="button"
+        (click)="onToggleTheme()"
+        [matTooltip]="theme.isDark() ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'"
+        aria-label="Cambiar de tema"
+      >
+        <mat-icon aria-hidden="true">{{ theme.isDark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+      </button>
+
+      <button
+        mat-icon-button
+        type="button"
+        [matMenuTriggerFor]="userMenu"
+        [attr.aria-label]="'Menu de ' + (auth.user()?.name ?? 'usuario')"
+      >
+        <span class="shell__avatar">{{ userInitials() }}</span>
+      </button>
+    </mat-toolbar>
+
+    <main class="shell__main">
+      <router-outlet />
+    </main>
+  </mat-sidenav-content>
+
+  <mat-menu #userMenu="matMenu">
+    @if (auth.user(); as user) {
+      <div class="shell__user-info">
+        <span class="shell__user-name">{{ user.name }}</span>
+        <span class="shell__user-email">{{ user.email }}</span>
+      </div>
+      <mat-divider />
+    }
+    <a mat-menu-item routerLink="/guia-estilo">
+      <mat-icon aria-hidden="true">palette</mat-icon>
+      <span>Guia de estilo</span>
+    </a>
+    <button mat-menu-item type="button" (click)="onLogout()">
+      <mat-icon aria-hidden="true">logout</mat-icon>
+      <span>Cerrar sesion</span>
+    </button>
+  </mat-menu>
+</mat-sidenav-container>

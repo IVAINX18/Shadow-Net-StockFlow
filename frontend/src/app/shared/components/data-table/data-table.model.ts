@@ -1,0 +1,38 @@
+import type { ChipTone } from '../status-chip/status-chip.component';
+
+/**
+ * Definicion de una columna de la tabla de datos. `cell` produce la
+ * representacion textual (los decimales llegan como cadena y se muestran tal
+ * cual); `status` opcional hace que la celda se pinte con un chip de estado.
+ */
+export interface DataTableColumn<T> {
+  /** Identificador de la columna (y clave de orden por defecto). */
+  readonly key: string;
+  /** Encabezado visible. */
+  readonly header: string;
+  /** Texto de la celda para la fila. */
+  readonly cell: (row: T) => string;
+  /** Tono del chip si la columna representa un estado. */
+  readonly status?: (row: T) => ChipTone | null;
+  /** Alinea a la derecha y activa cifras tabulares. */
+  readonly numeric?: boolean;
+  /** Permite ordenar por esta columna. */
+  readonly sortable?: boolean;
+  /** Campo de orden que espera la API, si difiere de `key`. */
+  readonly sortKey?: string;
+}
+
+/** Direccion de ordenamiento. */
+export type SortDirection = 'asc' | 'desc';
+
+/** Cambio de orden solicitado por el usuario. */
+export interface SortChange {
+  readonly key: string;
+  readonly direction: SortDirection;
+}
+
+/** Cambio de pagina solicitado por el usuario. */
+export interface PageChange {
+  readonly page: number;
+  readonly pageSize: number;
+}

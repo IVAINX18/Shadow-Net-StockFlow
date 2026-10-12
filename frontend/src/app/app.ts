@@ -1,12 +1,15 @@
-import { Component, signal } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
+/**
+ * Componente raiz. Solo hospeda el enrutador: el armazon (navegacion y barra
+ * superior) es una ruta hija, de modo que la pantalla de acceso se renderiza
+ * fuera del armazon.
+ */
 @Component({
-  imports: [RouterOutlet],
   selector: 'app-root',
-  styleUrl: './app.scss',
+  imports: [RouterOutlet],
   templateUrl: './app.html',
+  styleUrl: './app.scss',
 })
-export class App {
-  protected readonly title = signal('frontend');
-}
+export class App {}

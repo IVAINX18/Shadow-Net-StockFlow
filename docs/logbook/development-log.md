@@ -533,3 +533,143 @@ Esta bitácora registra cada unidad de trabajo del proyecto: fecha, fase, archiv
 - Los cambios de las unidades 1 a 7 siguen sin confirmar en Git, a la espera de autorización.
 
 **Nota:** no se modificaron el esquema ni las migraciones; la base de desarrollo no se tocó en esta unidad.
+
+---
+
+## Entrada 12 - 12/10/2026 - Fase 1, corrección del contrato del PUT de usuarios
+
+**Fase:** Fase 1 - Autenticación, RBAC y almacenes (corrección posterior al cierre de las unidades).
+
+**Archivos afectados (creados o modificados):**
+- `backend/app/Http/Requests/User/UpdateUserRequest.php` (modificado): regla `prohibited` para `password` y su mensaje en español.
+- `backend/tests/Feature/Users/UserCrudTest.php` (modificado): una prueba nueva.
+- `docs/architecture/api-design.md` (modificado): el §7.2 declara que `password` se rechaza con 422.
+- Esta bitácora.
+
+**Cambios efectuados:**
+- `password` viaja con la regla `prohibited`: si llega con valor, el endpoint responde 422 `VALIDACION` con el detalle `{field: "password", message: "La contraseña no se cambia por este endpoint."}`, en lugar de aceptar la petición y no cambiar nada.
+- Un valor vacío se sigue tolerando, porque un formulario puede enviar el campo sin contenido.
+- Se añadió la prueba que cubre el 422, comprueba que la contraseña original no se altera y verifica que el campo vacío no impide el resto de la actualización.
+
+**Motivo:** el `PUT` respondía 200 aunque la contraseña no se modificara, lo que podía hacer creer a un cliente que el cambio había ocurrido.
+
+**Decisiones tomadas:**
+- `prohibited` y no `missing`: `missing` rechazaría también el campo vacío, y un formulario de edición puede enviarlo así; `prohibited` rechaza el intento real y tolera el campo sin contenido.
+- No se aplica la misma regla al `slug` del rol, que también se ignora con 200: un formulario puede reenviar el valor que cargó (el identificador que muestra la ficha) y rechazarlo rompería una actualización legítima. Queda como diferencia consciente; endurecerlo sería la misma línea si se decide.
+- No se tocaron el esquema ni las migraciones.
+
+**Pruebas ejecutadas (resultados reales):**
+- `php artisan test` (host, contra MySQL) → 76 pruebas, 76 correctas, 421 aserciones.
+- `./vendor/bin/pint --test` → sin diferencias pendientes.
+- Comprobación por HTTP real contra el contenedor: `PUT /api/v1/users/{id}` con `password` → 422 con el campo y el mensaje esperados; con `password` vacío → 200; el login con la contraseña original → 200 y con la intentada → 401.
+
+**Pendientes:**
+- Los dos riesgos de auto-bloqueo registrados en la Entrada 11 siguen sin corregir.
+- Las unidades 1 a 7 ya están confirmadas y publicadas en Git (`27058fc`).
+- Corrección de la Entrada 11: el conteo real fue 14 pruebas de usuarios y 9 de roles (la bitácora decía 13 y 10); el total de 23 era correcto.
+
+**Nota:** no se modificaron el esquema ni las migraciones; la base de desarrollo no se tocó en esta unidad.
+
+---
+
+## Entrada 13 - 12/10/2026 - Frontend: base técnica, sistema de diseño, autenticación y armazón
+
+**Fase:** Fase 1 - Autenticación, RBAC y almacenes (unidad de frontend, sobre la API ya cerrada).
+
+**Archivos afectados (creados o modificados):**
+- `frontend/tsconfig.json` (modificado): `strict`, `noUnusedLocals` y `noUnusedParameters` activados.
+- `frontend/eslint.config.mjs` y `frontend/vitest.config.mts` (nuevos): estilo y configuración de pruebas.
+- `frontend/package.json` (modificado): Material 22.2, CDK, Roboto y Roboto Mono autoalojadas, Material Symbols, ESLint con angular-eslint y `@angular/animations`; scripts `lint` y `palette:generate`.
+- `frontend/angular.json` (modificado): entornos con `fileReplacements`, copia de las fuentes a `/fonts` y `runnerConfig` de Vitest.
+- `frontend/tools/generate-palette.mjs` (nuevo): deriva la paleta tonal M3 de una única semilla.
+- `frontend/src/styles.scss` y `frontend/src/styles/_palette.scss` (modificado y nuevo): tema Material 3 con semilla verde azulado, una sola invocación con `light-dark()`, fuentes autoalojadas, densidad compacta, cifras tabulares y movimiento reducido.
+- `frontend/src/environments/{environment,environment.staging,environment.prod}.ts` (nuevos) y `core/services/api-base-url.token.ts`.
+- `frontend/src/app/core/` (nuevo): interceptores de autenticación y de errores, guardias de navegación, modelos tipados y servicios (`AuthService`, `ThemeService`, `ApiService`, `ErrorService`).
+- `frontend/src/app/shared/components/` (nuevo): cabecera de página, tarjeta de indicador, envoltorio de tabla, estado vacío, estado de error, esqueleto de carga, chip de estado, acceso denegado y módulo pendiente.
+- `frontend/src/app/features/` (nuevo): `auth`, `shell` (armazón y navegación), `dashboard`, `warehouses`, `users`/`roles` y `style-guide`.
+- `frontend/src/app/{app.ts,app.html,app.routes.ts,app.config.ts,app.spec.ts}` (modificados): raíz mínima, rutas perezosas con guardias, configuración zoneless con HTTP e interceptores, y pruebas reales.
+- `frontend/src/index.html` (modificado): precarga de fuentes y `color-scheme`.
+- `backend/config/sanctum.php` (modificado) y `backend/config/cors.php` (nuevo): origen de la SPA autorizado con credenciales.
+- `.env.example` y `backend/.env.example` (modificados): variable `FRONTEND_URL` documentada.
+- `.github/workflows/ci.yml` (modificado): el trabajo del frontend ahora ejecuta estilo, pruebas y compilación.
+- `docs/architecture/design-system.md` (nuevo) y `docs/architecture/frontend-architecture.md` (modificado): contrato visual y enlace desde la arquitectura.
+- Esta bitácora.
+
+**Cambios efectuados:**
+- Se activó el tipado estricto que la documentación exigía y no estaba: el proyecto compilaba con `strict` desactivado.
+- Se implantó el contrato visual: paleta tonal M3 derivada de una única semilla verde azulado, un solo bloque de tema que emite ambos esquemas con `light-dark()`, Roboto y Roboto Mono autoalojadas, Material Symbols como única fuente de iconos, densidad compacta y utilidades de cifras tabulares.
+- Se construyeron el núcleo HTTP (interceptores de sesión y de errores sobre el sobre de error del backend), la autenticación por cookie de Sanctum, el armazón con navegación filtrada por los permisos reales, y las pantallas de acceso, tablero, guía de estilo y módulos pendientes.
+- Los módulos sin API (productos, categorías, inventario, movimientos, transferencias, reportes, auditoría, configuración) apuntan a una pantalla que nombra la fase y los endpoints que faltan: no se simulan datos en ningún punto.
+- El backend necesitaba autorizar el origen de la SPA: se añadió `localhost:4200` a los dominios stateful y un `config/cors.php` con credenciales, documentando la variable nueva.
+
+**Motivo:** la Fase 1 estaba cerrada solo en la API y el frontend no existía. Esta unidad entrega la base técnica y el armazón sobre el que se construyen las pantallas de cada fase.
+
+**Decisiones tomadas:**
+- El tema se resuelve con una sola invocación de `mat.theme` y `color-scheme: light dark`, en lugar de dos bloques con `theme-type` claro y oscuro. Es la forma documentada por Angular Material y elimina la clase de tema oscuro que mantenía `ThemeService`.
+- `mat.theme` recibe solo `primary` y `tertiary`: deriva de la semilla los roles neutral, neutral-variant y error con el mismo algoritmo M3 que usa el generador. La "paleta de marca" con sub-mapas que había antes no es una forma que la API acepte, y rompía la compilación.
+- Los módulos sin API muestran una pantalla de dependencia en lugar de datos de demostración: que un tablero con cifras falsas parezca terminado es un riesgo mayor que el de un módulo visiblemente pendiente.
+- Las pruebas usan un solo hilo sin paralelismo (memoria ajustada del equipo) y el archivo de configuración es `.mts` para que Vite lo cargue como módulo.
+
+**Pruebas ejecutadas (resultados reales):**
+- `npm run lint` → sin errores.
+- `npm test` → 3 archivos, 10 pruebas, todas correctas (24 a 42 s según la caché).
+- `npm run build` → compilación correcta; paquete inicial 338,73 kB en crudo y 92,08 kB de transferencia estimada, dentro del presupuesto de 500 kB; estilos 11,49 kB; una carga perezosa por pantalla.
+- `npm run palette:generate` → regenera la paleta sin errores.
+- Verificado sobre el artefacto compilado: la paleta tonal llega al CSS (`#006b5e`, `#003730`, `#76f8e1`), los tokens `--mat-sys-*` están presentes, el CSS usa `light-dark()` y las siete fuentes se copian a `/fonts` y se referencian desde el CSS.
+- Verificado por HTTP: el backend responde `Access-Control-Allow-Origin: http://localhost:4200` con `Access-Control-Allow-Credentials: true`, que es lo que habilita la sesión por cookie desde la SPA.
+- La suite del backend sigue en verde y Pint sin diferencias.
+
+**Pendientes:**
+- No se pudo comprobar el render en un navegador: el equipo no tiene ningún navegador instalado y la memoria disponible (884 MB) no permite descargarlo con garantías. Queda pendiente la revisión visual de ambos temas y de la guía de estilo.
+- Con la caché fría, la primera ejecución de pruebas agota el tiempo de arranque del trabajador de Vitest en este disco; a partir de la segunda pasa. Conviene vigilarlo en la integración continua.
+- `environment.prod.ts` contiene una URL de API de ejemplo: hay que sustituirla antes de desplegar.
+- Los dos riesgos de auto-bloqueo registrados en la Entrada 11 siguen sin corregir.
+- La acentuación de los comentarios del frontend es inconsistente; conviene homogeneizarla en una pasada.
+
+**Nota:** no se modificaron el esquema ni las migraciones, ni se tocaron datos de desarrollo. El backend solo cambió en los dos ficheros de configuración de origen y CORS.
+
+---
+
+## Entrada 13 - 12/10/2026 - Frontend: base técnica y sistema de diseño Material 3 (F0+F1)
+
+**Fase:** Transversal a Fase 0 y Fase 1. Deja lista la base técnica del frontend y el sistema de diseño; el armazón y la autenticación se construyen en la unidad siguiente.
+
+**Archivos afectados (creados o modificados):**
+- `frontend/src/styles.scss` (modificado): tema Material 3 desde la semilla verde azulado, tema claro y oscuro, fuentes autoalojadas (Roboto, Roboto Mono, Material Symbols), escala de espaciado y de índices de apilamiento, densidad compacta y utilidades de cifras tabulares.
+- `frontend/angular.json` (modificado): las fuentes pasan a copiarse como assets a `/fonts` con nombre estable (antes se cargaban vía `styles` del empaquetador); se conserva el `runnerConfig` de pruebas.
+- `frontend/src/index.html` (modificado): precarga de Roboto 400 y 500 desde rutas estables; Material Symbols no se precarga por su tamaño.
+- `frontend/tools/generate-palette.mjs` (modificado): corrección del paréntesis sobrante que rompía la paleta de marca.
+- `frontend/src/styles/_palette.scss` (regenerado): paleta tonal M3 derivada de `#00695C` con el generador corregido.
+- `frontend/src/app/app.config.ts` (modificado): se retira `provideAnimationsAsync`, que no aporta nada en Material 22 y exigía `@angular/animations` (no instalado).
+- `frontend/src/app/core/models/api.model.ts` y `frontend/src/app/core/services/error.service.ts` (modificados): el `error_id` del 500 se conserva al normalizar el sobre, para que `readErrorId` lo encuentre.
+- `frontend/src/app/features/style-guide/style-guide-page.component.ts`, `.html` y `.scss` (modificados): se añaden la tarjeta de indicador, la tabla de datos y el conmutador de tema.
+- `frontend/vitest.config.mts` (modificado): pool de procesos (`forks`) con un solo hijo; el pool de hilos no responde en este equipo.
+- `frontend/vitest.config.ts` (eliminado): configuración obsoleta y duplicada que usaba `poolOptions`, retirado en Vitest 4.
+- `.github/workflows/ci.yml` (modificado): el job de frontend ahora corre ESLint, Vitest y el build.
+- Esta bitácora.
+
+**Cambios efectuados:**
+- Base técnica verificada: `tsconfig.json` con `strict`, `noUnusedLocals` y `noUnusedParameters`; `eslint.config.mjs` (flat config con `angular-eslint` y `typescript-eslint`) y script `lint`; los tres entornos con `apiBaseUrl` y `fileReplacements`; el token `API_BASE_URL` en `core/services`; script `palette:generate`.
+- Sistema de diseño en `styles.scss`: tema M3 con los roles de superficie, acento y semánticos del contrato, claro y oscuro, tipografía Roboto y Roboto Mono autoalojadas, densidad compacta global (`density: -2`), escala de espaciado, escala de índices de apilamiento, respeto al movimiento reducido y utilidades de cifras tabulares.
+- Guía de estilo en `/guia-estilo` (carga perezosa): roles de color, escala tipográfica, botones, campos con etiqueta arriba y error abajo, chips de estado, estados de carga, vacío y error, tarjeta de indicador, tabla de datos y conmutador de tema.
+
+**Motivo:** cerrar la base del frontend y dejar el sistema de diseño revisable visualmente antes de construir el armazón y la autenticación, para no fijar pantallas sobre una identidad sin verificar.
+
+**Decisiones tomadas:**
+- Mecanismo de paleta: se conserva el generador reproducible (`tools/generate-palette.mjs`) porque Angular Material 22 no trae un verde azulado profundo entre sus paletas y el contrato exige derivar todo de una única semilla. La decisión queda documentada en un comentario de `styles.scss`.
+- Densidad compacta global (`-2`) en lugar de por componente: el producto es un back-office de datos densos y el contrato pide `-2` tanto en las vistas de datos como en los campos; las pantallas de bodega reajustarán sus 44 px por encima de esta base cuando existan.
+- Fuentes autoalojadas con rutas estables `/fonts` (assets) y precarga, en vez de dejarlas al empaquetador con nombre con hash: es lo que permite precargarlas sin depender de un hash de compilación. Material Symbols se excluye de la precarga por tamaño.
+- Pruebas con pool de procesos (`forks`): el pool de hilos no arranca dentro del tiempo de espera en este equipo (riesgo R-10 de memoria ajustada).
+- La guía de estilo usa un fixture de dos filas genéricas solo para revisar la tabla; no son datos de negocio y el KPI muestra un formato de muestra, no una cifra.
+
+**Pruebas ejecutadas (resultados reales):**
+- `npm run lint` → "All files pass linting".
+- `npm test -- --no-watch` → 3 archivos, 10 pruebas, 10 correctas.
+- `npm run build` → correcto. Paquete inicial 338,73 kB (92,08 kB transferidos), por debajo del aviso de 500 kB y del error de 1 MB; ninguna advertencia de presupuesto. El chunk de la guía de estilo pesa 12,09 kB.
+
+**Pendientes:**
+- No se pudo hacer la revisión visual en navegador: no hay herramienta de automatización (Playwright/Puppeteer) ni navegador instalado en el entorno. La guía queda servida y compilada para revisión manual.
+- El armazón, los interceptores, el servicio de autenticación, el inicio de sesión y el tablero pertenecen a la unidad siguiente; aquí solo quedaron cableados en las rutas.
+- El aviso de deprecación de Vitest por `poolOptions` quedó resuelto al eliminar la configuración duplicada.
+
+**Nota:** no se tocó el backend en esta unidad. Los cambios no se confirman en Git a la espera de autorización.

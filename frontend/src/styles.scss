@@ -1,1 +1,193 @@
-/* You can add global styles to this file, and also import other style files */
+// Estilos globales de Shadow-Net StockFlow.
+//
+// Configuro Material 3 con una semilla verde azulado profundo. Los dos temas
+// (claro y oscuro) salen de una sola invocacion, porque el tema emite sus tokens
+// con la funcion light-dark() y el navegador resuelve segun `color-scheme`. Los
+// componentes no declaran colores literales: todo color, radio, tipografia y
+// elevacion sale de estos tokens (design-system.md §3 a §8).
+
+@use '@angular/material' as mat;
+@use './styles/palette' as palette;
+
+// --- Fuentes autoalojadas -------------------------------------------------
+//
+// Autoalojo Roboto y Roboto Mono desde los paquetes del proyecto, nunca desde un
+// CDN ni un <link> a un servicio de fuentes (design-system.md §6). Los .woff2 se
+// copian a /fonts desde node_modules (ver assets en angular.json) y se
+// referencian por URL absoluta y estable, de modo que el index.html puede
+// precargarlas sin depender de un hash generado en cada compilacion.
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/roboto-latin-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/roboto-latin-500-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/roboto-latin-700-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Roboto Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/roboto-mono-latin-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Roboto Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/roboto-mono-latin-500-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Roboto Mono';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/roboto-mono-latin-700-normal.woff2') format('woff2');
+}
+
+// Material Symbols es una fuente de iconos: si falta el glifo, el icono no se
+// dibuja, asi que no uso swap (evitaria el destello de texto). La cargo con
+// font-display block y sin precarga, porque el binario pesa varios megabytes y
+// precargarlo penalizaria el primer render.
+@font-face {
+  font-family: 'Material Symbols Outlined';
+  font-style: normal;
+  font-weight: 100 700;
+  font-display: block;
+  src: url('/fonts/material-symbols-outlined.woff2') format('woff2');
+}
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+// Escala de espaciado del proyecto en incrementos de 4 px, como la densidad de
+// Material 3. No son margenes arbitrarios: son la escala unica que usan todos
+// los componentes.
+:root {
+  --app-space-1: 4px;
+  --app-space-2: 8px;
+  --app-space-3: 12px;
+  --app-space-4: 16px;
+  --app-space-5: 20px;
+  --app-space-6: 24px;
+  --app-space-8: 32px;
+
+  // Escala unica de indices de apilamiento del proyecto (design-system.md §14).
+  --app-z-base: 0;
+  --app-z-sticky: 100;
+  --app-z-drawer: 200;
+  --app-z-appbar: 300;
+  --app-z-overlay: 400;
+  --app-z-toast: 500;
+}
+
+html {
+  // Declaro los dos esquemas y dejo que el tema emita los tokens con
+  // light-dark(). ThemeService fuerza uno u otro escribiendo `color-scheme` en
+  // la raiz, asi que el conmutador no necesita una clase de tema.
+  color-scheme: light dark;
+
+  // Densidad compacta global (density: -2). El producto es un back-office de
+  // datos densos (VISUAL_DENSITY 7) y el contrato pide densidad -2 tanto en las
+  // vistas de datos como en los campos de formulario (design-system.md §8 y
+  // §10). Las pantallas de operacion de bodega reajustaran sus objetivos
+  // tactiles a 44 px por encima de esta base cuando existan.
+  @include mat.theme(
+    (
+      // Paso la paleta de marca completa (tonos 0..100 mas los sub-mapas
+      // secondary, neutral, neutral-variant y error). mat.theme deriva de ella
+      // todos los roles; si recibe una paleta sin sub-mapas, los roles de
+      // superficie, error y neutral salen vacios y el tema queda roto. Al pasar
+      // solo el primario, el terciario se iguala a el: un unico acento.
+      color: palette.$stockflow-brand-palette,
+      typography: (
+        plain-family: Roboto,
+        brand-family: Roboto,
+        bold-weight: 700,
+        medium-weight: 500,
+        regular-weight: 400,
+      ),
+      density: -2,
+    )
+  );
+}
+
+// No hay bloque de tema oscuro: `color-scheme` resuelve los dos esquemas con
+// light-dark() y ThemeService solo cambia ese valor en la raiz. Asi una pantalla
+// nunca mezcla dos temas (design-system.md §5).
+
+html,
+body {
+  block-size: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+// Respeto la preferencia de movimiento reducido del sistema (design-system.md
+// §13): acorto toda animacion y transicion a un instante.
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+// Cifras tabulares: sin ellas las columnas numericas no alinean en vertical,
+// que es justo lo que el contrato pide para comparar cantidades y valores
+// (design-system.md §6). Solo cambia la presentacion, nunca el valor.
+.app-tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+// Los identificadores y claves (SKU, codigo de almacen) usan Roboto Mono con
+// cifras tabulares: monoespaciado para leer caracteres, no cifras.
+.app-mono {
+  font-family: 'Roboto Mono', monospace;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+:focus-visible {
+  outline: 2px solid var(--mat-sys-primary);
+  outline-offset: 2px;
+}

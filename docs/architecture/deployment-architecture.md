@@ -100,6 +100,7 @@ flowchart LR
 [DECISIÓN] Todos los secretos viajan por variables de entorno y nunca se confirman:
 
 - Backend: `APP_KEY`, credenciales de base de datos (`DB_*`), credenciales del administrador de desarrollo en semillas, credenciales de correo y del registro de imágenes.
+- Origen de la SPA: la variable `FRONTEND_URL` fija el origen autorizado a llamar a la API con la cookie de sesión (la lee `backend/config/cors.php`) y debe figurar además en `SANCTUM_STATEFUL_DOMAINS`. Sin ella el navegador bloquea toda petición con credenciales, porque la SPA se autentica por cookie y no por token (C-06).
 - Frontend: solo configuración pública (`apiBaseUrl` por environment); ningún secreto en el paquete compilado.
 - Repositorio: los ficheros `.env` y cualquier fichero con secretos están en `.gitignore`; el repositorio solo contiene `.env.example` con valores ficticios y la lista de variables requeridas.
 - CI: los secretos viven en los secretos del repositorio o del entorno de GitHub Actions, nunca en el flujo versionado.

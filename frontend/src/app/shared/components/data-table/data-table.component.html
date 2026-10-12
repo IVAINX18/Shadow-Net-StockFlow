@@ -1,0 +1,66 @@
+<div class="data-table">
+  @if (loading()) {
+    <app-loading-skeleton variant="table" [rows]="skeletonRows()" />
+  } @else if (error(); as errorMessage) {
+    <app-error-state
+      [message]="errorMessage"
+      [errorId]="errorId()"
+      (retry)="retry.emit()"
+    />
+  } @else if (rows().length === 0) {
+    <app-empty-state [icon]="emptyIcon()" [title]="emptyTitle()" [message]="emptyMessage()" />
+  } @else {
+    <div class="data-table__scroll">
+      <table mat-table [dataSource]="rows()" class="data-table__table">
+        @for (column of columns(); track column.key) {
+          <ng-container [matColumnDef]="column.key">
+            <th
+              mat-header-cell
+              *matHeaderCellDef
+              scope="col"
+              [class.data-table__numeric]="column.numeric"
+              [attr.aria-sort]="column.sortable ? ariaSort(column) : null"
+            >
+              @if (column.sortable) {
+                <button type="button" class="data-table__sort" (click)="onSort(column)">
+                  {{ column.header }}
+                  <mat-icon class="data-table__sort-icon" aria-hidden="true">
+                    {{ sortIcon(column) }}
+                  </mat-icon>
+                </button>
+              } @else {
+                {{ column.header }}
+              }
+            </th>
+            <td
+              mat-cell
+              *matCellDef="let row"
+              [class.data-table__numeric]="column.numeric"
+            >
+              @if (column.status) {
+                @if (column.status(row); as tone) {
+                  <app-status-chip [label]="column.cell(row)" [tone]="tone" />
+                } @else {
+                  {{ column.cell(row) }}
+                }
+              } @else {
+                {{ column.cell(row) }}
+              }
+            </td>
+          </ng-container>
+        }
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns()"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns()"></tr>
+      </table>
+    </div>
+
+    <mat-paginator
+      [length]="total()"
+      [pageSize]="pageSize()"
+      [pageIndex]="page() - 1"
+      [pageSizeOptions]="[10, 15, 25, 50]"
+      (page)="onPage($event)"
+    />
+  }
+</div>

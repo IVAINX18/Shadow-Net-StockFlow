@@ -1,0 +1,69 @@
+.dashboard__section + .dashboard__section {
+  margin-top: var(--app-space-8);
+}
+
+.dashboard__title {
+  margin: 0 0 var(--app-space-3);
+  font: var(--mat-sys-title-medium);
+}
+
+.dashboard__note {
+  margin: 0 0 var(--app-space-4);
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface-variant);
+  max-inline-size: 70ch;
+}
+
+.dashboard__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--app-space-4);
+}
+
+.dashboard__dependencies {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--app-space-4);
+}
+
+.dependency {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-space-1);
+  padding: var(--app-space-4);
+  border: 1px dashed var(--mat-sys-outline-variant);
+  border-radius: var(--mat-sys-corner-medium);
+  background: var(--mat-sys-surface-container-low);
+}
+
+.dependency__head {
+  display: flex;
+  align-items: center;
+  gap: var(--app-space-2);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.dependency__phase {
+  font: var(--mat-sys-label-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.dependency__label {
+  margin: 0;
+  font: var(--mat-sys-title-small);
+}
+
+.dependency__detail {
+  margin: 0;
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.dependency__endpoint {
+  margin-top: var(--app-space-1);
+  font-family: 'Roboto Mono', monospace;
+  font-size: 0.8rem;
+  color: var(--mat-sys-on-surface-variant);
+  font-variant-numeric: tabular-nums;
+}

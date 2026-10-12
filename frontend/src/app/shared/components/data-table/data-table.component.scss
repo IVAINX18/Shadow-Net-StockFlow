@@ -1,0 +1,46 @@
+// La tabla usa los tokens del sistema y no declara colores literales. Las celdas
+// numericas alinean a la derecha y activan cifras tabulares para comparar en
+// vertical (design-system.md §6 y §11).
+.data-table {
+  display: flex;
+  flex-direction: column;
+}
+
+.data-table__scroll {
+  overflow-x: auto;
+}
+
+.data-table__table {
+  inline-size: 100%;
+  background: transparent;
+}
+
+.data-table__numeric {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+.data-table__sort {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--app-space-1);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.data-table__sort:focus-visible {
+  outline: 2px solid var(--mat-sys-primary);
+  outline-offset: 2px;
+  border-radius: var(--mat-sys-corner-extra-small);
+}
+
+.data-table__sort-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  color: var(--mat-sys-on-surface-variant);
+}

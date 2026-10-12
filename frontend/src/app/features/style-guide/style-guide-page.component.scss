@@ -1,0 +1,127 @@
+.guide__section + .guide__section {
+  margin-top: var(--app-space-8);
+}
+
+.guide__title {
+  margin: 0 0 var(--app-space-3);
+  font: var(--mat-sys-title-medium);
+}
+
+.guide__swatches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--app-space-3);
+}
+
+.swatch {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-block-size: 88px;
+  padding: var(--app-space-3);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--mat-sys-corner-medium);
+}
+
+.swatch__label {
+  font: var(--mat-sys-label-large);
+  color: var(--mat-sys-on-surface);
+}
+
+.swatch__token {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.guide__type {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-space-3);
+}
+
+.type-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--app-space-4);
+  padding-block-end: var(--app-space-2);
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+
+.type-row__meta {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 180px;
+}
+
+.type-row__label {
+  font: var(--mat-sys-label-medium);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.type-row__token {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.type-row__sample {
+  color: var(--mat-sys-on-surface);
+}
+
+.guide__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--app-space-3);
+}
+
+.guide__note {
+  margin: 0 0 var(--app-space-3);
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.guide__kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--app-space-4);
+}
+
+.guide__fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--app-space-4);
+}
+
+.guide__states {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--app-space-4);
+}
+
+.state-box {
+  padding: var(--app-space-4);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--mat-sys-corner-medium);
+  background: var(--mat-sys-surface-container-low);
+}
+
+.state-box__title {
+  margin: 0 0 var(--app-space-3);
+  font: var(--mat-sys-label-large);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.guide__z {
+  margin: 0;
+  padding-inline-start: var(--app-space-5);
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.numeric {
+  font-variant-numeric: tabular-nums;
+  font-family: 'Roboto Mono', monospace;
+}

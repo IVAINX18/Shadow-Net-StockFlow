@@ -141,6 +141,7 @@ Las rutas de funcionalidad se cargan de forma perezosa desde `app.routes.ts`; el
 
 ## 10. Interfaz con Material y tipado estricto
 
+- La identidad visual (tokens, temas claro y oscuro, tipografía, color, forma, densidad, estados, copy y lista de verificación) está en [design-system.md](./design-system.md), que es la fuente única de esas decisiones.
 - `@angular/material` 22.2.x para tablas (kardex, existencias), formularios, diálogos de confirmación y reversión, y navegación accesible.
 - `strict` activado en TypeScript: modelos sin `any` implícito, formularios tipados, respuestas HTTP con tipos generados o mantenidos desde el contrato OpenAPI.
 - Código y nombres técnicos en inglés; textos visibles y documentación en español.

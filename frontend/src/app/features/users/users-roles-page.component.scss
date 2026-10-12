@@ -1,0 +1,9 @@
+.section + .section {
+  margin-top: var(--app-space-8);
+}
+
+.section__title {
+  margin: 0 0 var(--app-space-3);
+  font: var(--mat-sys-title-medium);
+  color: var(--mat-sys-on-surface);
+}
