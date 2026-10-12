@@ -4,7 +4,7 @@
 
 ## 1. Propósito y lectura
 
-Este archivo define los criterios verificables AC-001 a AC-060 del ERP Shadow-Net StockFlow en formato Dado (Given), Cuando (When) y Entonces (Then). El índice maestro vive en [requirements.md](./requirements.md), el detalle funcional en [functional-requirements.md](./functional-requirements.md) y los atributos de calidad en [non-functional-requirements.md](./non-functional-requirements.md). Las reglas de inventario y los escenarios de concurrencia C-01 a C-04 provienen de [../architecture/inventory-domain.md](../architecture/inventory-domain.md). El alcance general se fija en [project-charter.md](./project-charter.md).
+Este archivo define los criterios verificables AC-001 a AC-070 del ERP Shadow-Net StockFlow en formato Dado (Given), Cuando (When) y Entonces (Then). El índice maestro vive en [requirements.md](./requirements.md), el detalle funcional en [functional-requirements.md](./functional-requirements.md) y los atributos de calidad en [non-functional-requirements.md](./non-functional-requirements.md). Las reglas de inventario y los escenarios de concurrencia C-01 a C-04 provienen de [../architecture/inventory-domain.md](../architecture/inventory-domain.md). El alcance general se fija en [project-charter.md](./project-charter.md).
 
 Cada criterio se verifica por prueba o revisión. Un requisito se considera cumplido solo cuando todos sus criterios asociados pasan.
 
@@ -114,3 +114,18 @@ Criterios AC-053 y AC-055 confirman la trazabilidad de reversiones: cada reversi
 | AC-058 | Dado un error de negocio como duplicado, faltante o validación, cuando ocurre, entonces la respuesta trae código, mensaje en español y detalle del campo o producto. Cubre HU-029, RF-119 y el formato uniforme de errores. |
 | AC-059 | Dada una operación válida, cuando la interfaz anticipa una validación, entonces el servidor la vuelve a aplicar y decide el resultado final. Cubre RF-120. |
 | AC-060 | Dado el repositorio, cuando se sigue su guía documentada, entonces el sistema completo se levanta con un solo comando sobre el entorno canónico. Cubre HU-030 y RF-123. |
+
+## 11. Importación de datos (AC-061 a AC-070)
+
+| ID | Criterio |
+| --- | --- |
+| AC-061 | Dada la plantilla de importación de catálogo, cuando se descarga, entonces trae las columnas esperadas y una fila de ejemplo. Cubre HU-031 y RF-126. |
+| AC-062 | Dado un archivo de catálogo válido, cuando se ejecuta la validación previa, entonces no modifica datos y los conteos antes y después son idénticos. Cubre HU-032 y RF-127. |
+| AC-063 | Dado un archivo con una fila inválida, cuando se intenta aplicar, entonces la aplicación completa se impide y el informe indica fila, campo y motivo. Cubre HU-034, RF-128 y RF-129. |
+| AC-064 | Dado un archivo ya importado, cuando se reimporta el mismo archivo, entonces no se duplican productos por SKU. Cubre HU-033 y RF-130. |
+| AC-065 | Dada una importación aplicada, cuando se consulta la bitácora, entonces existe una entrada con autor, archivo y filas aplicadas. Cubre HU-036 y RF-131. |
+| AC-066 | Dado un archivo que excede el límite de tamaño o de filas, cuando se envía, entonces el servidor lo rechaza con error uniforme y sin efectos. Cubre RF-132 y AC-058. |
+| AC-067 | Dada una carga inicial válida, cuando se aplica, entonces las existencias igualan la suma del kardex y el promedio ponderado se recalcula. Invariante I-02. Cubre HU-035 y RF-135. |
+| AC-068 | Dada una fila con producto inexistente o almacén fuera del alcance del usuario, cuando se valida la carga inicial, entonces la fila se rechaza y no produce efectos. Cubre RF-134 y AC-055. |
+| AC-069 | Dada una carga inicial aplicada, cuando se reenvía con la misma clave de idempotencia, entonces no se duplican existencias. Cubre RF-136. |
+| AC-070 | Dado un usuario sin el permiso correspondiente, cuando intenta importar, entonces el servidor rechaza la operación con 403 SIN_PERMISO. Cubre RF-128 y AC-005. |

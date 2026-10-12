@@ -116,7 +116,7 @@ Salvo indicación contraria, todos los endpoints requieren autenticación. La co
 | GET | `/api/v1/warehouses` | `warehouses.view` (solo autorizados) | Paginación; filtros `is_active`, `city`; búsqueda `q` (código, nombre); `sort` por `code`, `name`, `created_at`. | Colección paginada de almacenes visibles. | 401, 403. |
 | POST | `/api/v1/warehouses` | `warehouses.create` | `code` requerido y único (máx. 30); `name` requerido; `address`, `city` opcionales; `manager_user_id` existente si se envía. | `201` con el almacén creado. | 401, 403, 422. |
 | GET | `/api/v1/warehouses/{id}` | `warehouses.view` + alcance | `id` numérico. | Almacén con responsable y usuarios autorizados. | 401, 403 sin permiso de almacén, 404. |
-| PUT | `/api/v1/warehouses/{id}` | `warehouses.update` + alcance | `name`, `address`, `city`, `manager_user_id` existente. | Almacén actualizado. | 401, 403, 404, 422. |
+| PUT | `/api/v1/warehouses/{id}` | `warehouses.update` + alcance | `code` opcional y único (máx. 30); `name`, `address`, `city`, `manager_user_id` existente. | Almacén actualizado. | 401, 403, 404, 422. |
 | POST | `/api/v1/warehouses/{id}/deactivate` | `warehouses.update` + alcance | Sin cuerpo; rechaza si tiene existencias positivas pendientes de traslado según regla de negocio. | Almacén desactivado. | 401, 403, 404, 409 con existencias. |
 | GET | `/api/v1/warehouses/{id}/users` | `warehouses.view` + alcance | Paginación. | Usuarios autorizados del almacén. | 401, 403, 404. |
 | POST | `/api/v1/warehouses/{id}/users` | `warehouses.update` + alcance | `user_ids` existentes y activos. | Lista actualizada de autorizados. | 401, 403, 404, 422. |
@@ -190,6 +190,21 @@ Salvo indicación contraria, todos los endpoints requieren autenticación. La co
 | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/audit-logs` | `audit.view` | Paginación; filtros `user_id`, `action`, `entity_type`, `from`, `to`; `sort` por `created_at`. Solo lectura; sin secretos (ver [security-design.md](./security-design.md)). | Colección paginada de entradas. | 401, 403, 422. |
 | GET | `/api/v1/audit-logs/{id}` | `audit.view` | `id` numérico. | Entrada con `old_values` y `new_values` sin datos sensibles. | 401, 403, 404. |
+
+### 7.13 Importación
+
+Todos los endpoints requieren autenticación. La columna «Acceso» indica el permiso RBAC exigido; el alcance por almacén (`warehouse_user`) se valida además en cada operación de carga inicial.
+
+| Método | Ruta | Acceso | Parámetros y validaciones | Respuesta | Errores |
+| --- | --- | --- | --- | --- | --- |
+| GET | `/api/v1/imports/catalog/template` | `catalog.create` | Parámetro `format` en (`xlsx`, `csv`). | Descarga de la plantilla de catálogo con las columnas esperadas y una fila de ejemplo. | 401, 403, 422 formato inválido. |
+| POST | `/api/v1/imports/catalog/validate` | `catalog.create` | Cuerpo `multipart` con el archivo; validación en el servidor de tipo, tamaño, codificación y número de filas; dry-run con informe por fila sin modificar datos. | Informe por fila con campo y motivo de cada fallo. | 401, 403, 422 VALIDACION, 413 si se define límite de tamaño. |
+| POST | `/api/v1/imports/catalog` | `catalog.create` | Cuerpo `multipart` con el archivo ya validado; aplicación atómica e idempotente por SKU en una sola transacción. | `201` con el resumen de filas creadas y actualizadas más la referencia de auditoría. | 401, 403, 422 VALIDACION, 409 IDEMPOTENCIA_REPETIDA, 413 si se define límite de tamaño. |
+| GET | `/api/v1/imports/initial-stock/template` | `inventory.create` | Sin parámetros. | Descarga de la plantilla de carga inicial (SKU, almacén, cantidad y costo). | 401, 403. |
+| POST | `/api/v1/imports/initial-stock/validate` | `inventory.create` + alcance | Cuerpo `multipart` con el archivo; dry-run con alcance por almacén: rechaza producto inexistente, almacén fuera de alcance, cantidad inválida y decimales no permitidos. | Informe por fila con campo y motivo de cada fallo. | 401, 403 SIN_PERMISO, 403 FUERA_DE_ALCANCE, 422 VALIDACION, 413 si se define límite de tamaño. |
+| POST | `/api/v1/imports/initial-stock` | `inventory.create` + alcance | Cuerpo `multipart` con el archivo; cabecera `Idempotency-Key` requerida; genera y confirma el documento de entrada con recálculo de promedio ponderado. | `201` con el documento de entrada confirmado y su resumen de líneas. | 401, 403 SIN_PERMISO, 403 FUERA_DE_ALCANCE, 422 VALIDACION, 409 IDEMPOTENCIA_REPETIDA, 413 si se define límite de tamaño. |
+
+Los errores usan la envoltura de §5: `422 VALIDACION` para archivo o filas inválidas (se usa `413` solo si el límite de tamaño se define como tal), `403 SIN_PERMISO` sin el permiso correspondiente, `403 FUERA_DE_ALCANCE` para almacén fuera de alcance y `409 IDEMPOTENCIA_REPETIDA` ante reenvío con clave ya usada.
 
 ## 8. Ejemplo de confirmación de documento
 

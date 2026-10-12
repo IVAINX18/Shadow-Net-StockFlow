@@ -46,21 +46,21 @@ Detalle completo en el [acta de constitución](./planning/project-charter.md) (�
 
 El MVP (MUST HAVE) entrega una organización con multi-almacén: autenticación y RBAC con alcance por almacén; CRUD de almacenes, categorías, unidades y productos; inventario con entradas, salidas, ajustes, transferencias, kardex y reversiones; tablero con indicadores reales; reportes de existencias, movimientos y valorización exportables a PDF y Excel; auditoría; y calidad operativa (paginación, filtros, errores uniformes, logs, pruebas, documentación y despliegue).
 
-Fuera del MVP (WON'T) quedan multi-organización, facturación fiscal, contabilidad, lotes y series, órdenes de compra, costeo FIFO, lector de códigos de barras, Redis, microservicios, Kubernetes, event sourcing, MFA/SSO y app nativa. V1 (SHOULD) incorpora recuperación de contraseña, lotes y vencimientos, órdenes de compra y mejoras de exportación. V2 (COULD) incorpora multi-organización y costeo por capas.
+Fuera del MVP (WON'T) quedan multi-organización, facturación fiscal, contabilidad, lotes y series, órdenes de compra, costeo FIFO, lector de códigos de barras, Redis, microservicios, Kubernetes, event sourcing, MFA/SSO y app nativa. La importación de catálogo y la carga inicial de existencias sí pertenecen al MVP; la captura por OCR, el intercambio EDI, la integración POS y la captura por código de barras siguen fuera del alcance. V1 (SHOULD) incorpora recuperación de contraseña, lotes y vencimientos, órdenes de compra y mejoras de exportación. V2 (COULD) incorpora multi-organización y costeo por capas.
 
 Detalle completo en el [alcance y hitos](./planning/scope-and-milestones.md) y los [requisitos](./planning/requirements.md).
 
 ## 7. Requisitos
 
-Los requisitos funcionales se numeran RF-001 a RF-125 agrupados en nueve módulos (autenticación y usuarios, almacenes, categorías y unidades, productos, inventario, tablero, reportes, auditoría y calidad). Los no funcionales se numeran RNF-001 a RNF-030 y cubren rendimiento, seguridad, disponibilidad, mantenibilidad, verificabilidad, portabilidad, accesibilidad (WCAG 2.1 AA), observabilidad e integridad. La prioridad usa la escala MoSCoW, con la regla de que ningún MUST pertenece a una fase posterior.
+Los requisitos funcionales se numeran RF-001 a RF-137 agrupados en diez módulos (autenticación y usuarios, almacenes, categorías y unidades, productos, inventario, tablero, reportes, auditoría, calidad e importación de datos). El módulo de importación cubre la plantilla, la validación previa en modo dry-run, la importación de catálogo y la carga inicial de existencias. Los no funcionales se numeran RNF-001 a RNF-030 y cubren rendimiento, seguridad, disponibilidad, mantenibilidad, verificabilidad, portabilidad, accesibilidad (WCAG 2.1 AA), observabilidad e integridad. La prioridad usa la escala MoSCoW, con la regla de que ningún MUST pertenece a una fase posterior.
 
-El documento de requisitos actúa como maestro: define la metodología, las reglas de negocio (RN-INV y RN-GEN), las historias de usuario (HU-001 a HU-030) y la matriz de trazabilidad que vincula módulo, RF, HU y criterios de aceptación. El detalle funcional y no funcional vive en sus documentos respectivos.
+El documento de requisitos actúa como maestro: define la metodología, las reglas de negocio (RN-INV, RN-GEN y RN-IMP), las historias de usuario (HU-001 a HU-036) y la matriz de trazabilidad que vincula módulo, RF, HU y criterios de aceptación. El detalle funcional y no funcional vive en sus documentos respectivos.
 
 Detalle completo en [requisitos](./planning/requirements.md), [requisitos funcionales](./planning/functional-requirements.md) y [requisitos no funcionales](./planning/non-functional-requirements.md).
 
 ## 8. Historias y criterios de aceptación
 
-Las 30 historias de usuario agrupan el trabajo por módulo con formato «Como… quiero… para…». Los criterios de aceptación (AC-001 a AC-060) son verificables en formato Dado/Cuando/Entonces e incluyen los casos críticos: sobreventa rechazada, transferencia atómica, prevención de stock negativo, idempotencia, reversión trazable, autorización por almacén, paginación y filtrado, y formato uniforme de errores. Los escenarios de concurrencia C-01 a C-04 del dominio de inventario se reflejan como criterios.
+Las 36 historias de usuario agrupan el trabajo por módulo con formato «Como… quiero… para…». Los criterios de aceptación (AC-001 a AC-070) son verificables en formato Dado/Cuando/Entonces e incluyen los casos críticos: sobreventa rechazada, transferencia atómica, prevención de stock negativo, idempotencia, reversión trazable, autorización por almacén, paginación y filtrado, formato uniforme de errores, importación atómica e idempotente y carga inicial que cuadra con el kardex. Los escenarios de concurrencia C-01 a C-04 del dominio de inventario se reflejan como criterios.
 
 Detalle completo en los [criterios de aceptación](./planning/acceptance-criteria.md).
 
@@ -138,9 +138,9 @@ Detalle completo en la [estrategia de pruebas](./development/testing-strategy.md
 
 ## 19. Fases, backlog y orden de implementación
 
-El trabajo se ordena en ocho fases: Fase 0 fundaciones (repositorio, Podman, esqueleto, CI); Fase 1 autenticación, RBAC y almacenes; Fase 2 catálogo (categorías, unidades, productos); Fase 3 inventario (documentos, movimientos, kardex, reversos); Fase 4 tablero; Fase 5 reportes y exportación; Fase 6 auditoría; Fase 7 calidad y despliegue. Cada fase define criterios de salida medibles. Las duraciones son `[ESTIMACIÓN]`, sin fechas calendario comprometidas.
+El trabajo se ordena en ocho fases: Fase 0 fundaciones (repositorio, Podman, esqueleto, CI); Fase 1 autenticación, RBAC y almacenes; Fase 2 catálogo (categorías, unidades, productos e importación de catálogo); Fase 3 inventario (documentos, movimientos, kardex, reversos y carga inicial de existencias); Fase 4 tablero; Fase 5 reportes y exportación; Fase 6 auditoría; Fase 7 calidad y despliegue. Cada fase define criterios de salida medibles. Las duraciones son `[ESTIMACIÓN]`, sin fechas calendario comprometidas.
 
-El backlog descompone el alcance en once épicas (EP-001 a EP-011) con tareas técnicas, dependencias y prioridad MoSCoW. El orden recomendado comienza por autenticación y almacenes, porque todo lo demás exige autorización por almacén, y culmina con el inventario, que es el núcleo de mayor riesgo.
+El backlog descompone el alcance en trece épicas (EP-001 a EP-013) con tareas técnicas, dependencias y prioridad MoSCoW. El orden recomendado comienza por autenticación y almacenes, porque todo lo demás exige autorización por almacén, y culmina con el inventario, que es el núcleo de mayor riesgo.
 
 Detalle completo en [alcance y hitos](./planning/scope-and-milestones.md) y el [backlog](./planning/backlog.md).
 

@@ -83,13 +83,27 @@ Convención de este backlog: cada épica implementa el rango de RF indicado; la 
 - **Dependencias:** todas las épicas anteriores (cierra el MVP); entorno de pruebas sobre MySQL real, nunca SQLite para concurrencia [DECISIÓN] Fuente: docs/architecture/architecture-decisions.md §ADR-005.
 - **Referencia de aceptación:** criterios de los RF-116 a RF-125 en requirements.md y las historias de usuario del módulo Calidad (definidas en requirements.md).
 
+## EP-012. Importación de catálogo (RF-126 a RF-132)
+
+- **Módulo:** Importación de datos. **Prioridad:** Must (MVP, Fase 2).
+- **Tareas técnicas:** descarga de plantilla XLSX y CSV con columnas esperadas y fila de ejemplo; validación previa en modo dry-run con informe por fila sin modificar datos; aplicación atómica e idempotente por SKU en una sola transacción; límites de tamaño, filas, tipo y codificación validados en el servidor; auditoría con autor, fecha, archivo y filas aplicadas; procesamiento en cola para archivos grandes.
+- **Dependencias:** EP-003 y EP-004 (catálogo y productos); EP-001 (autorización con alcance por almacén donde aplique).
+- **Referencia de aceptación:** criterios AC-061 a AC-066 y las historias HU-031 a HU-034 y HU-036 (definidas en requirements.md).
+
+## EP-013. Carga inicial de existencias (RF-133 a RF-137)
+
+- **Módulo:** Importación de datos. **Prioridad:** Must (MVP, Fase 3).
+- **Tareas técnicas:** descarga de plantilla con SKU, almacén, cantidad y costo; validación previa con alcance por almacén (producto existente, almacén autorizado, cantidad válida, decimales según la unidad); aplicación como documento de entrada confirmado con recálculo de promedio ponderado; idempotencia por clave sin duplicar existencias; procesamiento en cola para archivos grandes con consulta del resultado.
+- **Dependencias:** EP-005, EP-006 y EP-007 (motor de documentos de inventario, movimientos y kardex); EP-001 (autorización y alcance por almacén).
+- **Referencia de aceptación:** criterios AC-067 a AC-070 y las historias HU-032, HU-034, HU-035 y HU-036 (definidas en requirements.md).
+
 ## Orden recomendado de implementación
 
 El orden recomendado sigue la cadena de dependencias: primero la capacidad de entrar y autorizar, después el catálogo que el inventario necesita, después el núcleo transaccional y finalmente la explotación de los datos. [DECISIÓN] Fuente: juicio del equipo de planificación sobre la secuencia de fases en scope-and-milestones.md §3.
 
 1. EP-001 (autenticación y acceso), junto con EP-002 (almacenes), porque todo lo demás exige autorización por almacén.
-2. EP-003 (categorías y unidades) y después EP-004 (productos), porque ningún movimiento existe sin catálogo.
-3. EP-005 (documentos), EP-006 (movimientos y reversiones) y EP-007 (kardex y valorización), en ese orden interno, porque forman el núcleo transaccional indivisible de la Fase 3.
+2. EP-003 (categorías y unidades) y después EP-004 (productos), porque ningún movimiento existe sin catálogo; EP-012 (importación de catálogo) va después del catálogo, porque reutiliza sus validaciones y permisos.
+3. EP-005 (documentos), EP-006 (movimientos y reversiones) y EP-007 (kardex y valorización), en ese orden interno, porque forman el núcleo transaccional indivisible de la Fase 3; EP-013 (carga inicial de existencias) va después del motor de inventario, porque se aplica como documento de entrada confirmado.
 4. EP-008 (dashboard) y EP-009 (reportes), porque solo consumen datos ya íntegros.
 5. EP-010 (auditoría) se integra desde EP-005 pero se verifica como hito propio tras los reportes.
 6. EP-011 (calidad y despliegue) corre en continuo desde la Fase 0 y cierra el MVP en la Fase 7.
@@ -119,6 +133,10 @@ graph TD
   EP001 --> EP011["EP-011 Calidad y despliegue (RF-116..125)"]
   EP007 --> EP011
   EP010 --> EP011
+  EP004 --> EP012["EP-012 Importación de catálogo (RF-126..132)"]
+  EP001 --> EP012
+  EP007 --> EP013["EP-013 Carga inicial (RF-133..137)"]
+  EP001 --> EP013
 ```
 
-En texto: EP-001 no depende de nadie y sostiene a todas. EP-002 depende de EP-001. EP-003 depende de EP-001. EP-004 depende de EP-002 y EP-003. EP-005 depende de EP-002, EP-004 y EP-001. EP-006 depende de EP-005 y alimenta a EP-010. EP-007 depende de EP-005, EP-006 y EP-001. EP-008 depende de EP-007 y EP-001. EP-009 depende de EP-007 y EP-001. EP-010 depende de EP-005, EP-006, EP-001 y EP-009 para su verificación final. EP-011 depende de todas y cierra el MVP.
+En texto: EP-001 no depende de nadie y sostiene a todas. EP-002 depende de EP-001. EP-003 depende de EP-001. EP-004 depende de EP-002 y EP-003. EP-005 depende de EP-002, EP-004 y EP-001. EP-006 depende de EP-005 y alimenta a EP-010. EP-007 depende de EP-005, EP-006 y EP-001. EP-008 depende de EP-007 y EP-001. EP-009 depende de EP-007 y EP-001. EP-010 depende de EP-005, EP-006, EP-001 y EP-009 para su verificación final. EP-011 depende de todas y cierra el MVP. EP-012 depende de EP-001, EP-003 y EP-004 y se implementa después del catálogo. EP-013 depende de EP-001, EP-005, EP-006 y EP-007 y se implementa después del motor de inventario.

@@ -4,7 +4,7 @@
 
 ## 1. Propósito y lectura
 
-Este archivo detalla cada requisito funcional RF-001 a RF-125 del ERP Shadow-Net StockFlow. El índice maestro con reglas, historias y trazabilidad vive en [requirements.md](./requirements.md). Los atributos de calidad están en [non-functional-requirements.md](./non-functional-requirements.md) y los criterios verificables en [acceptance-criteria.md](./acceptance-criteria.md). El dominio de inventario se define en [../architecture/inventory-domain.md](../architecture/inventory-domain.md), el modelo físico en [../architecture/database-design.md](../architecture/database-design.md) y el acta de alcance en [project-charter.md](./project-charter.md).
+Este archivo detalla cada requisito funcional RF-001 a RF-137 del ERP Shadow-Net StockFlow. El índice maestro con reglas, historias y trazabilidad vive en [requirements.md](./requirements.md). Los atributos de calidad están en [non-functional-requirements.md](./non-functional-requirements.md) y los criterios verificables en [acceptance-criteria.md](./acceptance-criteria.md). El dominio de inventario se define en [../architecture/inventory-domain.md](../architecture/inventory-domain.md), el modelo físico en [../architecture/database-design.md](../architecture/database-design.md) y el acta de alcance en [project-charter.md](./project-charter.md).
 
 Cada fila incluye identificador, título, descripción, módulo, prioridad MoSCoW, regla relacionada y fase. La prioridad Must corresponde al MVP, Should a V1 y Could a V2.
 
@@ -177,3 +177,22 @@ Cada fila incluye identificador, título, descripción, módulo, prioridad MoSCo
 | RF-123 | Despliegue reproducible | El sistema se despliega con un comando documentado sobre el entorno canónico de contenedores. | Calidad y operación | Must | RN-GEN-001 | MVP |
 | RF-124 | Datos iniciales del sistema | La instalación precarga roles, permisos, unidades base y un administrador definido por variables de entorno. | Calidad y operación | Must | RN-GEN-001 | MVP |
 | RF-125 | Zona horaria de presentación | Las fechas se almacenan en UTC y toda presentación usa America/Bogota. | Calidad y operación | Must | RN-GEN-014 | MVP |
+
+## 11. Importación de datos (RF-126 a RF-137)
+
+| ID | Título | Descripción | Módulo | Prioridad | RN | Fase |
+| --- | --- | --- | --- | --- | --- | --- |
+| RF-126 | Plantilla de importación de catálogo | El sistema ofrece la descarga de la plantilla de catálogo en XLSX y CSV con las columnas esperadas y una fila de ejemplo. | Importación de datos | Must | RN-IMP-02 | MVP |
+| RF-127 | Validación previa del catálogo | El sistema valida el archivo de catálogo en modo de prueba (dry-run) y devuelve un informe por fila sin modificar ningún dato. | Importación de datos | Must | RN-IMP-02 | MVP |
+| RF-128 | Confirmación de la importación de catálogo | El sistema crea o actualiza categorías, unidades y productos en una sola transacción a partir del archivo validado. | Importación de datos | Must | RN-IMP-01 | MVP |
+| RF-129 | Informe de errores por fila | La validación informa por cada fila el campo y el motivo del fallo, sin abortar el análisis de las demás filas. | Importación de datos | Must | RN-IMP-02 | MVP |
+| RF-130 | Idempotencia por SKU | La importación crea o actualiza por SKU; reimportar el mismo archivo no duplica productos. | Importación de datos | Must | RN-IMP-04 | MVP |
+| RF-131 | Trazabilidad de la importación | Cada importación de catálogo queda registrada en la auditoría con autor, fecha, archivo y número de filas aplicadas. | Importación de datos | Must | RN-IMP-04 | MVP |
+| RF-132 | Límites y validación del archivo | El sistema valida en el servidor el tamaño, el número de filas, el tipo y la codificación del archivo, y rechaza el que exceda los límites con un error claro. | Importación de datos | Must | RN-IMP-05 | MVP |
+| RF-133 | Plantilla de carga inicial de existencias | El sistema ofrece la descarga de la plantilla de carga inicial con SKU, almacén, cantidad y costo. | Importación de datos | Must | RN-IMP-02 | MVP |
+| RF-134 | Validación previa de la carga inicial | El sistema valida la carga inicial en modo de prueba: rechaza producto inexistente, almacén fuera de alcance, cantidad inválida y decimales en unidades que no los permiten. | Importación de datos | Must | RN-IMP-02 | MVP |
+| RF-135 | Carga inicial como documento de entrada confirmado | La carga inicial se aplica como un documento de entrada confirmado; nunca escribe directo en las existencias y el kardex cuadra. | Importación de datos | Must | RN-IMP-03 | MVP |
+| RF-136 | Idempotencia de la carga inicial | Reenviar la carga inicial con la misma clave no duplica existencias. | Importación de datos | Must | RN-IMP-04 | MVP |
+| RF-137 | Procesamiento en cola para archivos grandes | Los archivos que superan el umbral definido se procesan en cola y el usuario consulta el resultado sin bloquear su sesión. | Importación de datos | Should | RN-GEN-013 | V1 |
+
+La importación reutiliza siempre la misma validación y autorización que la captura manual (RN-IMP-02) y nunca relaja una regla de negocio.

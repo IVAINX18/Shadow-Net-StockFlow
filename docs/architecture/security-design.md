@@ -26,6 +26,7 @@ Alcance: SPA Angular, API `/api/v1`, base MySQL 8.4 con InnoDB, sesiones Sanctum
 | Registro de datos sensibles | Divulgación de información | Contraseñas, tokens o costos indebidos en logs o en `audit_logs`. | C-08: auditoría con responsable, acción, entidad y referencia, sin secretos; revisión de `old_values` y `new_values`. |
 | Validación solo en el cliente | Manipulación | Peticiones artesanales con cantidades negativas, almacenes iguales en transferencias o ajustes sin motivo. | C-01: validación completa en el servidor; el cliente nunca decide. |
 | Borrado o edición del historial | Repudiación | Intento de modificar movimientos o borrar documentos confirmados para ocultar un faltante. | C-09: libro append-only, documentos confirmados inmutables, reversión compensatoria y claves con `RESTRICT`. |
+| Subida de archivo malicioso o sobredimensionado | Manipulación / Denegación | Un archivo de importación con tipo inesperado, tamaño excesivo o contenido hostil compromete el backend o la disponibilidad. | C-10: validación de tipo, tamaño, codificación y filas en el servidor; contenido nunca confiable; mismos permisos y reglas; auditoría con autor. |
 
 ## 3. Controles
 
@@ -117,6 +118,13 @@ El administrador de desarrollo se crea solo desde las variables de entorno `DEV_
 ### C-09. Inmutabilidad del historial
 
 - Los movimientos son append-only (sin `updated_at`); los documentos confirmados solo transitan a `revertido` mediante reversión compensatoria; las claves foráneas usan `RESTRICT` para preservar la historia.
+
+### C-10. Subidas de archivos (importación)
+
+- Todo archivo de importación se valida en el servidor: tipo, tamaño, codificación y número de filas; el contenido nunca se confía. [DECISIÓN]
+- El procesamiento ocurre en el backend con los mismos permisos y reglas que la captura manual; ningún archivo omite la autorización por rol ni el alcance por almacén.
+- Los prefijos de fórmula (`=`, `+`, `-`, `@`) se neutralizan al exportar para prevenir inyección de fórmulas en hojas de cálculo.
+- Cada importación queda auditada con su autor, fecha, archivo y número de filas aplicadas.
 
 ## 4. Transporte y plataforma
 

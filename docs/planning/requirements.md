@@ -36,6 +36,7 @@ Toda afirmación que introduce una elección no derivada de los documentos canó
 | Reportes | Existencias, movimientos y valorización con exportación a PDF y Excel. | RF-091 a RF-105 |
 | Auditoría | Bitácora de quién hizo qué, cuándo y sobre qué entidad, sin secretos. | RF-106 a RF-115 |
 | Calidad y operación | Paginación, filtros, errores uniformes, registros, pruebas y despliegue reproducible. | RF-116 a RF-125 |
+| Importación de datos | Plantilla, validación previa (dry-run), importación de catálogo y carga inicial de existencias. | RF-126 a RF-137 |
 
 El detalle de cada RF vive en [functional-requirements.md](./functional-requirements.md). Este archivo no lo duplica.
 
@@ -78,6 +79,16 @@ Las reglas siguientes reproducen fielmente la sección 2 de [../architecture/inv
 | RN-GEN-012 | Todo error de negocio responde con formato uniforme: código, mensaje en español y detalle por campo o producto cuando aplica. |
 | RN-GEN-013 | Las exportaciones a PDF y Excel se generan en el servidor con las mismas reglas de autorización que la consulta en pantalla. [DECISIÓN] Fuente: [../architecture/architecture-decisions.md](../architecture/architecture-decisions.md) ADR-015. |
 | RN-GEN-014 | Las fechas se almacenan en UTC y se presentan en la zona America/Bogota. |
+
+### 5.3 Reglas de importación (RN-IMP-01 a RN-IMP-05)
+
+| ID | Regla |
+| --- | --- |
+| RN-IMP-01 | La importación es atómica: si una fila falla, no se aplica ninguna. |
+| RN-IMP-02 | La importación reutiliza las mismas validaciones, permisos y reglas que la captura manual. |
+| RN-IMP-03 | La carga inicial de existencias se aplica como documento de entrada confirmado, nunca escribiendo directo en las existencias. |
+| RN-IMP-04 | Toda importación es idempotente por clave y queda auditada con su autor. |
+| RN-IMP-05 | El archivo se valida en el servidor; su contenido nunca se confía. |
 
 ## 6. Historias de usuario
 
@@ -158,6 +169,17 @@ Formato: Como (rol) quiero (capacidad) para (beneficio).
 | HU-029 | Como Operador quiero listados paginados con filtros y mensajes de error claros para trabajar sin confusión. |
 | HU-030 | Como Administrador quiero registros de aplicación y despliegue reproducible para operar el sistema con confianza. |
 
+### 6.10 Importación de datos
+
+| ID | Historia |
+| --- | --- |
+| HU-031 | Como Jefe de almacén quiero descargar la plantilla de importación para preparar el catálogo con el formato esperado. |
+| HU-032 | Como Jefe de almacén quiero validar el archivo antes de aplicarlo para detectar errores sin modificar datos. |
+| HU-033 | Como Jefe de almacén quiero importar el catálogo desde Excel sin teclear cientos de productos para poner el sistema en marcha con rapidez. |
+| HU-034 | Como Operador quiero ver por fila qué falló para corregir solo lo necesario. |
+| HU-035 | Como Jefe de almacén quiero cargar las existencias iniciales por almacén para empezar a operar con saldos reales. |
+| HU-036 | Como Auditor quiero consultar en la bitácora las importaciones realizadas para rendir cuentas de cada carga. |
+
 ## 7. Matriz de trazabilidad
 
 Cada fila enlaza módulo con su rango de RF detallado en [functional-requirements.md](./functional-requirements.md), sus historias y sus criterios en [acceptance-criteria.md](./acceptance-criteria.md).
@@ -173,5 +195,6 @@ Cada fila enlaza módulo con su rango de RF detallado en [functional-requirement
 | Reportes | RF-091 a RF-105 | HU-024 a HU-026 | AC-047 a AC-052 |
 | Auditoría | RF-106 a RF-115 | HU-027 a HU-028 | AC-053 a AC-056 |
 | Calidad y operación | RF-116 a RF-125 | HU-029 a HU-030 | AC-057 a AC-060 |
+| Importación de datos | RF-126 a RF-137 | HU-031 a HU-036 | AC-061 a AC-070 |
 
 Los atributos transversales de rendimiento, seguridad y disponibilidad se verifican con [non-functional-requirements.md](./non-functional-requirements.md), identificadores RNF-001 a RNF-030.

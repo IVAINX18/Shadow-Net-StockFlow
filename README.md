@@ -96,8 +96,8 @@ cd backend && php artisan test
 | --- | --- | --- |
 | Fase 0 | Fundaciones: repositorio, contenedores, esqueleto Laravel y Angular, CI | Completada |
 | Fase 1 | Autenticación, RBAC y almacenes | En curso (unidades 1 y 2 completadas) |
-| Fase 2 | Catálogo: categorías, unidades y productos | Pendiente |
-| Fase 3 | Inventario: documentos, movimientos, kardex y reversos | Pendiente |
+| Fase 2 | Catálogo: categorías, unidades, productos e importación de catálogo | Pendiente |
+| Fase 3 | Inventario: documentos, movimientos, kardex, reversos y carga inicial de existencias | Pendiente |
 | Fases 4 a 7 | Tablero, reportes, auditoría, calidad y despliegue | Pendientes |
 
 El detalle de cada fase, con sus criterios de salida medibles, está en [docs/planning/scope-and-milestones.md](docs/planning/scope-and-milestones.md).
