@@ -82,16 +82,20 @@ class User extends Authenticatable
         return in_array($slug, $this->cachedPermissionSlugs, true);
     }
 
-    // Devuelvo los almacenes que puedo operar: si tengo el permiso global veo
-    // todos los activos, si no solo los asignados. Así el alcance por almacén
-    // del §5.1 queda en un único punto en lugar de repartido por servicios.
+    // Devuelvo los almacenes que puedo operar: con el permiso global veo todos
+    // sin filtrar por estado, porque el alcance decide QUÉ almacenes veo y el
+    // filtro `is_active` del listado ya es un parámetro aparte; ocultar aquí
+    // los desactivados dejaría al Administrador sin ver en el listado uno que
+    // acaba de desactivar, aunque su detalle sí se lo permite. Sin el permiso
+    // global, solo los asignados. Así el alcance del §5.1 queda en un único
+    // punto en lugar de repartido por servicios.
     /**
      * @return array<int>
      */
     public function accessibleWarehouseIds(): array
     {
         if ($this->hasPermission('warehouses.view_all')) {
-            return Warehouse::query()->where('is_active', true)->pluck('id')->all();
+            return Warehouse::query()->pluck('id')->all();
         }
 
         return $this->warehouses()->pluck('warehouses.id')->all();

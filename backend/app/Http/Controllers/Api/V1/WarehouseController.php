@@ -6,11 +6,19 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Domain\Enums\PermissionSlug;
 use App\Http\Controllers\Controller;
+use App\Http\Errors\ApiErrorResponse;
+use App\Http\Requests\Warehouse\AttachWarehouseUsersRequest;
 use App\Http\Requests\Warehouse\IndexWarehouseRequest;
+use App\Http\Requests\Warehouse\StoreWarehouseRequest;
+use App\Http\Requests\Warehouse\UpdateWarehouseRequest;
+use App\Http\Resources\UserSummaryResource;
 use App\Http\Resources\WarehouseResource;
+use App\Models\User;
 use App\Models\Warehouse;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\Response;
 
 // Mantengo el controlador fino: valida en el Form Request, autoriza con la
 // Policy y delega la forma JSON en el Resource, sin reglas de negocio (§2 de
@@ -78,5 +86,90 @@ class WarehouseController extends Controller
         ]);
 
         return new WarehouseResource($warehouse);
+    }
+
+    public function store(StoreWarehouseRequest $request): JsonResponse
+    {
+        $this->authorize('create', Warehouse::class);
+
+        // Creo siempre activo porque RF-020 reserva la inactividad para la
+        // desactivación posterior; el responsable no otorga acceso automático
+        // al almacén, que viaja por warehouse_user (RF-023).
+        $warehouse = Warehouse::create(array_merge($request->validated(), [
+            'is_active' => true,
+        ]));
+
+        $warehouse->load('manager:id,name,email');
+
+        return (new WarehouseResource($warehouse))->response()->setStatusCode(201);
+    }
+
+    public function update(UpdateWarehouseRequest $request, Warehouse $warehouse): WarehouseResource
+    {
+        $this->authorize('update', $warehouse);
+
+        $warehouse->update($request->validated());
+
+        $warehouse->load('manager:id,name,email');
+
+        return new WarehouseResource($warehouse->refresh());
+    }
+
+    public function deactivate(Warehouse $warehouse): WarehouseResource|JsonResponse
+    {
+        $this->authorize('deactivate', $warehouse);
+
+        // No compruebo existencias aquí porque la tabla `inventories` llega en
+        // la Fase 3 y no existe nada que consultar todavía; esa guarda se añade
+        // entonces sin tocar este flujo. RF-020 solo me exige hoy no borrar.
+        if (! $warehouse->is_active) {
+            return ApiErrorResponse::make(
+                'ESTADO_INVALIDO',
+                'El almacén ya se encuentra desactivado.',
+                409
+            );
+        }
+
+        // Desactivo de forma lógica y conservo el registro, porque RF-020 exige
+        // preservar el kardex: nunca borro ni marco `deleted_at` en esta ruta.
+        $warehouse->update(['is_active' => false]);
+
+        return new WarehouseResource($warehouse->refresh());
+    }
+
+    public function users(Warehouse $warehouse): AnonymousResourceCollection
+    {
+        $this->authorize('view', $warehouse);
+
+        $users = $warehouse->users()->with('roles:id,name,slug')->paginate(15)->withQueryString();
+
+        return UserSummaryResource::collection($users);
+    }
+
+    /**
+     * @return AnonymousResourceCollection<UserSummaryResource>
+     */
+    public function attachUsers(AttachWarehouseUsersRequest $request, Warehouse $warehouse): AnonymousResourceCollection
+    {
+        $this->authorize('manageUsers', $warehouse);
+
+        // Adjunto sin retirar a los ya autorizados, porque revocar acceso en
+        // silencio violaría RF-023; la retirada tiene su propio endpoint.
+        $warehouse->users()->syncWithoutDetaching($request->validated()['user_ids']);
+
+        $autorizados = $warehouse->users()->with('roles:id,name,slug')->orderBy('users.id')->get();
+
+        return UserSummaryResource::collection($autorizados);
+    }
+
+    public function detachUser(Warehouse $warehouse, User $user): Response
+    {
+        $this->authorize('manageUsers', $warehouse);
+
+        // Retirar a quien no estaba autorizado sigue en 204, porque la
+        // operación es idempotente: el estado final es el mismo.
+        $warehouse->users()->detach($user->id);
+
+        return response()->noContent();
     }
 }

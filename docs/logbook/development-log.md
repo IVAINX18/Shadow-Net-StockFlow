@@ -16,6 +16,8 @@ Esta bitácora registra cada unidad de trabajo del proyecto: fecha, fase, archiv
 | 6 | 12/10/2026 | Fase 1 - U3: autorización y alcance por almacén | Completada (403 y alcance verificados por HTTP) |
 | 7 | 12/10/2026 | Fase 1 - U4: semillas de permisos, roles y admin | Completada (login real con el admin sembrado) |
 | 8 | 12/10/2026 | Tooling - Base de conocimiento de agentes | Completada |
+| 9 | 12/10/2026 | Planificación - Importación y carga inicial | Completada (revisión de coherencia; pendiente confirmación de Master) |
+| 10 | 12/10/2026 | Fase 1 - U5: escritura de almacenes y usuarios autorizados | Completada (pruebas contra MySQL real) |
 
 ---
 
@@ -387,3 +389,93 @@ Esta bitácora registra cada unidad de trabajo del proyecto: fecha, fase, archiv
 - Deriva detectada entre documentación y código, registrada en las notas del `AGENTS.md` de la raíz para corregirla al tocar esos documentos: `development-workflow.md` afirma que `backend/` y `frontend/` aún no existen, y ADR-006 figura como pendiente aunque Node 22 ya está instalado.
 
 **Nota:** no se modificó ningún documento de la especificación; la bitácora es el único documento actualizado.
+
+---
+
+## Entrada 9 - 12/10/2026 - Planificación: importación de catálogo y carga inicial de existencias
+
+**Fase:** Planificación (documentación, sin código de aplicación).
+
+**Archivos afectados (modificados):**
+- `docs/planning/functional-requirements.md`
+- `docs/planning/requirements.md`
+- `docs/planning/acceptance-criteria.md`
+- `docs/planning/scope-and-milestones.md`
+- `docs/planning/backlog.md`
+- `docs/architecture/api-design.md`
+- `docs/architecture/security-design.md`
+- `docs/SHADOW_NET_STOCKFLOW_SPECIFICATION.md`
+- `README.md`
+- Esta bitácora.
+
+**Cambios efectuados:**
+- Se añadieron los requisitos RF-126 a RF-137 (importación de catálogo y carga inicial de existencias) con su sección propia en `functional-requirements.md`.
+- Se añadieron las reglas RN-IMP-01 a RN-IMP-05, las historias HU-031 a HU-036 y la fila de trazabilidad del nuevo módulo en `requirements.md`.
+- Se añadieron los criterios AC-061 a AC-070 en `acceptance-criteria.md`.
+- Se añadieron las épicas EP-012 (importación de catálogo, Fase 2) y EP-013 (carga inicial de existencias, Fase 3) con su orden y grafo en `backlog.md`.
+- Se añadieron los seis endpoints del módulo de importación con sus errores en `api-design.md`.
+- Se añadió el control C-10 de subidas de archivos y su fila de amenaza en `security-design.md`.
+- Se actualizaron las fases 2 y 3 (entregables, duración estimada y criterios de salida), la tabla MoSCoW y la decisión de ampliación del MVP en `scope-and-milestones.md`, más la especificación maestra y el `README.md`.
+
+**Motivo:** la captura manual bloquea la adopción: cargar cientos de SKU a mano no es viable y el sistema debe arrancar con catálogo y saldos reales.
+
+**Decisiones tomadas:**
+- La importación es atómica (RN-IMP-01): si una fila falla, no se aplica ninguna.
+- Toda importación es idempotente por clave (por SKU en el catálogo) y queda auditada con su autor (RN-IMP-04).
+- La carga inicial se aplica como documento de entrada confirmado, nunca escribiendo directo en las existencias (RN-IMP-03).
+- Ambos objetivos son Must del MVP, con impacto en la duración estimada (Fase 2 de 2 a 3 semanas, Fase 3 de 3 a 4 semanas).
+
+**Pruebas ejecutadas:**
+- Revisión de coherencia: los identificadores nuevos (RF-126 a RF-137, RN-IMP-01 a RN-IMP-05, HU-031 a HU-036, AC-061 a AC-070, EP-012 y EP-013) no colisionan con los existentes y ningún identificador previo fue renumerado ni eliminado.
+- Revisión de referencias cruzadas y enlaces relativos entre los diez archivos modificados.
+
+**Resultado:** planificación completada como cambio de documentación; ninguna funcionalidad se declara implementada.
+
+**Pendientes:**
+- Confirmación de Master sobre la prioridad MoSCoW y el impacto en el calendario.
+
+**Nota:** esta entrada no registra pruebas de funcionalidad porque, por diseño de esta fase, no existe todavía código ejecutable de importación.
+
+---
+
+## Entrada 10 - 12/10/2026 - Fase 1, Unidad 5: escritura de almacenes y usuarios autorizados
+
+**Fase:** Fase 1 - Autenticación, RBAC y almacenes (Unidad 5 de 8).
+
+**Archivos afectados (creados o modificados):**
+- `backend/routes/api/v1/warehouses.php` (modificado): grupos de lectura, creación y actualización con su permiso propio.
+- `backend/app/Http/Requests/Warehouse/StoreWarehouseRequest.php` (nuevo).
+- `backend/app/Http/Requests/Warehouse/UpdateWarehouseRequest.php` (nuevo).
+- `backend/app/Http/Requests/Warehouse/AttachWarehouseUsersRequest.php` (nuevo).
+- `backend/app/Http/Controllers/Api/V1/WarehouseController.php` (modificado): `store`, `update`, `deactivate`, `users`, `attachUsers` y `detachUser`.
+- `backend/app/Http/Resources/UserSummaryResource.php` (nuevo): resumen del autorizado con roles.
+- `backend/app/Models/User.php` (modificado): `accessibleWarehouseIds()` con `view_all` devuelve todos.
+- `backend/tests/Feature/Warehouses/WarehouseWriteTest.php` (nuevo): 12 pruebas de escritura.
+- `docs/architecture/api-design.md` (modificado): `code` opcional y único en la fila del `PUT` del §7.4.
+- Esta bitácora.
+
+**Cambios efectuados:**
+- Se dividieron las rutas de almacenes en tres grupos para que cada endpoint exija su permiso del §7.4 (`warehouses.view` en lecturas y listado de autorizados, `warehouses.create` en la creación, `warehouses.update` en el resto); el alcance por almacén lo verifica la Policy en cada acción, no el middleware.
+- Se crearon los endpoints de escritura: crear (201), actualizar, desactivar (lógica, con 409 `ESTADO_INVALIDO` si ya estaba inactivo) y gestión de autorizados (listado paginado, adjuntar acumulativo y retirar con 204 idempotente).
+- Se corrigió `accessibleWarehouseIds()`: con `warehouses.view_all` devuelve todos los almacenes, activos o no, para que el Administrador siga viendo en el listado uno que acaba de desactivar; el filtro `is_active` del listado sigue existiendo como parámetro.
+- Se precisó el contrato del §7.4: el `PUT` acepta `code` opcional y único, como exige AC-008 (renombrar).
+
+**Motivo:** cerrar el ciclo de vida del almacén (RF-016, RF-019 a RF-023) y su matriz de permisos y alcance (AC-007, AC-008, AC-010 en su parte implementable y AC-011).
+
+**Decisiones tomadas:**
+- La desactivación es lógica sin borrado ni `deleted_at`: la historia se conserva (RF-020).
+- Adjuntar usuarios es acumulativo (`syncWithoutDetaching`): nunca se revoca acceso en silencio; la retirada tiene su propio endpoint.
+- El responsable (`manager_user_id`) no obtiene acceso automático al almacén: responsable y autorizados son conceptos separados del contrato.
+- El `code` sí se puede renombrar y respeta la unicidad ignorando el propio registro (AC-008).
+- El listado de autorizados usa `UserSummaryResource`, más ligero que `UserResource`, que queda reservado al propio autenticado.
+
+**Pruebas ejecutadas (resultados reales):**
+- `php artisan test` (host, contra MySQL) → 49 pruebas, 49 correctas, 254 aserciones; 12 de ellas de escritura.
+- `./vendor/bin/pint` → sin diferencias; `./vendor/bin/pint --test` → sin diferencias.
+
+**Pendientes:**
+- La guarda de existencias al desactivar («rechaza si tiene existencias positivas») queda para la Fase 3, cuando exista la tabla `inventories`; no se simuló ni se consultó ninguna tabla inexistente.
+- Unidades 6 y 7: CRUD de usuarios y de roles.
+- Los cambios de las unidades 1 a 5 siguen sin confirmar en Git, a la espera de autorización.
+
+**Nota:** la base de pruebas se reconstruye en cada ejecución; la base de desarrollo no se tocó en esta unidad.
