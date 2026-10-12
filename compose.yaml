@@ -48,7 +48,11 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     working_dir: /var/www/html
-    command: php artisan serve --host=0.0.0.0 --port=8000
+    # Uso --no-reload para que el contenedor respete las variables de entorno de
+    # compose: sin esa opcion, artisan serve elimina del proceso hijo toda
+    # variable que tambien exista en el .env montado, y el .env (orientado al
+    # host, con DB_HOST=127.0.0.1) gana sobre el DB_HOST=mysql del servicio.
+    command: php artisan serve --host=0.0.0.0 --port=8000 --no-reload
     volumes:
       - ./backend:/var/www/html
       - backend-vendor:/var/www/html/vendor

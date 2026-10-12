@@ -11,6 +11,8 @@ Esta bitácora registra cada unidad de trabajo del proyecto: fecha, fase, archiv
 | 1 | 10/10/2026 | Fase 0 - Planificación | Completada |
 | 2 | 10/10/2026 | Fase 0 - Fundaciones | Completada (verificación de `docker compose up` pendiente del demonio Docker) |
 | 3 | 10/10/2026 | Fase 0 - Fundaciones | Completada (entorno verificado con Podman; ADR-017 reemplaza ADR-011) |
+| 4 | 12/10/2026 | Fase 1 - U1: esquema RBAC y almacenes | Completada (pruebas contra MySQL real) |
+| 5 | 12/10/2026 | Fase 1 - U2: errores uniformes y autenticación | Completada (flujo SPA verificado por HTTP) |
 
 ---
 
@@ -150,3 +152,105 @@ Esta bitácora registra cada unidad de trabajo del proyecto: fecha, fase, archiv
 - Decidir sobre `laravel/boost`, sugerido por el `AGENTS.md` generado por el esqueleto; no se instaló y el PHP se mantiene en 8.4, no en 8.5.
 
 **Nota:** esta entrada no modifica la Entrada 2, que se conserva como historia; la verificación pendiente del demonio Docker quedó resuelta por el cambio a Podman.
+
+---
+
+## Entrada 4 - 12/10/2026 - Fase 1, Unidad 1: esquema RBAC, almacenes y pruebas contra MySQL
+
+**Fase:** Fase 1 - Autenticación, RBAC y almacenes (Unidad 1 de 8).
+
+**Archivos afectados (creados o modificados):**
+- `backend/database/migrations/2026_10_12_000001_add_state_columns_to_users_table.php`
+- `backend/database/migrations/2026_10_12_000002_create_roles_table.php`
+- `backend/database/migrations/2026_10_12_000003_create_permissions_table.php`
+- `backend/database/migrations/2026_10_12_000004_create_role_user_table.php`
+- `backend/database/migrations/2026_10_12_000005_create_permission_role_table.php`
+- `backend/database/migrations/2026_10_12_000006_create_warehouses_table.php`
+- `backend/database/migrations/2026_10_12_000007_create_warehouse_user_table.php`
+- `backend/app/Models/User.php`, `Role.php`, `Permission.php`, `Warehouse.php`
+- `backend/database/factories/UserFactory.php`, `RoleFactory.php`, `PermissionFactory.php`, `WarehouseFactory.php`
+- `backend/tests/Feature/RbacWarehouseSchemaTest.php`
+- `backend/phpunit.xml` y `.github/workflows/ci.yml`
+- `backend/.env` (local, ignorado por Git)
+
+**Cambios efectuados:**
+- Se creó el esquema físico del RBAC nativo (roles, permisos y sus pivotes) y de almacenes (código único, desactivación lógica y pivote usuario-almacén), conforme a docs/architecture/database-design.md, secciones 5.1 y 5.2.
+- Se añadieron a `users` las columnas `is_active` y `last_login_at`.
+- Se implementaron los modelos con relaciones, conversiones de tipo y los ayudantes `hasPermission()` (con caché por petición) y `accessibleWarehouseIds()` (alcance por almacén).
+- Se creó la base de datos de pruebas `stockflow_test` en el MySQL del contenedor y se configuró `phpunit.xml` para usar MySQL real, sin SQLite.
+- Se añadió el servicio `mysql:8.4` con comprobación de salud al trabajo de backend de la integración continua.
+
+**Motivo:** disponer del modelo de datos y de los modelos Eloquent antes de implementar autenticación y autorización, y garantizar que las pruebas se ejecuten contra el mismo motor que producción (InnoDB), como exige la estrategia de pruebas.
+
+**Pruebas ejecutadas (resultados reales):**
+- `podman-compose exec -T backend php artisan migrate --force` → las 7 migraciones aplicadas.
+- Verificación en `information_schema`: colación `utf8mb4_0900_ai_ci`, claves únicas `uq_*`, claves foráneas `fk_*` (CASCADE salvo `manager_user_id` con RESTRICT) e índice `idx_warehouses_is_active`.
+- `php artisan test` (host, contra MySQL) → 6 pruebas, 6 correctas, 15 aserciones.
+- `./vendor/bin/pint --test` → sin diferencias.
+- La prueba `RbacWarehouseSchemaTest` rechaza el código de almacén duplicado y el slug de rol duplicado.
+
+**Resultado:** Unidad 1 completada y verificada. Las tablas existen en MySQL real: `roles`, `permissions`, `role_user`, `permission_role`, `warehouses` y `warehouse_user`.
+
+**Decisiones tomadas:**
+- Las pruebas de integración usan MySQL real en lugar de SQLite (coherente con la estrategia de pruebas y con ADR-005); en local requieren el contenedor de MySQL levantado.
+- `accessibleWarehouseIds()` contempla el permiso `warehouses.view_all` para que el Administrador no dependa de asignaciones manuales de almacén.
+
+**Pendientes:**
+- Unidad 2: errores uniformes y autenticación con Sanctum en modo estatal.
+- Los cambios de esta unidad están sin confirmar en Git, a la espera de autorización.
+- El host no tiene la extensión PHP `intl`, por lo que `php artisan db:show` no funciona localmente; no afecta a las pruebas ni a la base de datos.
+
+**Nota:** no se modificaron `frontend/`, `compose.yaml` ni las rutas; la base `stockflow_test` es independiente de la base de desarrollo `stockflow`.
+
+---
+
+## Entrada 5 - 12/10/2026 - Fase 1, Unidad 2: errores uniformes y autenticación con Sanctum estatal
+
+**Fase:** Fase 1 - Autenticación, RBAC y almacenes (Unidad 2 de 8).
+
+**Archivos afectados (creados o modificados):**
+- `backend/app/Http/Errors/ApiErrorResponse.php` (nuevo): único constructor del sobre de error.
+- `backend/app/Http/Middleware/EnsureAccountIsActive.php` (nuevo): cuenta desactivada pierde acceso.
+- `backend/app/Http/Controllers/Api/V1/AuthController.php` (nuevo): login, logout y perfil.
+- `backend/app/Http/Requests/Auth/LoginRequest.php` (nuevo): validación y verificación de credenciales.
+- `backend/app/Http/Resources/UserResource.php`, `RoleResource.php` y `WarehouseResource.php` (nuevos).
+- `backend/routes/api/v1/auth.php` (nuevo) y `backend/routes/api.php` (modificado).
+- `backend/bootstrap/app.php` (modificado): `statefulApi`, redirección de invitados y mapeo de excepciones.
+- `backend/app/Providers/AppServiceProvider.php` (modificado): limitador `login` por correo y dirección.
+- `backend/app/Models/User.php` y `Warehouse.php` (modificados): nombre explícito del pivote `warehouse_user`.
+- `backend/tests/Feature/Auth/AuthTest.php` y `backend/tests/TestCase.php` (nuevos/modificado).
+- `compose.yaml` (modificado): `--no-reload` en el comando del backend.
+- `docs/architecture/api-design.md` (modificado): códigos `SOLICITUD_INVALIDA`, `METODO_NO_PERMITIDO`, `CSRF_INVALIDO` y `CUENTA_INACTIVA`.
+
+**Cambios efectuados:**
+- Se implementó la envoltura uniforme de errores con los códigos documentados y sin filtrar trazas ni SQL al cliente.
+- Se activó Sanctum en modo estatal (cookie de sesión con CSRF) para la SPA, más el middleware de cuenta activa.
+- Se crearon los endpoints de login (con límite de intentos), logout y perfil.
+- Se limitó el login a cinco intentos por minuto por correo y dirección, con respuesta 429.
+
+**Motivo:** controlar quién entra al sistema, con autorización y errores uniformes aplicados en el servidor (RF-001 a RF-003, RF-007, RF-011 y RNF-009).
+
+**Pruebas ejecutadas (resultados reales):**
+- `php artisan test` (host, contra MySQL) → 15 pruebas, 15 correctas, 86 aserciones.
+- `./vendor/bin/pint --test` → sin diferencias; `php -l` sobre `bootstrap/app.php` → sin errores de sintaxis.
+- Flujo completo de la SPA por HTTP real contra el contenedor: cookie CSRF (204) → login (200) → perfil (200) → logout (204) → perfil (401).
+- Códigos verificados por HTTP: 401 `NO_AUTENTICADO`, 404 `NO_ENCONTRADO`, 405 `METODO_NO_PERMITIDO`, 419 `CSRF_INVALIDO`, 422 `VALIDACION` con detalles por campo y 429 `LIMITE_EXCEDIDO` en las pruebas.
+
+**Resultado:** Unidad 2 completada y verificada.
+
+**Defectos reales encontrados y corregidos durante la verificación:**
+1. **El contenedor no conectaba a MySQL** (`Connection refused` a 127.0.0.1): `artisan serve` elimina del proceso hijo toda variable que también exista en el `.env` montado, de modo que el `DB_HOST=mysql` de la composición se perdía y ganaba el `.env` orientado al host. Se corrigió con `--no-reload` en el comando del servicio backend.
+2. **500 en `/auth/me` sin encabezado `Accept`**: el middleware de autenticación buscaba la ruta `login`, inexistente en una API pura. Se corrigió desactivando la redirección de invitados para que el 401 uniforme siempre responda.
+3. **Defecto de seguridad**: había un registro de depuración que escribía en el log el identificador de sesión y las claves de cookies, en contradicción con el criterio de salida de la fase. Se eliminó.
+4. **Errores HTTP no contemplados devolvían 500**: cualquier `HttpException` de Symfony (por ejemplo 405 o el 419 del CSRF) caía en el manejador genérico. Se añadió el mapeo por estado y se documentaron los códigos nuevos.
+
+**Decisiones tomadas:**
+- El login verifica primero las credenciales y solo después el estado de la cuenta, para no revelar qué correos existen (anti-enumeración).
+- El pivote `warehouse_user` se declara explícitamente en los modelos porque el nombre por defecto de Eloquent sería `user_warehouse` y no coincide con el esquema documentado.
+- Los códigos `CUENTA_INACTIVA`, `SOLICITUD_INVALIDA`, `METODO_NO_PERMITIDO` y `CSRF_INVALIDO` se añadieron al catálogo documentado de la API.
+
+**Pendientes:**
+- Unidad 3: autorización (Gates, Policies y alcance por almacén).
+- Los cambios de las unidades 1 y 2 siguen sin confirmar en Git, a la espera de autorización.
+
+**Nota:** las pruebas unitarias no detectaron los defectos 1 y 4 porque solo se manifiestan en el entorno contenedorizado y con errores HTTP fuera del camino feliz; se encontraron con la verificación por HTTP real, tal como exige el estándar de calidad del proyecto.

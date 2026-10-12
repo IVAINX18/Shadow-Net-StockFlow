@@ -55,10 +55,14 @@ Toda respuesta de error usa la misma envoltura, con el código HTTP correspondie
 | --- | --- | --- |
 | 401 | `NO_AUTENTICADO` | Sin sesión o token válido o ausente. |
 | 403 | `SIN_PERMISO` / `FUERA_DE_ALCANCE` | Sin permiso de rol, o sin acceso al almacén solicitado (`warehouse_user`). |
+| 403 | `CUENTA_INACTIVA` | Cuenta desactivada: el usuario no puede iniciar sesión ni operar. |
 | 404 | `NO_ENCONTRADO` | Recurso inexistente o fuera del alcance visible del usuario. |
 | 409 | `STOCK_INSUFICIENTE` | Salida, ajuste negativo o pata de origen de transferencia sin disponibilidad. |
 | 409 | `ESTADO_INVALIDO` | Transición de estado no permitida (por ejemplo confirmar un documento ya confirmado). |
 | 409 | `IDEMPOTENCIA_REPETIDA` | Reintento con clave ya usada cuyo resultado difiere o cuyo documento quedó descartado. |
+| 400 | `SOLICITUD_INVALIDA` | Solicitud malformada o error HTTP no clasificado en otro código de esta tabla; conserva el estado real. |
+| 405 | `METODO_NO_PERMITIDO` | Método HTTP no permitido para el recurso solicitado. |
+| 419 | `CSRF_INVALIDO` | Token CSRF ausente o expirado; el cliente debe renovar la cookie CSRF y reintentar. |
 | 422 | `VALIDACION` | Fallo de validación de parámetros, con un elemento en `details` por campo. |
 | 429 | `LIMITE_EXCEDIDO` | Límite de peticiones superado (ver [security-design.md](./security-design.md)). |
 | 500 | `ERROR_INTERNO` | Fallo inesperado; sin detalle técnico hacia el cliente. |

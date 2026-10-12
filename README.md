@@ -4,35 +4,114 @@ Shadow-Net StockFlow es un sistema ERP web de gestión de inventarios y logísti
 
 El núcleo del sistema no es una columna de stock, sino un libro de movimientos (kardex) inmutable: cada operación de inventario se confirma dentro de una transacción atómica, con bloqueo de filas para impedir la sobreventa, idempotencia para evitar duplicados y reversiones trazables para corregir sin borrar.
 
-Estado actual: **fase de planificación - documentación**.
+**Estado actual:** Fase 0 (fundaciones) **completada y verificada**; Fase 1 (autenticación, RBAC y almacenes) **en curso**, con las unidades 1 y 2 terminadas.
 
-Documentación: ver [docs/](docs/) y la [especificación maestra](docs/SHADOW_NET_STOCKFLOW_SPECIFICATION.md).
+## Objetivos
 
-Nota: todavía NO hay código de aplicación en este repositorio. No existen `backend/` ni `frontend/`; solo la especificación en `docs/`. El desarrollo del MVP comenzará cuando se apruebe la documentación.
+**De producto**
+
+- Ofrecer existencias exactas por producto y almacén, respaldadas por un kardex completo.
+- Garantizar la integridad transaccional: ninguna salida consume más de lo disponible ni deja saldos negativos.
+- Permitir transferencias atómicas entre almacenes con trazabilidad de origen y destino.
+- Proveer reportes de existencias, movimientos y valorización, exportables a PDF y Excel.
+- Registrar auditoría de cada operación relevante y controlar el acceso por rol y por almacén.
+
+**De aprendizaje**
+
+- Comprender y aplicar arquitectura limpia y separación de responsabilidades.
+- Dominar transacciones, bloqueo de filas e idempotencia en MySQL con Laravel.
+- Construir una API REST versionada, segura y documentada con OpenAPI.
+- Desarrollar un frontend Angular con componentes standalone, Signals y patrón de servicios.
+- Establecer pruebas unitarias, de integración, de autorización y de concurrencia.
 
 ## Nombres canónicos
 
 **Nombres canónicos (no usar sinónimos en otras fases):** el detalle de tablas está en [docs/architecture/database-design.md](docs/architecture/database-design.md). La base de la API es `/api/v1`. Los tipos de documento de inventario son `entrada`, `salida`, `ajuste` y `transferencia`; los estados son `borrador`, `confirmado`, `revertido` y `descartado`. La valorización del MVP es por promedio ponderado móvil.
 
-## Stack objetivo (versiones verificadas el 10/10/2026)
+## Stack en uso (versiones verificadas)
 
-- **Backend:** PHP 8.4, Laravel 13.35, Laravel Sanctum 4.3, API REST versionada en `/api/v1`.
-- **Frontend:** Angular 22.2 (standalone, zoneless), TypeScript 6.0, Signals, Reactive Forms.
-- **Base de datos:** MySQL 8.4 LTS con InnoDB.
-- **Calidad y despliegue:** Pest 5, Laravel Pint, Podman con podman-compose, GitHub Actions, OpenAPI.
+| Capa | Tecnología | Versión |
+| --- | --- | --- |
+| Backend | PHP / Laravel / Sanctum | 8.4.26 / 13.35.0 / 4.3.3 |
+| Base de datos | MySQL LTS (InnoDB) | 8.4.11 |
+| Pruebas y estilo | Pest / Laravel Pint | 5.3.1 / 1.32.1 |
+| Frontend | Angular / TypeScript | 22.2.2 / 6.0.3 |
+| Runtime del frontend | Node.js LTS (instalado con nvm) | 22.23.3 |
+| Entorno reproducible | Podman / Buildah / podman-compose | 5.4.2 / 1.39.3 / 1.6.0 |
+| Gestor de dependencias PHP | Composer | 2.10.3 |
+| Integración continua | GitHub Actions | — |
 
-El detalle y la justificación de cada elección están en [docs/architecture/architecture-decisions.md](docs/architecture/architecture-decisions.md).
+La justificación de cada elección, con las alternativas descartadas, está en [docs/architecture/architecture-decisions.md](docs/architecture/architecture-decisions.md) (ADR-001 a ADR-017).
+
+## Estructura del repositorio
+
+```text
+Shadownet_Stockflow/
+├── README.md                 Este archivo
+├── compose.yaml              Servicios mysql, backend y frontend (podman-compose)
+├── .env.example              Variables de entorno para la composición
+├── .github/workflows/ci.yml  Integración continua: Pint, Pest y build de Angular
+├── backend/                  API Laravel 13
+├── frontend/                 SPA Angular 22
+└── docs/                     Especificación completa del proyecto
+```
+
+## Puesta en marcha (entorno local)
+
+1. Copiar el archivo de ejemplo y completar los valores:
+
+```bash
+cp .env.example .env
+php backend/artisan key:generate --show   # pegar el resultado en APP_KEY
+```
+
+2. Levantar los servicios:
+
+```bash
+podman-compose up -d --build
+```
+
+3. Aplicar migraciones y comprobar la API:
+
+```bash
+podman-compose exec -T backend php artisan migrate --force
+curl http://localhost:8000/api/v1/health
+```
+
+| Servicio | URL |
+| --- | --- |
+| API (salud) | http://localhost:8000/api/v1/health |
+| Frontend | http://localhost:4200 |
+| MySQL | localhost:3306 |
+
+4. Ejecutar las pruebas del backend (requieren el contenedor de MySQL levantado):
+
+```bash
+cd backend && php artisan test
+```
+
+## Estado de las fases
+
+| Fase | Alcance | Estado |
+| --- | --- | --- |
+| Fase 0 | Fundaciones: repositorio, contenedores, esqueleto Laravel y Angular, CI | Completada |
+| Fase 1 | Autenticación, RBAC y almacenes | En curso (unidades 1 y 2 completadas) |
+| Fase 2 | Catálogo: categorías, unidades y productos | Pendiente |
+| Fase 3 | Inventario: documentos, movimientos, kardex y reversos | Pendiente |
+| Fases 4 a 7 | Tablero, reportes, auditoría, calidad y despliegue | Pendientes |
+
+El detalle de cada fase, con sus criterios de salida medibles, está en [docs/planning/scope-and-milestones.md](docs/planning/scope-and-milestones.md).
 
 ## Requisitos del entorno de desarrollo
 
 | Herramienta | Estado en el equipo de referencia | Acción |
 | --- | --- | --- |
-| PHP 8.4 | Instalado (8.4.26) | Ninguna. |
-| Composer 2.10 | No instalado | Instalar con el instalador oficial. |
-| Node.js | 20.19.2 (EOL) | Subir a Node 22 LTS o 24 LTS (ver ADR-006). |
-| MySQL 8.4 LTS | No instalado | Instalar localmente o usar el contenedor de Podman (podman-compose). |
-| Podman / podman-compose | Instalado (5.4.2 / 1.6.0 vía pipx) | Ninguna (Docker 26.1.5 sigue instalado pero su demonio está apagado y no se usa). |
-| Angular CLI | No instalado | Se instala en la Fase 0 (fundaciones). |
+| PHP 8.4 | Instalado (8.4.26, con `intl`) | Ninguna. |
+| Composer 2.10 | Instalado (2.10.3, a nivel de usuario) | Ninguna. |
+| Node.js | Instalado (22.23.3, con nvm) | Ninguna. |
+| MySQL 8.4 LTS | No instalado en el host | Se usa el contenedor de Podman. |
+| Podman / podman-compose | Instalado (5.4.2 / 1.6.0 vía pipx) | Ninguna. Docker sigue instalado pero su demonio está apagado y no se usa (ADR-017). |
+| Angular CLI | Dependencia del proyecto en `frontend/` | `npm install` dentro de `frontend/`. |
 
 ## Cómo leer la documentación
 
@@ -40,6 +119,7 @@ El detalle y la justificación de cada elección están en [docs/architecture/ar
 2. [Especificación maestra](docs/SHADOW_NET_STOCKFLOW_SPECIFICATION.md) para la visión completa.
 3. [Acta de constitución](docs/planning/project-charter.md) y [alcance y hitos](docs/planning/scope-and-milestones.md) para el qué y el cuándo.
 4. [Dominio de inventario](docs/architecture/inventory-domain.md) para el corazón del sistema.
+5. [Bitácora de desarrollo](docs/logbook/development-log.md) para el avance real, unidad por unidad.
 
 ## Autor
 
