@@ -67,7 +67,10 @@ export class ApiService {
 
     for (const [key, value] of Object.entries(params)) {
       if (value !== undefined && value !== null) {
-        httpParams = httpParams.set(key, String(value));
+        // Laravel valida los filtros booleanos con la regla `boolean`, que solo
+        // acepta 1/0 (no la cadena "true"): serializo el booleano como 1 o 0 para
+        // que un filtro como is_active no devuelva 422.
+        httpParams = httpParams.set(key, typeof value === 'boolean' ? (value ? '1' : '0') : String(value));
       }
     }
 
