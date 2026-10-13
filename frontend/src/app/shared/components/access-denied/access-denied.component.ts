@@ -15,12 +15,12 @@ import { RouterLink } from '@angular/router';
   template: `
     <div class="denied" role="alert">
       <mat-icon class="denied__icon" aria-hidden="true">lock</mat-icon>
-      <h1 class="denied__title">Acceso denegado</h1>
+      <h1 class="denied__title app-tight">Acceso denegado</h1>
       <p class="denied__message">
         Su cuenta no tiene el permiso necesario para ver esta seccion. Si cree que
         es un error, solicite al administrador que revise sus roles.
       </p>
-      <a mat-flat-button routerLink="/dashboard">
+      <a mat-flat-button class="denied__action" routerLink="/dashboard">
         <mat-icon aria-hidden="true">dashboard</mat-icon>
         Volver al panel
       </a>
@@ -40,7 +40,7 @@ import { RouterLink } from '@angular/router';
       font-size: 48px;
       width: 48px;
       height: 48px;
-      color: var(--mat-sys-on-surface-variant);
+      color: var(--mat-sys-primary);
     }
 
     .denied__title {
@@ -53,6 +53,14 @@ import { RouterLink } from '@angular/router';
       max-inline-size: 52ch;
       font: var(--mat-sys-body-medium);
       color: var(--mat-sys-on-surface-variant);
+    }
+
+    .denied__action {
+      transition: transform 140ms ease;
+    }
+
+    .denied__action:active {
+      transform: scale(0.98);
     }
   `,
 })

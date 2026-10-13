@@ -1,9 +1,12 @@
-// La tabla usa los tokens del sistema y no declara colores literales. Las celdas
-// numericas alinean a la derecha y activan cifras tabulares para comparar en
-// vertical (design-system.md §6 y §11).
+// Refino la tabla al contrato de presentacion densa (design-system.md §1, §3,
+// §6, §7, §8 y §11): encabezado sereno con una sola linea fina, filas densas
+// que respiran, numeros tabulares a la derecha y separacion por linea fina,
+// nunca por sombra. Yo mantengo los tokens de Material 3 y la escala
+// --app-space, sin margenes ni colores inventados.
 .data-table {
   display: flex;
   flex-direction: column;
+  gap: var(--app-element-gap);
 }
 
 .data-table__scroll {
@@ -13,29 +16,83 @@
 .data-table__table {
   inline-size: 100%;
   background: transparent;
+  box-shadow: none;
 }
 
+// Encabezado sereno: etiqueta pequena en mayusculas, tono apagado y una sola
+// linea fina inferior. Sin fondo elevado ni sombra.
+.data-table__table .mat-mdc-header-cell {
+  font: var(--mat-sys-label-small);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mat-sys-on-surface-variant);
+  background: transparent;
+  box-shadow: none;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+  padding: var(--app-space-2) var(--app-space-3);
+  white-space: nowrap;
+}
+
+// Filas densas que respiran: cuerpo medio y una sola linea fina entre filas.
+// Quito la linea de la ultima fila para no duplicar la del paginador.
+.data-table__table .mat-mdc-cell {
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface);
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+  padding: var(--app-space-2) var(--app-space-3);
+}
+
+.data-table__table .mat-mdc-row:last-child .mat-mdc-cell {
+  border-bottom: 0;
+}
+
+// Resalto la fila bajo el puntero con superficie, no con sombra, para que el
+// seguimiento visual no dependa del color del texto.
+.data-table__table .mat-mdc-row:hover .mat-mdc-cell {
+  background: var(--mat-sys-surface-container-low);
+}
+
+// Celdas numericas: alineacion a la derecha y cifras tabulares para comparar
+// en vertical, como pide el contrato de presentacion de datos.
 .data-table__numeric {
   text-align: end;
   font-variant-numeric: tabular-nums;
 }
 
+// El boton de orden hereda la tipografia del encabezado y anuncia su estado
+// con fondo suave e icono en el acento, no solo con el glifo.
 .data-table__sort {
   display: inline-flex;
   align-items: center;
   gap: var(--app-space-1);
-  padding: 0;
+  padding: var(--app-space-1);
   border: 0;
+  border-radius: var(--mat-sys-corner-extra-small);
   background: transparent;
   color: inherit;
   font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
   cursor: pointer;
+  transition:
+    background-color 140ms ease,
+    color 140ms ease,
+    transform 140ms ease;
+}
+
+.data-table__sort:hover {
+  color: var(--mat-sys-on-surface);
+  background: var(--mat-sys-surface-container-high);
+}
+
+// Hundimiento fisico al pulsar, el que pide el contrato para toda accion.
+.data-table__sort:active {
+  transform: scale(0.98);
 }
 
 .data-table__sort:focus-visible {
   outline: 2px solid var(--mat-sys-primary);
   outline-offset: 2px;
-  border-radius: var(--mat-sys-corner-extra-small);
 }
 
 .data-table__sort-icon {
@@ -43,4 +100,21 @@
   width: 16px;
   height: 16px;
   color: var(--mat-sys-on-surface-variant);
+  transition: color 140ms ease;
+}
+
+// La columna que ordena tine su icono con el acento unico, asi el estado
+// activo se lee sin depender solo del glifo.
+.data-table__sort-icon--active {
+  color: var(--mat-sys-primary);
+}
+
+// El paginador comparte la linea fina superior y el fondo transparente: separa
+// sin sombra y sin duplicar la linea de la ultima fila. Sus botones conservan
+// la onda y la capa de estado propias de Material, asi que no los redefino
+// aqui y evito selectores profundos.
+.data-table .mat-mdc-paginator {
+  background: transparent;
+  border-top: 1px solid var(--mat-sys-outline-variant);
+  box-shadow: none;
 }

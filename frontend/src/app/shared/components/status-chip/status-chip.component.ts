@@ -29,6 +29,15 @@ const TONE_ICONS: Readonly<Record<ChipTone, string>> = {
     </span>
   `,
   styles: `
+    // Mapeo unico de tonos a color (design-system.md §3 y §4): neutral a
+    // surface-variant, informacion a secondary-container, exito a
+    // tertiary-container, advertencia al par semantico documentado
+    // --app-status-warning-container y error a error-container. Cuento la
+    // verdad: exito y advertencia colisionaron porque mi paleta de semilla
+    // unica colapsa primario y terciario en el mismo valor medido en pantalla,
+    // por eso advertencia necesita este par documentado y nada mas. Cada tono
+    // suma icono y texto, nunca solo color (§13). La pildora usa corner-full
+    // segun el vocabulario de forma (§7).
     .chip {
       display: inline-flex;
       align-items: center;
@@ -46,7 +55,7 @@ const TONE_ICONS: Readonly<Record<ChipTone, string>> = {
     }
 
     .chip--neutral {
-      background: var(--mat-sys-surface-container-highest);
+      background: var(--mat-sys-surface-variant);
       color: var(--mat-sys-on-surface-variant);
     }
 
@@ -61,8 +70,8 @@ const TONE_ICONS: Readonly<Record<ChipTone, string>> = {
     }
 
     .chip--warning {
-      background: var(--mat-sys-secondary-container);
-      color: var(--mat-sys-on-secondary-container);
+      background: var(--app-status-warning-container);
+      color: var(--app-status-on-warning-container);
     }
 
     .chip--error {

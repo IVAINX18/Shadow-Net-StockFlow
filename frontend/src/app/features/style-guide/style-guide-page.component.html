@@ -9,62 +9,219 @@
 </app-page-header>
 
 <section class="guide__section" aria-labelledby="color-title">
-  <h2 class="guide__title" id="color-title">Roles de superficie y acento</h2>
-  <div class="guide__swatches">
+  <h2 class="guide__title app-tight" id="color-title">Roles de superficie y acento</h2>
+  <p class="guide__note">
+    Cada celda muestra un rol real del tema. El color vive en su propio bloque y la etiqueta
+    queda sobre la superficie neutra para conservar el contraste.
+  </p>
+  <h3 class="guide__subtitle app-tight">Superficies (5 roles)</h3>
+  <div class="guide__swatches guide__swatches--surface">
     @for (swatch of surfaceTokens; track swatch.token) {
-      <div class="swatch" [style.background]="'var(' + swatch.token + ')'">
+      <div class="swatch">
+        <span class="swatch__color" [style.background]="'var(' + swatch.token + ')'"></span>
         <span class="swatch__label">{{ swatch.label }}</span>
-        <code class="swatch__token">{{ swatch.token }}</code>
+        <code class="swatch__token app-mono">{{ swatch.token }}</code>
       </div>
     }
+  </div>
+  <h3 class="guide__subtitle app-tight">Acento y semantica (6 roles)</h3>
+  <div class="guide__swatches guide__swatches--accent">
     @for (swatch of accentTokens; track swatch.token) {
-      <div class="swatch" [style.background]="'var(' + swatch.token + ')'">
+      <div class="swatch">
+        <span class="swatch__color" [style.background]="'var(' + swatch.token + ')'"></span>
         <span class="swatch__label">{{ swatch.label }}</span>
-        <code class="swatch__token">{{ swatch.token }}</code>
+        <code class="swatch__token app-mono">{{ swatch.token }}</code>
       </div>
     }
   </div>
 </section>
 
 <section class="guide__section" aria-labelledby="type-title">
-  <h2 class="guide__title" id="type-title">Escala tipografica</h2>
+  <h2 class="guide__title app-tight" id="type-title">Tipografia</h2>
+  <p class="guide__note">
+    Inter (pesos 400, 500 y 600) para texto y titulares, con tracking cerrado en display,
+    headline y title. JetBrains Mono (pesos 400 y 500) solo para datos tecnicos. Sin Roboto
+    y sin fuentes de CDN: ambas se autoalojan desde el proyecto.
+  </p>
   <div class="guide__type">
     @for (item of typography; track item.token) {
       <div class="type-row">
         <span class="type-row__meta">
           <span class="type-row__label">{{ item.label }}</span>
-          <code class="type-row__token">{{ item.token }}</code>
+          <code class="type-row__token app-mono">{{ item.token }}</code>
         </span>
-        <span class="type-row__sample" [style.font]="item.token">{{ item.sample }}</span>
+        <span class="type-row__sample" [class.app-tight]="item.tight" [style.font]="item.token">{{
+          item.sample
+        }}</span>
       </div>
     }
     <div class="type-row">
       <span class="type-row__meta">
-        <span class="type-row__label">Cifras tabulares</span>
-        <code class="type-row__token">font-variant-numeric: tabular-nums</code>
+        <span class="type-row__label">Cifras tabulares (cifras de negocio)</span>
+        <code class="type-row__token app-mono">.app-tabular</code>
       </span>
-      <span class="type-row__sample numeric">1.250 &nbsp; {{
-        decimalSample
-      }} &nbsp; 98.400</span>
+      <span class="type-row__sample app-tabular">1.250 &nbsp; {{ decimalSample }} &nbsp; 98.400</span>
+    </div>
+    <div class="type-row">
+      <span class="type-row__meta">
+        <span class="type-row__label">Cifras proporcionales (comparacion)</span>
+        <code class="type-row__token app-mono">sin .app-tabular</code>
+      </span>
+      <span class="type-row__sample type-row__sample--proportional"
+        >1.250 &nbsp; {{ decimalSample }} &nbsp; 98.400</span
+      >
+    </div>
+    <div class="type-row">
+      <span class="type-row__meta">
+        <span class="type-row__label">Monoespaciada tecnica</span>
+        <code class="type-row__token app-mono">.app-mono</code>
+      </span>
+      <span class="type-row__sample app-mono">ALM-001 &nbsp; SKU-88412 &nbsp; /api/v1/health</span>
     </div>
   </div>
 </section>
 
+<section class="guide__section" aria-labelledby="shape-title">
+  <h2 class="guide__title app-tight" id="shape-title">Vocabulario de forma</h2>
+  <p class="guide__note">
+    Los unicos radios del proyecto. Cada fila muestra el radio aplicado a un elemento real.
+  </p>
+  <table class="shape-table">
+    <thead>
+      <tr>
+        <th scope="col">Elemento</th>
+        <th scope="col">Rol de Material</th>
+        <th scope="col">Valor</th>
+        <th scope="col">Muestra</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Etiquetas, insignias, avatares</td>
+        <td><code class="app-mono">corner-full</code></td>
+        <td>Pildora</td>
+        <td><span class="shape-demo shape-demo--pill">Etiqueta</span></td>
+      </tr>
+      <tr>
+        <td>Botones</td>
+        <td><code class="app-mono">corner-small</code></td>
+        <td>8 px</td>
+        <td><span class="shape-demo shape-demo--button">Boton</span></td>
+      </tr>
+      <tr>
+        <td>Campos de formulario</td>
+        <td><code class="app-mono">corner-extra-small</code></td>
+        <td>4 px</td>
+        <td><span class="shape-demo shape-demo--field">ALM-001</span></td>
+      </tr>
+      <tr>
+        <td>Tarjetas y contenedores</td>
+        <td><code class="app-mono">corner-medium</code></td>
+        <td>12 px</td>
+        <td><span class="shape-demo shape-demo--card">Tarjeta</span></td>
+      </tr>
+      <tr>
+        <td>Superficies grandes</td>
+        <td><code class="app-mono">corner-large</code></td>
+        <td>16 px</td>
+        <td><span class="shape-demo shape-demo--surface">Acceso</span></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="guide__section" aria-labelledby="elevation-title">
+  <h2 class="guide__title app-tight" id="elevation-title">Elevacion y separacion</h2>
+  <p class="guide__note">
+    El contenedor se define con borde de 1 px, no con sombra. La sombra queda reservada a lo
+    que flota sobre la pagina.
+  </p>
+  <div class="guide__elevation">
+    <div class="elev-demo">
+      <span class="elev-demo__label">Contenedor: borde de 1 px, sin sombra</span>
+      <code class="elev-demo__token app-mono">outline-variant</code>
+    </div>
+    <div class="elev-demo elev-demo--float">
+      <span class="elev-demo__label">Capa flotante: caso reservado (menu o dialogo)</span>
+      <code class="elev-demo__token app-mono">--mat-sys-level3</code>
+    </div>
+  </div>
+</section>
+
+<section class="guide__section" aria-labelledby="rhythm-title">
+  <h2 class="guide__title app-tight" id="rhythm-title">Ritmo de composicion</h2>
+  <p class="guide__note">
+    El espaciado de bloque sale de cuatro tokens. Cada barra mide el valor real del token.
+  </p>
+  <div class="guide__rhythm">
+    @for (row of rhythmTokens; track row.token) {
+      <div class="rhythm-row">
+        <span class="rhythm-row__meta">
+          <code class="rhythm-row__token app-mono">{{ row.token }}</code>
+          <span class="rhythm-row__use">{{ row.use }} ({{ row.value }})</span>
+        </span>
+        <span class="rhythm-row__bar" [style.width]="'var(' + row.token + ')'"></span>
+      </div>
+    }
+  </div>
+  <h3 class="guide__subtitle app-tight">Escala de espaciado (4 px a 32 px)</h3>
+  <div class="guide__rhythm">
+    @for (row of spaceScale; track row.token) {
+      <div class="rhythm-row">
+        <span class="rhythm-row__meta">
+          <code class="rhythm-row__token app-mono">{{ row.token }}</code>
+          <span class="rhythm-row__use">{{ row.use }} ({{ row.value }})</span>
+        </span>
+        <span class="rhythm-row__bar" [style.width]="'var(' + row.token + ')'"></span>
+      </div>
+    }
+  </div>
+</section>
+
 <section class="guide__section" aria-labelledby="buttons-title">
-  <h2 class="guide__title" id="buttons-title">Botones</h2>
-  <div class="guide__row">
-    <button mat-flat-button (click)="onNoop()">Primario</button>
-    <button mat-stroked-button (click)="onNoop()">Secundario</button>
-    <button mat-button (click)="onNoop()">Texto</button>
-    <button mat-icon-button aria-label="Icono de ejemplo" (click)="onNoop()">
-      <mat-icon aria-hidden="true">add</mat-icon>
-    </button>
-    <button mat-flat-button disabled>Deshabilitado</button>
+  <h2 class="guide__title app-tight" id="buttons-title">Botones y estados de interaccion</h2>
+  <p class="guide__note">
+    El mismo boton primario en cada estado. Recorre con Tab para verificar el foco visible y
+    manten pulsado para sentir la respuesta tactil.
+  </p>
+  <div class="guide__interaction">
+    <div class="interaction-row">
+      <span class="interaction-row__label">Reposo</span>
+      <button mat-flat-button type="button" (click)="onNoop()">Primario</button>
+    </div>
+    <div class="interaction-row">
+      <span class="interaction-row__label">Hover (pasa el cursor)</span>
+      <button mat-flat-button type="button" (click)="onNoop()">Primario</button>
+    </div>
+    <div class="interaction-row">
+      <span class="interaction-row__label">Foco visible (pulsa Tab hasta llegar)</span>
+      <button mat-flat-button type="button" class="interaction-focus" (click)="onNoop()">
+        Primario
+      </button>
+    </div>
+    <div class="interaction-row">
+      <span class="interaction-row__label">Activo (manten pulsado)</span>
+      <button mat-flat-button type="button" (click)="onNoop()">Primario</button>
+    </div>
+    <div class="interaction-row">
+      <span class="interaction-row__label">Deshabilitado</span>
+      <button mat-flat-button type="button" disabled>Primario</button>
+    </div>
+    <div class="interaction-row">
+      <span class="interaction-row__label">Secundario y texto</span>
+      <span class="interaction-row__group">
+        <button mat-stroked-button type="button" (click)="onNoop()">Secundario</button>
+        <button mat-button type="button" (click)="onNoop()">Texto</button>
+        <button mat-icon-button type="button" aria-label="Icono de ejemplo" (click)="onNoop()">
+          <mat-icon aria-hidden="true">add</mat-icon>
+        </button>
+      </span>
+    </div>
   </div>
 </section>
 
 <section class="guide__section" aria-labelledby="fields-title">
-  <h2 class="guide__title" id="fields-title">Campos de formulario</h2>
+  <h2 class="guide__title app-tight" id="fields-title">Campos de formulario</h2>
   <div class="guide__fields">
     <mat-form-field appearance="outline">
       <mat-label>Codigo de almacen</mat-label>
@@ -84,16 +241,16 @@
 </section>
 
 <section class="guide__section" aria-labelledby="chips-title">
-  <h2 class="guide__title" id="chips-title">Chips de estado</h2>
+  <h2 class="guide__title app-tight" id="chips-title">Chips de estado</h2>
   <div class="guide__row">
     @for (tone of tones; track tone) {
-      <app-status-chip [label]="tone" [tone]="tone" />
+      <app-status-chip [label]="toneLabels[tone]" [tone]="tone" />
     }
   </div>
 </section>
 
 <section class="guide__section" aria-labelledby="kpi-title">
-  <h2 class="guide__title" id="kpi-title">Tarjeta de indicador</h2>
+  <h2 class="guide__title app-tight" id="kpi-title">Tarjeta de indicador</h2>
   <p class="guide__note">
     Componente de revision: el valor es un formato de muestra, no una cifra de negocio.
   </p>
@@ -109,7 +266,7 @@
 </section>
 
 <section class="guide__section" aria-labelledby="table-title">
-  <h2 class="guide__title" id="table-title">Tabla de datos</h2>
+  <h2 class="guide__title app-tight" id="table-title">Tabla de datos</h2>
   <p class="guide__note">
     Fixture de ejemplo para revisar encabezados, orden, chip de estado y paginacion.
   </p>
@@ -125,7 +282,7 @@
 </section>
 
 <section class="guide__section" aria-labelledby="states-title">
-  <h2 class="guide__title" id="states-title">Estados de interfaz</h2>
+  <h2 class="guide__title app-tight" id="states-title">Estados de interfaz</h2>
   <div class="guide__states">
     <div class="state-box">
       <h3 class="state-box__title">Carga</h3>
@@ -147,10 +304,12 @@
 </section>
 
 <section class="guide__section" aria-labelledby="z-title">
-  <h2 class="guide__title" id="z-title">Escala de indices de apilamiento</h2>
+  <h2 class="guide__title app-tight" id="z-title">Escala de indices de apilamiento</h2>
   <ul class="guide__z">
     @for (item of zIndexScale; track item.name) {
-      <li><code>{{ item.name }}</code> = {{ item.value }}</li>
+      <li>
+        <code class="app-mono">{{ item.name }}</code> = {{ item.value }}
+      </li>
     }
   </ul>
 </section>

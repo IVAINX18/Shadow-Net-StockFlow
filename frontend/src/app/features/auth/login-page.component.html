@@ -3,7 +3,7 @@
     <div class="login__brand">
       <mat-icon aria-hidden="true">inventory</mat-icon>
       <div>
-        <h1 class="login__title">Shadow-Net StockFlow</h1>
+        <h1 class="login__title app-tight">Shadow-Net StockFlow</h1>
         <p class="login__subtitle">Gestion de inventarios y logistica</p>
       </div>
     </div>
@@ -20,47 +20,53 @@
     }
 
     <form class="login__form" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
-      <mat-form-field appearance="outline">
-        <mat-label>Correo electronico</mat-label>
-        <input
-          matInput
-          type="email"
-          formControlName="email"
-          autocomplete="username"
-          aria-describedby="email-help"
-          required
-        />
-        <mat-hint id="email-help">Use el correo con el que fue registrado.</mat-hint>
-        <mat-error>
-          @if (emailControl.hasError('required')) {
-            El correo es obligatorio.
-          } @else if (emailControl.hasError('email')) {
-            El correo no tiene un formato valido.
-          } @else if (emailControl.hasError('backend')) {
-            {{ emailControl.getError('backend') }}
-          }
-        </mat-error>
-      </mat-form-field>
+      <div class="login__field">
+        <label class="login__label" for="login-email">Correo electronico</label>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <input
+            matInput
+            id="login-email"
+            type="email"
+            formControlName="email"
+            autocomplete="username"
+            aria-describedby="login-email-help"
+            required
+          />
+          <mat-hint id="login-email-help">Use el correo con el que fue registrado.</mat-hint>
+          <mat-error>
+            @if (emailControl.hasError('required')) {
+              El correo es obligatorio.
+            } @else if (emailControl.hasError('email')) {
+              El correo no tiene un formato valido.
+            } @else if (emailControl.hasError('backend')) {
+              {{ emailControl.getError('backend') }}
+            }
+          </mat-error>
+        </mat-form-field>
+      </div>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Contrasena</mat-label>
-        <input
-          matInput
-          type="password"
-          formControlName="password"
-          autocomplete="current-password"
-          aria-describedby="password-help"
-          required
-        />
-        <mat-hint id="password-help">Minimo exigido por el administrador de su cuenta.</mat-hint>
-        <mat-error>
-          @if (passwordControl.hasError('required')) {
-            La contrasena es obligatoria.
-          } @else if (passwordControl.hasError('backend')) {
-            {{ passwordControl.getError('backend') }}
-          }
-        </mat-error>
-      </mat-form-field>
+      <div class="login__field">
+        <label class="login__label" for="login-password">Contrasena</label>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <input
+            matInput
+            id="login-password"
+            type="password"
+            formControlName="password"
+            autocomplete="current-password"
+            aria-describedby="login-password-help"
+            required
+          />
+          <mat-hint id="login-password-help">Minimo exigido por el administrador de su cuenta.</mat-hint>
+          <mat-error>
+            @if (passwordControl.hasError('required')) {
+              La contrasena es obligatoria.
+            } @else if (passwordControl.hasError('backend')) {
+              {{ passwordControl.getError('backend') }}
+            }
+          </mat-error>
+        </mat-form-field>
+      </div>
 
       <button
         mat-flat-button

@@ -11,7 +11,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
   template: `
     <header class="page-header">
       <div class="page-header__titles">
-        <h1 class="page-header__title">{{ title() }}</h1>
+        <h1 class="page-header__title app-tight">{{ title() }}</h1>
         @if (subtitle(); as sub) {
           <p class="page-header__subtitle">{{ sub }}</p>
         }
@@ -26,10 +26,10 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
-      gap: var(--app-space-4);
+      gap: var(--app-card-padding);
       padding-block: var(--app-space-5);
       border-bottom: 1px solid var(--mat-sys-outline-variant);
-      margin-bottom: var(--app-space-5);
+      margin-bottom: var(--app-section-gap);
     }
 
     .page-header__title {
@@ -39,7 +39,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
     }
 
     .page-header__subtitle {
-      margin: 4px 0 0;
+      margin: var(--app-space-1) 0 0;
       font: var(--mat-sys-body-medium);
       color: var(--mat-sys-on-surface-variant);
     }
@@ -47,7 +47,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
     .page-header__actions {
       display: flex;
       align-items: center;
-      gap: var(--app-space-2);
+      gap: var(--app-element-gap);
       flex-wrap: wrap;
     }
   `,

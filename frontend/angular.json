@@ -29,13 +29,13 @@
                 "input": "public"
               },
               {
-                "glob": "roboto-latin-{400,500,700}-normal.woff2",
-                "input": "node_modules/@fontsource/roboto/files",
+                "glob": "inter-latin-{400,500,600}-normal.woff2",
+                "input": "node_modules/@fontsource/inter/files",
                 "output": "fonts"
               },
               {
-                "glob": "roboto-mono-latin-{400,500,700}-normal.woff2",
-                "input": "node_modules/@fontsource/roboto-mono/files",
+                "glob": "jetbrains-mono-latin-{400,500}-normal.woff2",
+                "input": "node_modules/@fontsource/jetbrains-mono/files",
                 "output": "fonts"
               },
               {

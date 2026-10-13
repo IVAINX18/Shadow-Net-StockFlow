@@ -16,6 +16,8 @@ export interface DataTableColumn<T> {
   readonly status?: (row: T) => ChipTone | null;
   /** Alinea a la derecha y activa cifras tabulares. */
   readonly numeric?: boolean;
+  /** Presenta la celda en monoespaciada (codigos, slugs, claves tecnicas). */
+  readonly mono?: boolean;
   /** Permite ordenar por esta columna. */
   readonly sortable?: boolean;
   /** Campo de orden que espera la API, si difiere de `key`. */

@@ -20,7 +20,7 @@ import { MatIconModule } from '@angular/material/icon';
       @if (loading()) {
         <span class="kpi__value-skeleton" aria-hidden="true"></span>
       } @else {
-        <p class="kpi__value">{{ value() }}</p>
+        <p class="kpi__value app-tight app-tabular">{{ value() }}</p>
       }
       @if (hint(); as hintText) {
         <p class="kpi__hint">{{ hintText }}</p>
@@ -31,8 +31,8 @@ import { MatIconModule } from '@angular/material/icon';
     .kpi {
       display: flex;
       flex-direction: column;
-      gap: var(--app-space-2);
-      padding: var(--app-space-4);
+      gap: var(--app-element-gap);
+      padding: var(--app-card-padding);
       border-radius: var(--mat-sys-corner-medium);
       background: var(--mat-sys-surface-container);
       border: 1px solid var(--mat-sys-outline-variant);
@@ -42,7 +42,7 @@ import { MatIconModule } from '@angular/material/icon';
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: var(--app-space-2);
+      gap: var(--app-element-gap);
     }
 
     .kpi__label {
@@ -58,7 +58,6 @@ import { MatIconModule } from '@angular/material/icon';
       margin: 0;
       font: var(--mat-sys-headline-medium);
       color: var(--mat-sys-on-surface);
-      font-variant-numeric: tabular-nums;
     }
 
     .kpi__value-skeleton {

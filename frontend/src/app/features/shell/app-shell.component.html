@@ -8,7 +8,7 @@
   >
     <div class="shell__brand">
       <mat-icon aria-hidden="true">inventory</mat-icon>
-      <span class="shell__brand-name">StockFlow</span>
+      <span class="shell__brand-name app-tight">StockFlow</span>
     </div>
 
     <mat-nav-list class="shell__nav">
@@ -46,7 +46,12 @@
       <nav class="shell__crumbs" aria-label="Ruta de navegacion">
         @for (crumb of crumbs(); track crumb.url; let last = $last) {
           <span class="shell__crumb">
-            <a [routerLink]="crumb.url" [class.shell__crumb--current]="last">{{ crumb.label }}</a>
+            <a
+              [routerLink]="crumb.url"
+              [class.shell__crumb--current]="last"
+              [attr.aria-current]="last ? 'page' : null"
+              >{{ crumb.label }}</a
+            >
             @if (!last) {
               <mat-icon class="shell__crumb-sep" aria-hidden="true">chevron_right</mat-icon>
             }

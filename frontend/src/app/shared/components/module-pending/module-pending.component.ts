@@ -18,7 +18,7 @@ import { PageHeaderComponent } from '../page-header/page-header.component';
       <div class="pending__banner">
         <mat-icon class="pending__icon" aria-hidden="true">construction</mat-icon>
         <div>
-          <p class="pending__phase">Disponible en {{ phase() }}.</p>
+          <p class="pending__phase app-tight">Disponible en {{ phase() }}.</p>
           <p class="pending__note">
             Esta seccion se construira cuando existan los endpoints del backend. Hasta
             entonces no se muestran datos: no hay API que los provea.
@@ -28,12 +28,12 @@ import { PageHeaderComponent } from '../page-header/page-header.component';
 
       @if (endpoints().length > 0) {
         <div class="pending__endpoints">
-          <h2 class="pending__subtitle">Endpoints que faltan</h2>
+          <h2 class="pending__subtitle app-tight">Endpoints que faltan</h2>
           <ul class="pending__list">
             @for (endpoint of endpoints(); track endpoint) {
               <li class="pending__item">
                 <mat-icon aria-hidden="true">api</mat-icon>
-                <code>{{ endpoint }}</code>
+                <code class="app-mono app-tabular">{{ endpoint }}</code>
               </li>
             }
           </ul>
@@ -45,14 +45,14 @@ import { PageHeaderComponent } from '../page-header/page-header.component';
     .pending {
       display: flex;
       flex-direction: column;
-      gap: var(--app-space-5);
+      gap: var(--app-section-gap);
     }
 
     .pending__banner {
       display: flex;
-      gap: var(--app-space-4);
+      gap: var(--app-card-padding);
       align-items: flex-start;
-      padding: var(--app-space-5);
+      padding: var(--app-card-padding);
       border-radius: var(--mat-sys-corner-medium);
       background: var(--mat-sys-surface-container);
       border: 1px solid var(--mat-sys-outline-variant);
@@ -74,7 +74,7 @@ import { PageHeaderComponent } from '../page-header/page-header.component';
     }
 
     .pending__subtitle {
-      margin: 0 0 var(--app-space-2);
+      margin: 0 0 var(--app-element-gap);
       font: var(--mat-sys-title-small);
     }
 
@@ -90,7 +90,7 @@ import { PageHeaderComponent } from '../page-header/page-header.component';
     .pending__item {
       display: flex;
       align-items: center;
-      gap: var(--app-space-2);
+      gap: var(--app-element-gap);
       font: var(--mat-sys-body-medium);
       color: var(--mat-sys-on-surface-variant);
     }
@@ -99,11 +99,6 @@ import { PageHeaderComponent } from '../page-header/page-header.component';
       font-size: 18px;
       width: 18px;
       height: 18px;
-    }
-
-    .pending__item code {
-      font-family: 'Roboto Mono', monospace;
-      font-variant-numeric: tabular-nums;
     }
   `,
 })

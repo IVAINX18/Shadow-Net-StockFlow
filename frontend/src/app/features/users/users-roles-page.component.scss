@@ -1,9 +1,22 @@
-.section + .section {
-  margin-top: var(--app-space-8);
+// Compongo el ritmo interno de la pantalla con los tokens del contrato
+// (design-system.md §8): las dos tablas respiran con el hueco de seccion y
+// cada bloque con el hueco de elemento. El margen exterior lo aporta el
+// armazon (shell__main), asi que no apilo otro relleno aqui y evito duplicar
+// el medianil de pagina.
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-section-gap);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-element-gap);
 }
 
 .section__title {
-  margin: 0 0 var(--app-space-3);
+  margin: 0;
   font: var(--mat-sys-title-medium);
   color: var(--mat-sys-on-surface);
 }

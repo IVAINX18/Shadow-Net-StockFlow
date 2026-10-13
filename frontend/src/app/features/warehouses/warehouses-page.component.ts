@@ -52,7 +52,9 @@ export class WarehousesPageComponent {
   private readonly service = inject(WarehousesService);
 
   protected readonly columns: readonly DataTableColumn<Warehouse>[] = [
-    { key: 'code', header: 'Codigo', sortable: true, cell: (row) => row.code },
+    // El codigo es un identificador tecnico: lo presento en monoespaciada
+    // para comparar caracter por caracter (design-system.md §6).
+    { key: 'code', header: 'Codigo', sortable: true, mono: true, cell: (row) => row.code },
     { key: 'name', header: 'Nombre', sortable: true, cell: (row) => row.name },
     { key: 'city', header: 'Ciudad', cell: (row) => row.city ?? 'Sin ciudad' },
     {

@@ -126,7 +126,9 @@ export class UsersRolesPageComponent {
 
   protected readonly roleColumns: readonly DataTableColumn<Role>[] = [
     { key: 'name', header: 'Rol', sortable: true, cell: (row) => row.name },
-    { key: 'slug', header: 'Slug', cell: (row) => row.slug },
+    // El slug es una clave tecnica: lo presento en monoespaciada para
+    // comparar caracter por caracter (design-system.md §6).
+    { key: 'slug', header: 'Slug', mono: true, cell: (row) => row.slug },
     { key: 'description', header: 'Descripcion', cell: (row) => row.description ?? 'Sin descripcion' },
     {
       key: 'permissions',

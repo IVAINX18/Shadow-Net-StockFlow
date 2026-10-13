@@ -21,6 +21,13 @@ interface TokenSwatch {
   readonly label: string;
 }
 
+/** Fila de ritmo o escala: el valor declarado es el que emite el token. */
+interface SpacingRow {
+  readonly token: string;
+  readonly value: string;
+  readonly use: string;
+}
+
 // Fixture de la guia: dos filas genericas que solo existen para revisar la
 // tabla (encabezado, chip de estado, alineacion). No representan datos de
 // negocio; las cifras reales siempre vienen del backend (design-system.md §11).
@@ -79,18 +86,49 @@ export class StyleGuidePageComponent {
     { token: '--mat-sys-error-container', label: 'Error container' },
   ];
 
-  protected readonly typography: readonly { token: string; label: string; sample: string }[] = [
-    { token: 'var(--mat-sys-display-small)', label: 'Display small', sample: 'StockFlow' },
-    { token: 'var(--mat-sys-headline-small)', label: 'Headline small', sample: 'Resumen de almacen' },
-    { token: 'var(--mat-sys-title-large)', label: 'Title large', sample: 'Movimientos del dia' },
-    { token: 'var(--mat-sys-title-medium)', label: 'Title medium', sample: 'Kardex por producto' },
-    { token: 'var(--mat-sys-body-large)', label: 'Body large', sample: 'Texto general de la interfaz.' },
-    { token: 'var(--mat-sys-body-medium)', label: 'Body medium', sample: 'Texto de apoyo y descripciones.' },
-    { token: 'var(--mat-sys-label-large)', label: 'Label large', sample: 'ETIQUETA DE CAMPO' },
-    { token: 'var(--mat-sys-label-small)', label: 'Label small', sample: 'ESTADO' },
+  protected readonly typography: readonly { token: string; label: string; sample: string; tight: boolean }[] = [
+    { token: 'var(--mat-sys-display-small)', label: 'Display small', sample: 'StockFlow', tight: true },
+    { token: 'var(--mat-sys-headline-small)', label: 'Headline small', sample: 'Resumen de almacen', tight: true },
+    { token: 'var(--mat-sys-title-large)', label: 'Title large', sample: 'Movimientos del dia', tight: true },
+    { token: 'var(--mat-sys-title-medium)', label: 'Title medium', sample: 'Kardex por producto', tight: true },
+    { token: 'var(--mat-sys-body-large)', label: 'Body large', sample: 'Texto general de la interfaz.', tight: false },
+    { token: 'var(--mat-sys-body-medium)', label: 'Body medium', sample: 'Texto de apoyo y descripciones.', tight: false },
+    { token: 'var(--mat-sys-label-large)', label: 'Label large', sample: 'ETIQUETA DE CAMPO', tight: false },
+    { token: 'var(--mat-sys-label-small)', label: 'Label small', sample: 'ESTADO', tight: false },
+  ];
+
+  // Ritmo de composicion del contrato (§8): los valores son los que declaran
+  // los tokens, asi que la pagina los muestra sin inventar ninguno.
+  protected readonly rhythmTokens: readonly SpacingRow[] = [
+    { token: '--app-page-gutter', value: '24 px', use: 'Margen interior del area de contenido' },
+    { token: '--app-section-gap', value: '24 px', use: 'Separacion entre bloques de una pantalla' },
+    { token: '--app-card-padding', value: '16 px', use: 'Relleno interior de tarjetas y contenedores' },
+    { token: '--app-element-gap', value: '8 px', use: 'Separacion entre elementos de un mismo bloque' },
+  ];
+
+  // Escala general de 4 px a 32 px tal como la emite :root en styles.scss.
+  protected readonly spaceScale: readonly SpacingRow[] = [
+    { token: '--app-space-1', value: '4 px', use: 'Separacion minima' },
+    { token: '--app-space-2', value: '8 px', use: 'Elementos de un bloque' },
+    { token: '--app-space-3', value: '12 px', use: 'Relleno compacto' },
+    { token: '--app-space-4', value: '16 px', use: 'Relleno de tarjeta' },
+    { token: '--app-space-5', value: '20 px', use: 'Paso intermedio' },
+    { token: '--app-space-6', value: '24 px', use: 'Separacion entre bloques' },
+    { token: '--app-space-8', value: '32 px', use: 'Separacion amplia' },
   ];
 
   protected readonly tones: readonly ChipTone[] = ['neutral', 'info', 'success', 'warning', 'error'];
+
+  // Traduzco la clave tecnica del tono a copy de interfaz en espanol para que
+  // la guia se lea como producto y no como codigo (design-system.md §12).
+  // Mantengo el bucle de la plantilla y solo mapeo la etiqueta.
+  protected readonly toneLabels: Readonly<Record<ChipTone, string>> = {
+    neutral: 'Neutral',
+    info: 'Informativo',
+    success: 'Exito',
+    warning: 'Advertencia',
+    error: 'Error',
+  };
 
   protected readonly zIndexScale: readonly { name: string; value: string }[] = [
     { name: '--app-z-base', value: '0' },

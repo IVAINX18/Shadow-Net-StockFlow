@@ -40,7 +40,7 @@ export type SkeletonVariant = 'table' | 'cards' | 'text';
   styles: `
     .skeleton {
       display: block;
-      border-radius: var(--mat-sys-corner-small);
+      border-radius: var(--mat-sys-corner-extra-small);
       background: linear-gradient(
         90deg,
         var(--mat-sys-surface-container-high) 25%,
@@ -55,7 +55,7 @@ export type SkeletonVariant = 'table' | 'cards' | 'text';
     .skeleton-text {
       display: flex;
       flex-direction: column;
-      gap: var(--app-space-2);
+      gap: var(--app-element-gap);
     }
 
     .skeleton--row { block-size: 40px; }

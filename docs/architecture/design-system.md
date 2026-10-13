@@ -1,14 +1,16 @@
 # Sistema de diseno - Shadow-Net StockFlow
 
-**Estado del documento:** v1.0 (decisiones cerradas). **Fecha:** 12/10/2026. **Autor:** Shadow-Net Technologies.
+**Estado del documento:** v1.1 (refinamiento de gusto visual). **Fecha:** 13/10/2026. **Autor:** Shadow-Net Technologies.
 
 Este documento es la **fuente unica** de la identidad visual de la SPA: sistema de componentes, tokens, temas, tipografia, color, forma, densidad, estados de interfaz y la lista de verificacion que una pantalla debe pasar antes de darse por terminada. La arquitectura de la SPA (carpetas, estado, interceptores, rutas) esta en [frontend-architecture.md](./frontend-architecture.md); los requisitos de accesibilidad en [../planning/non-functional-requirements.md](../planning/non-functional-requirements.md) (RNF-024, RNF-025, RNF-026); los contratos de presentacion de datos en [api-design.md](./api-design.md).
+
+**Cambios de la v1.1 respecto de la v1.0:** tipografia (seccion 6), vocabulario de forma y realimentacion tactil (seccion 7), ritmo de espaciado por tokens (seccion 8), `MOTION_INTENSITY` de 2 a 3 (seccion 1), adaptacion de la referencia de gusto externa (seccion 15) y casillas nuevas de verificacion (seccion 16).
 
 ## 1. Lectura de diseno y alcance
 
 [DECISION] **Lectura de diseno:** back-office ERP para operadores de bodega, jefes de almacen, auditores y administradores, en escritorio y en pantallas reducidas de bodega, con un lenguaje de informacion densa, confianza y accesibilidad critica, apoyado en **Angular Material 3** como sistema oficial.
 
-[DECISION] **Diales de interfaz:** `DESIGN_VARIANCE 3` (rejilla predecible, simetria, alineacion estricta), `MOTION_INTENSITY 2` (interfaz estatica, solo transiciones breves y estados de `:hover` y `:active`) y `VISUAL_DENSITY 7` (tablas y datos operativos densos). Los tres valores se derivan del caracter del producto: software de operacion, no de promocion.
+[DECISION] **Diales de interfaz:** `DESIGN_VARIANCE 3` (rejilla predecible, simetria, alineacion estricta), `MOTION_INTENSITY 3` (interfaz estatica: solo transiciones breves, estados de `:hover` y `:active`, y realimentacion fisica al pulsar) y `VISUAL_DENSITY 7` (tablas y datos operativos densos). Los tres valores se derivan del caracter del producto: software de operacion, no de promocion. El movimiento sube de 2 a 3 en la v1.1 porque se admite realimentacion tactil explicita; sigue sin existir animacion decorativa.
 
 [DECISION] La guia de gusto visual usada para cerrar estas decisiones declara explicitamente que los paneles de administracion, las tablas de datos y los formularios de varios pasos quedan **fuera de su alcance**. Por eso de este documento se excluye toda la maquinaria de paginas de marketing (hero, cuadriculas tipo bento, marquesinas, rotulaciones decorativas, prohibiciones de paleta para consumo premium) y se adopta unicamente lo que si transfiere a un panel de administracion: protocolo de temas, disciplina de color, consistencia de forma, ciclos completos de estado, patrones de formulario, tipografia para datos, contraste, rendimiento, respeto al movimiento reducido y verificacion previa a la entrega.
 
@@ -18,11 +20,22 @@ Este documento es la **fuente unica** de la identidad visual de la SPA: sistema 
 
 Motivos: la documentacion del proyecto ya fija Material 22.2.x para tablas, formularios, dialogos y navegacion accesible (ADR-006, [frontend-architecture.md](./frontend-architecture.md) seccion 10); mezclar dos sistemas obliga a mantener dos escalas de espaciado, dos paletas y dos modelos de accesibilidad; y la regla del proyecto prohibe anadir infraestructura por moda. Una biblioteca de estado global (NgRx) tambien queda descartada por sobredimensionada.
 
-No se anaden dependencias visuales sin justificarlo en este documento y en la bitacora.
+No se anaden dependencias visuales sin justificarlo en este documento y en la bitacora. Las unicas anadidas en la v1.1 son los paquetes de fuentes autoalojadas que justifica la seccion 6.
 
 ## 3. Tokens
 
 [DECISION] Todo color, tipografia, radio, espaciado y elevacion proviene de los **tokens de sistema de Material 3** que genera `mat.theme()` (familia `--mat-sys-*`), expuestos como propiedades personalizadas de CSS. Los componentes no declaran colores literales, ni hexadecimales, ni `rgb()`, ni transparencias inventadas.
+
+El proyecto anade sus propias propiedades con el prefijo `--app-` para lo que Material no cubre: escala de espaciado, escala de apilamiento y ritmo de composicion (seccion 8). No se redefine ningun rol de color ni de tipografia de Material.
+
+[DECISION] **Unica excepcion de color, y esta cerrada.** Material 3 no define un rol de advertencia, y como toda la paleta se deriva de una semilla unica, los roles primario y terciario colapsan en el mismo valor. Consecuencia medida: los tonos de estado no caben en cinco colores distintos usando solo roles de Material. Por eso el proyecto declara un unico par de propiedades semanticas de advertencia, resueltas con `light-dark()` para los dos temas:
+
+| Token | Tema claro | Tema oscuro |
+| --- | --- | --- |
+| `--app-status-warning-container` | `#fef3c7` | `#4a3208` |
+| `--app-status-on-warning-container` | `#78350f` | `#fde68a` |
+
+Los valores provienen de la familia de ambar de una paleta de uso comun. Su contraste se verifica en ambos temas (seccion 16) y no se anade ningun otro color: los demas tonos de estado usan roles de Material (`surface-variant`, `secondary-container`, `primary-container`, `error-container`).
 
 Reglas de uso de la jerarquia de superficie:
 
@@ -45,6 +58,7 @@ Reglas de uso de la jerarquia de superficie:
 - Sin gradientes decorativos, sin saturaciones altas, sin acentos innecesarios.
 - Sin negro puro ni blanco puro como superficie general: la paleta tonal de Material 3 entrega grises y blancos sucios, que conservan profundidad.
 - El color nunca es el unico portador de informacion (ver seccion 13).
+- **Cinco tonos de estado, cinco colores distintos.** Neutral, informativo, exito, advertencia y error deben poder distinguirse entre si por color, ademas de por texto e icono. La distincion se mide sobre los colores reales en pantalla, no se supone a partir del nombre de la clase.
 - Todo contraste se verifica sobre los valores reales de los tokens, en tema claro y en tema oscuro.
 
 ## 5. Temas claro y oscuro
@@ -57,19 +71,35 @@ Reglas de uso de la jerarquia de superficie:
 
 ## 6. Tipografia
 
-[DECISION] **Roboto** para texto general y **Roboto Mono** para identificadores y datos donde la alineacion monoespaciada ayuda a comparar (codigos de almacen, claves de documento, SKU). Ambas se autoalojan desde el paquete del proyecto, sin depender de un CDN y sin `<link>` a servicios de fuentes.
+[DECISION] **Inter** (pesos 400, 500 y 600) para texto general y titulares, y **JetBrains Mono** (pesos 400 y 500) para identificadores, codigos y metadatos tecnicos donde la alineacion monoespaciada ayuda a comparar. Ambas se autoalojan desde el paquete del proyecto, sin depender de un CDN y sin `<link>` a servicios de fuentes. Se retira Roboto.
+
+Motivos: la referencia de gusto del repositorio (`DESIGN.md`, seccion Tipografia) declara Inter con peso medio y tracking cerrado como sustituta de su titular, y una monoespaciada para los metadatos tecnicos; es la palanca de mayor mejora visual por unidad de riesgo en un rediseno. La guia de gusto que rige estas decisiones desaconseja Inter por defecto, pero admite la excepcion explicita para interfaces neutras al estilo Linear y de accesibilidad critica, que es exactamente este caso; la excepcion queda registrada aqui y en la bitacora.
 
 - Se usa la escala tipografica de Material 3; no se inventan tamanos fuera de ella.
+- **Titulares con tracking cerrado:** los roles `display`, `headline` y `title` se componen con `letter-spacing: -0.02em` mediante la utilidad `.app-tight`; el peso medio (no negrita) es lo que da caracter sin gritar.
 - **Numeros tabulares activados** en toda celda numerica, en los valores de las tarjetas de indicadores y en las columnas de cantidades, costos y valores: es lo que permite comparar cifras en vertical.
+- La monoespaciada se reserva a datos tecnicos: codigos de almacen, claves de documento, SKU, rutas de endpoint. No se usa para texto corrido.
 - Texto en espanol; codigo y nombres tecnicos en ingles (SD-06).
 - No se reduce el tamano del texto hasta perjudicar la legibilidad, ni siquiera para ganar densidad.
 - No se usa tipografia con serifa: es una interfaz de datos.
+- Se precargan los pesos 400 y 500 de Inter; no se precarga la monoespaciada, que no condiciona el primer render.
 
 ## 7. Forma, elevacion y separacion
 
-[DECISION] Radios y elevaciones se toman de los roles de Material 3, sin sobrescribirlos, con esta regla explicita: botones y chips redondeados, tarjetas con radio medio, campos de formulario con radio pequeno. La regla es unica para todo el proyecto.
+[DECISION] **Vocabulario unico de radios.** Fuera de esta tabla no se usa ningun radio en el proyecto:
 
-- Sombras discretas y entintadas con el tono del fondo; nunca negro puro sobre fondo claro.
+| Elemento | Rol de Material | Valor |
+| --- | --- | --- |
+| Etiquetas, insignias, avatares | `corner-full` | pildora |
+| Botones | `corner-small` | 8 px |
+| Campos de formulario | `corner-extra-small` | 4 px |
+| Tarjetas y contenedores de contenido | `corner-medium` | 12 px |
+| Superficies grandes (acceso, dialogos) | `corner-large` | 16 px |
+
+[DECISION] **El contenedor se define con borde, no con sombra.** La elevacion esta prohibida como decoracion: un bloque se separa con un borde de 1 px (`outline-variant`) o con espacio en blanco. La sombra se reserva a lo que de verdad flota sobre la pagina (menu, dialogo, capa superpuesta) y va entintada con el tono del fondo, nunca negro puro sobre fondo claro.
+
+[DECISION] **Realimentacion fisica al pulsar.** Toda accion interactiva responde al pulsarse con un hundimiento de 1 px o una escala de 0.98, y su transicion dura entre 120 y 160 ms. No hay ninguna animacion que no comunique un cambio de estado.
+
 - La separacion por defecto entre filas y bloques es un divisor de 1 px (`outline-variant`) o espacio en blanco, no una tarjeta.
 - Las tarjetas se usan solo cuando la elevacion comunica jerarquia real; no se envuelve todo en tarjetas.
 
@@ -77,9 +107,19 @@ Reglas de uso de la jerarquia de superficie:
 
 [DECISION] Las vistas de datos (tablas, listados, kardex, existencias) usan **densidad compacta** de Material (`density: -2`), con divisores sutiles y alineacion consistente, para alcanzar la densidad visual 7 declarada en la seccion 1.
 
+[DECISION] **Ritmo de composicion por tokens.** El espaciado de bloque no se improvisa por pantalla; se compone con estas propiedades, todas derivadas de la escala de 4 px:
+
+| Token | Valor | Uso |
+| --- | --- | --- |
+| `--app-page-gutter` | 24 px (32 px en escritorio) | Margen interior del area de contenido. |
+| `--app-section-gap` | 24 px | Separacion entre bloques de una pantalla. |
+| `--app-card-padding` | 16 px | Relleno interior de tarjetas y contenedores. |
+| `--app-element-gap` | 8 px | Separacion entre elementos de un mismo bloque. |
+| `--app-space-1` a `--app-space-8` | 4 a 32 px | Escala general de la seccion. |
+
 [DECISION] En las pantallas de operacion de bodega se mantienen **objetivos tactiles de al menos 44 px** y la densidad compacta no se aplica: ahi mandan RNF-024 y la accesibilidad por encima de la densidad.
 
-El espaciado sigue la escala de Material 3; no se usan margenes arbitrarios.
+No se usan margenes arbitrarios.
 
 ## 9. Estados de interfaz
 
@@ -92,7 +132,7 @@ Toda vista que obtiene datos del backend implementa los cuatro estados, no solo 
 | Error | Mensaje en espanol junto al contenido afectado; en formularios, por campo. Se distingue el error de validacion, el de permisos y el de servidor. |
 | Exito | Confirmacion breve y no intrusiva; el resultado de una operacion se refleja en los datos, no en un aviso permanente. |
 
-Las acciones interactivas dan respuesta fisica al pulsarse. Las confirmaciones y reversiones usan dialogos, nunca un `confirm` del navegador.
+Las acciones interactivas dan respuesta fisica al pulsarse (seccion 7). Las confirmaciones y reversiones usan dialogos, nunca un `confirm` del navegador.
 
 ## 10. Formularios
 
@@ -101,6 +141,7 @@ Las acciones interactivas dan respuesta fisica al pulsarse. Las confirmaciones y
 - Formularios reactivos tipados (ADR-014); el formulario valida la presentacion, nunca sustituye la validacion del backend.
 - Los errores 422 del backend se mapean campo por campo usando el detalle del contrato (`{field, code, message}`), que ya llega en el sobre de error.
 - Los campos deshabilitados y los de solo lectura se distinguen con claridad.
+- El foco es visible en todos los controles y su anillo se separa del borde del campo.
 
 ## 11. Contratos de presentacion de datos
 
@@ -138,10 +179,12 @@ RNF-025 exige **WCAG 2.1 nivel AA**. Se verifica:
 - Objetivos: LCP menor a 2.5 s, INP menor a 200 ms, CLS menor a 0.1.
 - Los presupuestos del compilador estan fijados en `angular.json` (inicial 500 kB de aviso y 1 MB de error; estilos por componente 4 kB y 8 kB). Se miden y se documentan al cerrar cada unidad; si se revisan, se hace con la medicion delante.
 - Carga perezosa por funcionalidad, como ya establece la arquitectura.
-- Las fuentes se autoalojan, se precargan y no bloquean el primer render.
+- Las fuentes se autoalojan, se precargan y no bloquean el primer render. Solo se precargan los pesos que usa el primer pintado.
 - Los indices de apilamiento se declaran en una escala unica del proyecto; no se usan valores sueltos por pantalla.
 
-## 15. Adaptacion de la referencia visual
+## 15. Adaptacion de las referencias visuales
+
+### 15.1 Composicion de referencia (armazon)
 
 La composicion de referencia aporta el armazon, no la piel. Lo que se adopta y lo que se corrige:
 
@@ -158,20 +201,43 @@ La composicion de referencia aporta el armazon, no la piel. Lo que se adopta y l
 | Panel flotante superpuesto con un anillo de porcentaje | No se adopta: es decoracion superpuesta que compite con el contenido y no responde a una necesidad operativa. |
 | Fondo neutro con superficies diferenciadas | Se adopta mediante los roles de superficie de la seccion 3. |
 
+### 15.2 Referencia de gusto externa (`DESIGN.md`)
+
+El repositorio incorpora `DESIGN.md` como referencia de gusto de una interfaz de producto ajena, con vocacion de aprender su sistema y no su identidad. El detalle de la adopcion:
+
+| Rasgo de la referencia externa | Decision |
+| --- | --- |
+| El contenedor se define con borde de 1 px y no con sombra | Se adopta. Ya era la practica del proyecto; ahora queda escrito, verificado y con la elevacion prohibida como decoracion (seccion 7). |
+| La tipografia es la primera palanca de mejora, con titular de peso medio y tracking cerrado | Se adopta: cambian las familias y se cierra el tracking de los titulares (seccion 6). |
+| Un solo acento gastado con avaricia: una accion principal por pantalla, el resto en contorno, texto o tono | Se adopta. |
+| Vocabulario fijo y corto de radios, con la pildora reservada a etiquetas e insignias | Se adopta como tabla unica de la seccion 7; los botones dejan de ser pildora. |
+| Densidad compacta con filas que respiran y numeros alineados | Se adopta. |
+| Realimentacion fisica al pulsar | Se adopta (seccion 7). |
+| Superficies planas, blanco sobre blanco, separadas por linea fina | Se adopta mediante los roles de superficie. |
+| El azul electrico de la referencia | **No se adopta:** la marca conserva su semilla verde azulada. Se aprende el sistema, no la identidad. |
+| Fondo de rejilla de puntos | **No se adopta:** es textura decorativa sin funcion operativa. |
+| Interfaz solo en tema claro | **No se adopta:** el proyecto mantiene tema claro y oscuro (seccion 5). |
+| Reglas de pagina de promocion (hero, marquesinas, rejillas bento, fotografia generada) | **No se adoptan:** la propia guia de gusto las declara fuera de alcance para paneles de administracion, y este documento las excluye en la seccion 1. |
+
 ## 16. Verificacion antes de entregar una pantalla
 
 Ninguna pantalla se declara terminada si alguna casilla no se puede marcar con honestidad:
 
 - [ ] Usa solo tokens; no hay colores literales ni tamanos inventados.
 - [ ] Se ve y se recorre correctamente en tema claro y en tema oscuro.
+- [ ] Se reviso la captura real de la pantalla en ambos temas antes de cerrarla.
 - [ ] Contraste AA verificado en texto, botones, campos, ayudas y foco.
 - [ ] Ningun boton ni campo queda ilegible sobre su fondo.
+- [ ] El vocabulario de forma de la seccion 7 se cumple sin excepciones.
+- [ ] Los titulares usan el tracking cerrado y las familias declaradas; ninguna pantalla carga fuentes de un CDN.
+- [ ] Las acciones interactivas responden al pulsarse, con transicion breve y sin animacion decorativa.
 - [ ] Estados de carga, vacio y error implementados, ademas del camino feliz.
 - [ ] Los numeros usan cifras tabulares y los decimales se presentan desde la cadena del contrato.
 - [ ] Las fechas se muestran en America/Bogota.
 - [ ] Los iconos son de Material Symbols; no hay iconos dibujados a mano.
 - [ ] Radios, sombras y espaciado coherentes con las secciones 7 y 8.
 - [ ] Sin guiones largos ni cifras inventadas en el texto visible.
+- [ ] Los tonos de estado se distinguen entre si por color medido en pantalla (no basta con que cambien de nombre de clase; una prueba en DOM simulado no puede comprobarlo).
 - [ ] La tabla tiene estructura semantica, es navegable por teclado y sus acciones respetan permisos.
 - [ ] El movimiento reducido del sistema se respeta.
 - [ ] La pantalla se sostiene en 1440, 1024, 768 y 375 px.
@@ -182,6 +248,7 @@ Ninguna pantalla se declara terminada si alguna casilla no se puede marcar con h
 
 ## 17. Referencias
 
+- Referencia de gusto externa: [DESIGN.md](../../DESIGN.md) (raiz del repositorio).
 - Arquitectura de la SPA: [frontend-architecture.md](./frontend-architecture.md).
 - Decisiones de version: [architecture-decisions.md](./architecture-decisions.md).
 - Contrato de la API y presentacion de datos: [api-design.md](./api-design.md).

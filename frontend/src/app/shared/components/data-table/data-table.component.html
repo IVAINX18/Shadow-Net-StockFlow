@@ -22,9 +22,18 @@
               [attr.aria-sort]="column.sortable ? ariaSort(column) : null"
             >
               @if (column.sortable) {
-                <button type="button" class="data-table__sort" (click)="onSort(column)">
+                <button
+                  type="button"
+                  class="data-table__sort"
+                  (click)="onSort(column)"
+                  [attr.aria-label]="'Ordenar por ' + column.header"
+                >
                   {{ column.header }}
-                  <mat-icon class="data-table__sort-icon" aria-hidden="true">
+                  <mat-icon
+                    class="data-table__sort-icon"
+                    [class.data-table__sort-icon--active]="sortKey() === (column.sortKey ?? column.key)"
+                    aria-hidden="true"
+                  >
                     {{ sortIcon(column) }}
                   </mat-icon>
                 </button>
@@ -36,6 +45,7 @@
               mat-cell
               *matCellDef="let row"
               [class.data-table__numeric]="column.numeric"
+              [class.app-mono]="column.mono"
             >
               @if (column.status) {
                 @if (column.status(row); as tone) {

@@ -15,8 +15,9 @@
 .shell__brand {
   display: flex;
   align-items: center;
-  gap: var(--app-space-2);
-  padding: var(--app-space-4);
+  min-block-size: 64px;
+  gap: var(--app-element-gap);
+  padding-inline: var(--app-card-padding);
   color: var(--mat-sys-on-surface);
 }
 
@@ -24,14 +25,33 @@
   font: var(--mat-sys-title-medium);
 }
 
+// Ritmo de navegacion. Los grupos respiran con el token de seccion y las
+// opciones comparten un mismo radio y una misma transicion breve, asi el menu
+// se recorre con un ritmo predecible (design-system.md §7 y §8).
 .shell__nav {
-  padding-block: var(--app-space-2);
+  padding: var(--app-space-2);
 }
 
+// El relleno lateral deja aire entre el borde del panel y el fondo activo,
+// para que el tono cromatico se lea como una ficha y no como una franja.
 .shell__group {
   display: flex;
   flex-direction: column;
+  gap: var(--app-space-1);
   padding-block: var(--app-space-2);
+}
+
+// El item activo se marca con un relleno cromatico suave (primary-container)
+// y radio pequeno, nunca con una barra pesada (design-system.md §15).
+.shell__nav .mat-mdc-list-item {
+  border-radius: var(--mat-sys-corner-small);
+  transition: background-color 140ms ease, transform 140ms ease;
+}
+
+// Hundimiento fisico al pulsar: confirma la accion sin animacion decorativa
+// (design-system.md §7).
+.shell__nav .mat-mdc-list-item:active {
+  transform: scale(0.98);
 }
 
 .shell__group-label {
@@ -57,22 +77,42 @@
   background: var(--mat-sys-surface);
 }
 
+// Barra separada con una linea fina, nunca con sombra; altura fija de 64 px
+// para que nunca supere el tope de 80 px (design-system.md §7).
 .shell__toolbar {
   position: sticky;
   inset-block-start: 0;
   z-index: var(--app-z-appbar);
-  gap: var(--app-space-2);
+  block-size: 64px;
+  gap: var(--app-element-gap);
   background: var(--mat-sys-surface-container);
   border-bottom: 1px solid var(--mat-sys-outline-variant);
+  box-shadow: none;
+  white-space: nowrap;
 }
 
+// Los botones de la barra confirman la pulsacion con el mismo hundimiento
+// breve que la navegacion (design-system.md §7).
+.shell__toolbar button {
+  transition: transform 140ms ease;
+}
+
+.shell__toolbar button:active {
+  transform: scale(0.98);
+}
+
+// Migas discretas: heredan el tono apagado, ocupan el espacio libre y
+// recortan con puntos suspensivos para que la barra siga en una sola linea.
 .shell__crumbs {
   display: flex;
   align-items: center;
+  flex: 1 1 auto;
+  min-inline-size: 0;
   gap: var(--app-space-1);
-  font: var(--mat-sys-body-medium);
-  color: var(--mat-sys-on-surface-variant);
   overflow: hidden;
+  text-overflow: ellipsis;
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-on-surface-variant);
 }
 
 .shell__crumb {
@@ -115,7 +155,7 @@
 }
 
 .shell__main {
-  padding: var(--app-space-5);
+  padding: var(--app-page-gutter);
   max-inline-size: 1440px;
   margin-inline: auto;
 }
@@ -123,7 +163,8 @@
 .shell__user-info {
   display: flex;
   flex-direction: column;
-  padding: var(--app-space-3) var(--app-space-4);
+  gap: var(--app-space-1);
+  padding: var(--app-space-3) var(--app-card-padding);
 }
 
 .shell__user-name {

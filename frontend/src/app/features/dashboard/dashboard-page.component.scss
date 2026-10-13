@@ -1,14 +1,18 @@
+// Pantalla compuesta solo con tokens de ritmo: los bloques se separan con el
+// token de seccion y las tarjetas respiran con el relleno de tarjeta, nunca
+// con margenes improvisados (design-system.md §8).
 .dashboard__section + .dashboard__section {
-  margin-top: var(--app-space-8);
+  margin-top: var(--app-section-gap);
 }
 
 .dashboard__title {
   margin: 0 0 var(--app-space-3);
   font: var(--mat-sys-title-medium);
+  color: var(--mat-sys-on-surface);
 }
 
 .dashboard__note {
-  margin: 0 0 var(--app-space-4);
+  margin: 0 0 var(--app-card-padding);
   font: var(--mat-sys-body-medium);
   color: var(--mat-sys-on-surface-variant);
   max-inline-size: 70ch;
@@ -17,20 +21,23 @@
 .dashboard__grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: var(--app-space-4);
+  gap: var(--app-card-padding);
 }
 
 .dashboard__dependencies {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: var(--app-space-4);
+  gap: var(--app-card-padding);
 }
 
+// Las dependencias se distinguen de los indicadores con un borde discontinuo
+// y una superficie rebajada: declaran trabajo futuro sin simular datos, asi
+// que se leen como notas, no como cifras (design-system.md §11).
 .dependency {
   display: flex;
   flex-direction: column;
   gap: var(--app-space-1);
-  padding: var(--app-space-4);
+  padding: var(--app-card-padding);
   border: 1px dashed var(--mat-sys-outline-variant);
   border-radius: var(--mat-sys-corner-medium);
   background: var(--mat-sys-surface-container-low);
@@ -62,8 +69,6 @@
 
 .dependency__endpoint {
   margin-top: var(--app-space-1);
-  font-family: 'Roboto Mono', monospace;
   font-size: 0.8rem;
   color: var(--mat-sys-on-surface-variant);
-  font-variant-numeric: tabular-nums;
 }

@@ -3,14 +3,15 @@
   align-items: center;
   justify-content: center;
   min-block-size: 100dvh;
-  padding: var(--app-space-4);
+  padding: var(--app-page-gutter);
   background: var(--mat-sys-surface);
 }
 
 .login__card {
   inline-size: min(420px, 100%);
-  padding: var(--app-space-6);
+  padding: var(--app-card-padding);
   background: var(--mat-sys-surface-container);
+  border: 1px solid var(--mat-sys-outline-variant);
   border-radius: var(--mat-sys-corner-large);
 }
 
@@ -18,7 +19,7 @@
   display: flex;
   align-items: center;
   gap: var(--app-space-3);
-  margin-bottom: var(--app-space-5);
+  margin-bottom: var(--app-section-gap);
   color: var(--mat-sys-on-surface);
 }
 
@@ -40,10 +41,11 @@
 .login__banner {
   display: flex;
   align-items: center;
-  gap: var(--app-space-2);
+  gap: var(--app-element-gap);
   margin-bottom: var(--app-space-4);
   padding: var(--app-space-3);
-  border-radius: var(--mat-sys-corner-small);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--mat-sys-corner-medium);
   background: var(--mat-sys-error-container);
   color: var(--mat-sys-on-error-container);
   font: var(--mat-sys-body-medium);
@@ -57,10 +59,51 @@
 .login__form {
   display: flex;
   flex-direction: column;
-  gap: var(--app-space-2);
+  // Uso el ritmo de composicion del contrato (design-system.md §8): un bloque
+  // a otro van 24 px. Antes mezclaba espacios y el formulario media un valor
+  // arbitrario en vez del section gap.
+  gap: var(--app-section-gap);
+}
+
+// Etiqueta persistente encima del campo, no flotante dentro del contorno: el
+// contrato de diseno exige etiqueta arriba, ayuda debajo y error bajo el campo
+// (design-system.md §10).
+.login__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-space-1);
+}
+
+.login__label {
+  padding-inline-start: 0;
+  font: var(--mat-sys-label-large);
+  color: var(--mat-sys-on-surface);
+}
+
+.login__field mat-form-field {
+  inline-size: 100%;
+}
+
+// Alineo la ayuda y el error con el borde izquierdo del campo: Material reserva
+// un relleno lateral en el contenedor del subindice y ese relleno dejaba el
+// texto un paso a la izquierda del contorno en la revision visual.
+.login__field .mat-mdc-form-field-subscript-wrapper,
+.login__field .mat-mdc-form-field-hint-wrapper,
+.login__field .mat-mdc-form-field-error-wrapper {
+  padding-inline-start: 0;
+  padding-inline-end: 0;
 }
 
 .login__submit {
-  margin-top: var(--app-space-2);
+  // Dejo el margen en cero porque el gap del formulario ya separa el boton un
+  // section gap del ultimo campo. Sumar otro margen duplicaria la separacion.
+  margin-top: 0;
   min-block-size: 44px;
+  transition: transform 140ms ease;
+}
+
+// Doy respuesta fisica al pulsar la unica accion comprometida, como pide el
+// contrato para todo control interactivo (design-system.md §7).
+.login__submit:active:not(:disabled) {
+  transform: scale(0.98);
 }

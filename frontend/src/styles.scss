@@ -11,52 +11,45 @@
 
 // --- Fuentes autoalojadas -------------------------------------------------
 //
-// Autoalojo Roboto y Roboto Mono desde los paquetes del proyecto, nunca desde un
+// Autoalojo Inter y JetBrains Mono desde los paquetes del proyecto, nunca desde un
 // CDN ni un <link> a un servicio de fuentes (design-system.md §6). Los .woff2 se
 // copian a /fonts desde node_modules (ver assets en angular.json) y se
 // referencian por URL absoluta y estable, de modo que el index.html puede
 // precargarlas sin depender de un hash generado en cada compilacion.
 @font-face {
-  font-family: 'Roboto';
+  font-family: 'Inter';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('/fonts/roboto-latin-400-normal.woff2') format('woff2');
+  src: url('/fonts/inter-latin-400-normal.woff2') format('woff2');
 }
 @font-face {
-  font-family: 'Roboto';
+  font-family: 'Inter';
   font-style: normal;
   font-weight: 500;
   font-display: swap;
-  src: url('/fonts/roboto-latin-500-normal.woff2') format('woff2');
+  src: url('/fonts/inter-latin-500-normal.woff2') format('woff2');
 }
 @font-face {
-  font-family: 'Roboto';
+  font-family: 'Inter';
   font-style: normal;
-  font-weight: 700;
+  font-weight: 600;
   font-display: swap;
-  src: url('/fonts/roboto-latin-700-normal.woff2') format('woff2');
+  src: url('/fonts/inter-latin-600-normal.woff2') format('woff2');
 }
 @font-face {
-  font-family: 'Roboto Mono';
+  font-family: 'JetBrains Mono';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('/fonts/roboto-mono-latin-400-normal.woff2') format('woff2');
+  src: url('/fonts/jetbrains-mono-latin-400-normal.woff2') format('woff2');
 }
 @font-face {
-  font-family: 'Roboto Mono';
+  font-family: 'JetBrains Mono';
   font-style: normal;
   font-weight: 500;
   font-display: swap;
-  src: url('/fonts/roboto-mono-latin-500-normal.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'Roboto Mono';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url('/fonts/roboto-mono-latin-700-normal.woff2') format('woff2');
+  src: url('/fonts/jetbrains-mono-latin-500-normal.woff2') format('woff2');
 }
 
 // Material Symbols es una fuente de iconos: si falta el glifo, el icono no se
@@ -100,6 +93,25 @@
   --app-space-6: 24px;
   --app-space-8: 32px;
 
+  // Ritmo de composicion por tokens (design-system.md §8): separaciones de
+  // bloque derivadas de la escala de 4 px, nunca margenes improvisados.
+  // Margen interior del area de contenido.
+  --app-page-gutter: 24px;
+  // Separacion entre bloques de una pantalla.
+  --app-section-gap: 24px;
+  // Relleno interior de tarjetas y contenedores.
+  --app-card-padding: 16px;
+  // Separacion entre elementos de un mismo bloque.
+  --app-element-gap: 8px;
+
+  // Declaro el unico par semantico de advertencia que me permite el contrato
+  // (design-system.md §3): Material 3 no trae rol de warning y mi paleta de
+  // semilla unica colapsa primario y terciario en el mismo color, asi que sin
+  // este par exito y advertencia se vuelven indistinguibles. Lo resuelvo con
+  // light-dark() para no crear una segunda rama de tema.
+  --app-status-warning-container: light-dark(#fef3c7, #4a3208);
+  --app-status-on-warning-container: light-dark(#78350f, #fde68a);
+
   // Escala unica de indices de apilamiento del proyecto (design-system.md §14).
   --app-z-base: 0;
   --app-z-sticky: 100;
@@ -129,13 +141,29 @@ html {
       // solo el primario, el terciario se iguala a el: un unico acento.
       color: palette.$stockflow-brand-palette,
       typography: (
-        plain-family: Roboto,
-        brand-family: Roboto,
-        bold-weight: 700,
+        plain-family: Inter,
+        brand-family: Inter,
+        bold-weight: 600,
         medium-weight: 500,
         regular-weight: 400,
       ),
       density: -2,
+    )
+  );
+
+  // Fijo los botones en corner-small (8px) en sus cinco variantes: por defecto
+  // Material 3 los emite como pildora (corner-full) y el contrato reserva la
+  // pildora a etiquetas, insignias y avatares (design-system.md §7). Sobrescribo
+  // los tokens que consumen las variantes en vez de una regla CSS suelta, asi el
+  // valor gana sin depender del orden de hojas. No toco el boton de icono, que
+  // conserva su forma circular ni los objetivos tactiles.
+  @include mat.button-overrides(
+    (
+      filled-container-shape: var(--mat-sys-corner-small),
+      outlined-container-shape: var(--mat-sys-corner-small),
+      protected-container-shape: var(--mat-sys-corner-small),
+      text-container-shape: var(--mat-sys-corner-small),
+      tonal-container-shape: var(--mat-sys-corner-small),
     )
   );
 }
@@ -179,12 +207,19 @@ body {
   font-feature-settings: 'tnum' 1;
 }
 
-// Los identificadores y claves (SKU, codigo de almacen) usan Roboto Mono con
+// Los identificadores y claves (SKU, codigo de almacen) usan JetBrains Mono con
 // cifras tabulares: monoespaciado para leer caracteres, no cifras.
 .app-mono {
-  font-family: 'Roboto Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum' 1;
+}
+
+// Compongo titulares, encabezados y titulos con tracking cerrado: el peso medio
+// ya da caracter sin gritar y el interletrado negativo compacta la lectura de
+// display, headline y title (design-system.md §6).
+.app-tight {
+  letter-spacing: -0.02em;
 }
 
 :focus-visible {

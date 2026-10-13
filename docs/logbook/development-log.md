@@ -572,104 +572,113 @@ Esta bitácora registra cada unidad de trabajo del proyecto: fecha, fase, archiv
 
 ---
 
-## Entrada 13 - 12/10/2026 - Frontend: base técnica, sistema de diseño, autenticación y armazón
+## Entrada 13 - 12/10/2026 - Frontend: base tecnica, sistema de diseno, autenticacion y armazon (F0-F3)
 
-**Fase:** Fase 1 - Autenticación, RBAC y almacenes (unidad de frontend, sobre la API ya cerrada).
+**Fase:** Fase 1 - Autenticacion, RBAC y almacenes (unidades de frontend F0 a F3, sobre la API ya cerrada de la Fase 1).
 
 **Archivos afectados (creados o modificados):**
-- `frontend/tsconfig.json` (modificado): `strict`, `noUnusedLocals` y `noUnusedParameters` activados.
-- `frontend/eslint.config.mjs` y `frontend/vitest.config.mts` (nuevos): estilo y configuración de pruebas.
-- `frontend/package.json` (modificado): Material 22.2, CDK, Roboto y Roboto Mono autoalojadas, Material Symbols, ESLint con angular-eslint y `@angular/animations`; scripts `lint` y `palette:generate`.
-- `frontend/angular.json` (modificado): entornos con `fileReplacements`, copia de las fuentes a `/fonts` y `runnerConfig` de Vitest.
-- `frontend/tools/generate-palette.mjs` (nuevo): deriva la paleta tonal M3 de una única semilla.
-- `frontend/src/styles.scss` y `frontend/src/styles/_palette.scss` (modificado y nuevo): tema Material 3 con semilla verde azulado, una sola invocación con `light-dark()`, fuentes autoalojadas, densidad compacta, cifras tabulares y movimiento reducido.
+- `frontend/tsconfig.json` (modificado): `strict`, `noUnusedLocals`, `noUnusedParameters` y `strictTemplates` activados.
+- `frontend/eslint.config.mjs` (nuevo): flat config con `angular-eslint` y `typescript-eslint`; script `lint` en `package.json`.
+- `frontend/vitest.config.mts` (nuevo) y `frontend/angular.json` (`runnerConfig`): pruebas con un solo proceso hijo.
+- `frontend/package.json` (modificado): `@angular/material` 22.2, `@angular/cdk` 22.2, `@fontsource/roboto`, `@fontsource/roboto-mono`, `material-symbols`, ESLint y `angular-eslint`; scripts `lint` y `palette:generate`.
+- `frontend/angular.json` (modificado): entornos con `fileReplacements`, copia de las fuentes a `/fonts`, y los target `lint` y `test`.
+- `frontend/tools/generate-palette.mjs` (nuevo): deriva la paleta tonal M3 de una unica semilla con `@material/material-color-utilities`.
+- `frontend/src/styles.scss` y `frontend/src/styles/_palette.scss` (nuevo y generado): tema Material 3, fuentes autoalojadas, densidad, escala de espaciado e indices de apilamiento.
 - `frontend/src/environments/{environment,environment.staging,environment.prod}.ts` (nuevos) y `core/services/api-base-url.token.ts`.
-- `frontend/src/app/core/` (nuevo): interceptores de autenticación y de errores, guardias de navegación, modelos tipados y servicios (`AuthService`, `ThemeService`, `ApiService`, `ErrorService`).
-- `frontend/src/app/shared/components/` (nuevo): cabecera de página, tarjeta de indicador, envoltorio de tabla, estado vacío, estado de error, esqueleto de carga, chip de estado, acceso denegado y módulo pendiente.
-- `frontend/src/app/features/` (nuevo): `auth`, `shell` (armazón y navegación), `dashboard`, `warehouses`, `users`/`roles` y `style-guide`.
-- `frontend/src/app/{app.ts,app.html,app.routes.ts,app.config.ts,app.spec.ts}` (modificados): raíz mínima, rutas perezosas con guardias, configuración zoneless con HTTP e interceptores, y pruebas reales.
-- `frontend/src/index.html` (modificado): precarga de fuentes y `color-scheme`.
+- `frontend/src/app/core/` (nuevo): `api.service`, `error.service`, `auth.service`, `theme.service`, interceptores de autenticacion y de errores, guardias `auth.guard` y `role.guard`, y modelos tipados.
+- `frontend/src/app/shared/components/` (nuevo): `page-header`, `kpi-card`, `data-table`, `empty-state`, `error-state`, `loading-skeleton`, `status-chip`, `access-denied` y `module-pending`.
+- `frontend/src/app/features/` (nuevo): `auth` (inicio de sesion), `shell` (armazon y navegacion), `dashboard`, `warehouses`, `users`, `roles` y `style-guide`.
+- `frontend/src/app/{app.ts,app.html,app.scss,app.routes.ts,app.config.ts,app.spec.ts}` (modificados): raiz minima, rutas perezosas con guardias, configuracion zoneless con HTTP e interceptores, y pruebas reales.
+- `frontend/src/index.html` (modificado): `lang="es"`, `color-scheme` y precarga de las fuentes de texto.
 - `backend/config/sanctum.php` (modificado) y `backend/config/cors.php` (nuevo): origen de la SPA autorizado con credenciales.
 - `.env.example` y `backend/.env.example` (modificados): variable `FRONTEND_URL` documentada.
-- `.github/workflows/ci.yml` (modificado): el trabajo del frontend ahora ejecuta estilo, pruebas y compilación.
-- `docs/architecture/design-system.md` (nuevo) y `docs/architecture/frontend-architecture.md` (modificado): contrato visual y enlace desde la arquitectura.
-- Esta bitácora.
+- `.github/workflows/ci.yml` (modificado): el trabajo del frontend ahora ejecuta estilo, pruebas y compilacion.
+- Esta bitacora.
 
 **Cambios efectuados:**
-- Se activó el tipado estricto que la documentación exigía y no estaba: el proyecto compilaba con `strict` desactivado.
-- Se implantó el contrato visual: paleta tonal M3 derivada de una única semilla verde azulado, un solo bloque de tema que emite ambos esquemas con `light-dark()`, Roboto y Roboto Mono autoalojadas, Material Symbols como única fuente de iconos, densidad compacta y utilidades de cifras tabulares.
-- Se construyeron el núcleo HTTP (interceptores de sesión y de errores sobre el sobre de error del backend), la autenticación por cookie de Sanctum, el armazón con navegación filtrada por los permisos reales, y las pantallas de acceso, tablero, guía de estilo y módulos pendientes.
-- Los módulos sin API (productos, categorías, inventario, movimientos, transferencias, reportes, auditoría, configuración) apuntan a una pantalla que nombra la fase y los endpoints que faltan: no se simulan datos en ningún punto.
-- El backend necesitaba autorizar el origen de la SPA: se añadió `localhost:4200` a los dominios stateful y un `config/cors.php` con credenciales, documentando la variable nueva.
+- Se activo el tipado estricto que la documentacion exigia y no estaba, y se añadio el linter que no existia; `npm run lint`, `npm test` y `npm run build` forman la verificacion del frontend.
+- Se construyo el sistema de diseno: paleta tonal M3 derivada de una unica semilla verde azulado, tema claro y oscuro, Roboto y Roboto Mono autoalojadas, Material Symbols como unica fuente de iconos, densidad compacta en las vistas de datos, cifras tabulares, escala de espaciado y escala de indices de apilamiento.
+- Se construyo el nucleo HTTP con interceptores funcionales: credenciales y CSRF de Sanctum, normalizacion del sobre de error a un `AppError` tipado (validacion por campo, autorizacion, negocio, servidor), renovacion de la cookie CSRF y reintento unico ante 419, y redireccion al inicio de sesion ante 401 conservando la ruta deseada.
+- Se construyo la autenticacion con Signals (sesion, perfil, permisos y almacenes), inicio de sesion con formulario reactivo tipado, cierre de sesion y guardias de navegacion.
+- Se construyo el armazon: navegacion lateral colapsable agrupada, barra superior con marca, migas, conmutador de tema y menu de usuario; la visibilidad de cada seccion se filtra con los slugs de permiso reales de `/auth/me`.
+- El tablero muestra solo los indicadores que las API reales soportan hoy (almacenes, usuarios, roles y permisos) y, aparte, tarjetas de dependencia que nombran la fase y el endpoint de cada indicador que aun no existe. Los once modulos sin API (productos, categorias, inventario, movimientos, transferencias, reportes, auditoria y configuracion) apuntan a una pantalla de "modulo pendiente": no se simulan datos en ningun punto.
+- La guia de estilo `/guia-estilo` renderiza roles de color, escala tipografica, botones, campos, chips y los estados de carga, vacio y error para revision visual en ambos temas.
+- El backend necesitaba autorizar el origen de la SPA para la sesion por cookie: se añadio `localhost:4200` a los dominios stateful de Sanctum y un `config/cors.php` con credenciales, documentando la variable `FRONTEND_URL`.
 
-**Motivo:** la Fase 1 estaba cerrada solo en la API y el frontend no existía. Esta unidad entrega la base técnica y el armazón sobre el que se construyen las pantallas de cada fase.
+**Motivo:** la Fase 1 estaba cerrada solo en la API y el frontend no existia. Esta unidad entrega la base tecnica, el sistema de diseno, el nucleo HTTP, la autenticacion y el armazon sobre los que se construyen las pantallas de cada fase, con la SPA verificada contra la API real.
 
 **Decisiones tomadas:**
-- El tema se resuelve con una sola invocación de `mat.theme` y `color-scheme: light dark`, en lugar de dos bloques con `theme-type` claro y oscuro. Es la forma documentada por Angular Material y elimina la clase de tema oscuro que mantenía `ThemeService`.
-- `mat.theme` recibe solo `primary` y `tertiary`: deriva de la semilla los roles neutral, neutral-variant y error con el mismo algoritmo M3 que usa el generador. La "paleta de marca" con sub-mapas que había antes no es una forma que la API acepte, y rompía la compilación.
-- Los módulos sin API muestran una pantalla de dependencia en lugar de datos de demostración: que un tablero con cifras falsas parezca terminado es un riesgo mayor que el de un módulo visiblemente pendiente.
-- Las pruebas usan un solo hilo sin paralelismo (memoria ajustada del equipo) y el archivo de configuración es `.mts` para que Vite lo cargue como módulo.
+- **Paleta que consume el tema:** `mat.theme` recibe `$stockflow-brand-palette`, que ademas de los dieciseis tonos incluye los sub-mapas `secondary`, `neutral`, `neutral-variant` y `error`, y la paleta `neutral` incorpora los tonos intermedios (4, 6, 12, 17, 22, 24, 87, 92, 94, 96). Es un requisito de Angular Material: sin esos sub-mapas los roles `surface-container-*`, `error`, `secondary` y `outline` se emiten vacios (`light-dark(, )`) y el tema queda roto. Verificado compilando el SCSS: cero roles vacios.
+- **Un solo bloque de tema:** los dos esquemas se emiten en una unica invocacion y el navegador los resuelve con `light-dark()`; `ThemeService` solo escribe `color-scheme` en la raiz y persiste la eleccion, sin clase de tema oscuro que mantener.
+- **Sin `@angular/animations`:** Angular Material 22 no lo importa en tiempo de ejecucion, asi que no se instala ni se registra `provideAnimationsAsync`.
+- **Fuentes autoalojadas como assets** con nombre estable en `/fonts` y precarga de los pesos de texto en `index.html`; Material Symbols no se precarga por su tamano.
+- **Pruebas con un solo proceso** (`forks`) sin paralelismo: el pool de hilos no arranca dentro del tiempo de espera en este equipo (riesgo R-10 de memoria ajustada).
+- **Modulos sin API:** pantalla de dependencia con la fase y los endpoints que faltan, nunca datos de demostracion.
+- **Unica excepcion de backend autorizada:** los dos ficheros de configuracion de origen y CORS; nada mas se toco en `backend/`.
 
 **Pruebas ejecutadas (resultados reales):**
-- `npm run lint` → sin errores.
-- `npm test` → 3 archivos, 10 pruebas, todas correctas (24 a 42 s según la caché).
-- `npm run build` → compilación correcta; paquete inicial 338,73 kB en crudo y 92,08 kB de transferencia estimada, dentro del presupuesto de 500 kB; estilos 11,49 kB; una carga perezosa por pantalla.
-- `npm run palette:generate` → regenera la paleta sin errores.
-- Verificado sobre el artefacto compilado: la paleta tonal llega al CSS (`#006b5e`, `#003730`, `#76f8e1`), los tokens `--mat-sys-*` están presentes, el CSS usa `light-dark()` y las siete fuentes se copian a `/fonts` y se referencian desde el CSS.
-- Verificado por HTTP: el backend responde `Access-Control-Allow-Origin: http://localhost:4200` con `Access-Control-Allow-Credentials: true`, que es lo que habilita la sesión por cookie desde la SPA.
-- La suite del backend sigue en verde y Pint sin diferencias.
+- `npm run lint` -> "All files pass linting".
+- `npm test` -> 4 archivos, 12 pruebas, todas correctas.
+- `npm run build` -> correcto. Paquete inicial 339,49 kB en crudo (92,27 kB de transferencia estimada) y estilos 12,26 kB, por debajo del aviso de 500 kB y del error de 1 MB; una carga perezosa por pantalla (login 24,39 kB, guia de estilo 12,09 kB, tablero 7,39 kB, armazon 97,25 kB).
+- Compilacion del SCSS e inspeccion del CSS emitido: cero tokens `light-dark(, )` vacios; `--mat-sys-surface-container: light-dark(#eceeec, #1d201f)`; `--mat-sys-primary: light-dark(#006b5e, #56dbc5)`.
+- Inspeccion del artefacto: las siete fuentes (`roboto-latin-{400,500,700}`, `roboto-mono-latin-{400,500,700}`, `material-symbols-outlined`) se copian a `dist/frontend/browser/fonts`.
+- Flujo de autenticacion por HTTP contra el contenedor: `GET /sanctum/csrf-cookie` (204), `POST /api/v1/auth/login` (200 con el usuario y sus 19 permisos) y `GET /api/v1/auth/me` (200). Preflight `OPTIONS` con `Origin: http://localhost:4200` responde `Access-Control-Allow-Origin: http://localhost:4200` y `Access-Control-Allow-Credentials: true`.
+- `npm run palette:generate` -> regenera la paleta desde la semilla sin errores.
 
 **Pendientes:**
-- No se pudo comprobar el render en un navegador: el equipo no tiene ningún navegador instalado y la memoria disponible (884 MB) no permite descargarlo con garantías. Queda pendiente la revisión visual de ambos temas y de la guía de estilo.
-- Con la caché fría, la primera ejecución de pruebas agota el tiempo de arranque del trabajador de Vitest en este disco; a partir de la segunda pasa. Conviene vigilarlo en la integración continua.
-- `environment.prod.ts` contiene una URL de API de ejemplo: hay que sustituirla antes de desplegar.
+- No se pudo verificar el render en un navegador: el entorno no tiene navegador ni herramienta de automatizacion instalados. La revision visual de ambos temas y de `/guia-estilo` queda pendiente y se declara como no realizada.
+- `environment.staging.ts` y `environment.prod.ts` contienen URLs de ejemplo (dominio reservado `.example`) que hay que sustituir antes de desplegar.
+- Con la cache fria, el arranque del trabajador de Vitest en este disco agota el tiempo en la primera ejecucion; a partir de la segunda pasa. Conviene vigilarlo en la integracion continua.
 - Los dos riesgos de auto-bloqueo registrados en la Entrada 11 siguen sin corregir.
-- La acentuación de los comentarios del frontend es inconsistente; conviene homogeneizarla en una pasada.
 
-**Nota:** no se modificaron el esquema ni las migraciones, ni se tocaron datos de desarrollo. El backend solo cambió en los dos ficheros de configuración de origen y CORS.
+**Nota:** no se modificaron el esquema ni las migraciones. Del backend solo cambiaron los dos ficheros de configuracion de origen y CORS (excepcion autorizada). Los cambios no se confirman en Git a la espera de autorizacion.
 
----
+## Entrada 14 - 13/10/2026 - Frontend: refinamiento de gusto visual (sistema de diseno v1.1)
 
-## Entrada 13 - 12/10/2026 - Frontend: base técnica y sistema de diseño Material 3 (F0+F1)
-
-**Fase:** Transversal a Fase 0 y Fase 1. Deja lista la base técnica del frontend y el sistema de diseño; el armazón y la autenticación se construyen en la unidad siguiente.
+**Fase:** Fase 1 - refinamiento transversal del armazon y de las pantallas ya existentes. No abre unidades nuevas ni toca el backend.
 
 **Archivos afectados (creados o modificados):**
-- `frontend/src/styles.scss` (modificado): tema Material 3 desde la semilla verde azulado, tema claro y oscuro, fuentes autoalojadas (Roboto, Roboto Mono, Material Symbols), escala de espaciado y de índices de apilamiento, densidad compacta y utilidades de cifras tabulares.
-- `frontend/angular.json` (modificado): las fuentes pasan a copiarse como assets a `/fonts` con nombre estable (antes se cargaban vía `styles` del empaquetador); se conserva el `runnerConfig` de pruebas.
-- `frontend/src/index.html` (modificado): precarga de Roboto 400 y 500 desde rutas estables; Material Symbols no se precarga por su tamaño.
-- `frontend/tools/generate-palette.mjs` (modificado): corrección del paréntesis sobrante que rompía la paleta de marca.
-- `frontend/src/styles/_palette.scss` (regenerado): paleta tonal M3 derivada de `#00695C` con el generador corregido.
-- `frontend/src/app/app.config.ts` (modificado): se retira `provideAnimationsAsync`, que no aporta nada en Material 22 y exigía `@angular/animations` (no instalado).
-- `frontend/src/app/core/models/api.model.ts` y `frontend/src/app/core/services/error.service.ts` (modificados): el `error_id` del 500 se conserva al normalizar el sobre, para que `readErrorId` lo encuentre.
-- `frontend/src/app/features/style-guide/style-guide-page.component.ts`, `.html` y `.scss` (modificados): se añaden la tarjeta de indicador, la tabla de datos y el conmutador de tema.
-- `frontend/vitest.config.mts` (modificado): pool de procesos (`forks`) con un solo hijo; el pool de hilos no responde en este equipo.
-- `frontend/vitest.config.ts` (eliminado): configuración obsoleta y duplicada que usaba `poolOptions`, retirado en Vitest 4.
-- `.github/workflows/ci.yml` (modificado): el job de frontend ahora corre ESLint, Vitest y el build.
-- Esta bitácora.
+- `docs/architecture/design-system.md` (v1.1): tipografia, vocabulario de forma, ritmo de composicion, excepcion cerrada de color para la advertencia, adaptacion de la referencia externa y casillas nuevas de verificacion.
+- `frontend/package.json` y `package-lock.json`: se añaden `@fontsource/inter` y `@fontsource/jetbrains-mono`; se retiran `@fontsource/roboto` y `@fontsource/roboto-mono`.
+- `frontend/angular.json` e `frontend/src/index.html`: copia de las fuentes nuevas y precarga de los pesos de texto.
+- `frontend/src/styles.scss`: tipografia del tema sobre Inter, escalas de ritmo, utilidad de tracking cerrado, radio 8 para botones y el par semantico de advertencia.
+- `frontend/src/app/features/{auth,shell,dashboard,warehouses,users,style-guide}`: ritmo por tokens, tracking cerrado en titulares, respuesta fisica al pulsar y bordes finos.
+- `frontend/src/app/shared/components/`: los nueve componentes compartidos, incluido el defecto corregido de los tonos de estado.
+- Esta bitacora.
 
 **Cambios efectuados:**
-- Base técnica verificada: `tsconfig.json` con `strict`, `noUnusedLocals` y `noUnusedParameters`; `eslint.config.mjs` (flat config con `angular-eslint` y `typescript-eslint`) y script `lint`; los tres entornos con `apiBaseUrl` y `fileReplacements`; el token `API_BASE_URL` en `core/services`; script `palette:generate`.
-- Sistema de diseño en `styles.scss`: tema M3 con los roles de superficie, acento y semánticos del contrato, claro y oscuro, tipografía Roboto y Roboto Mono autoalojadas, densidad compacta global (`density: -2`), escala de espaciado, escala de índices de apilamiento, respeto al movimiento reducido y utilidades de cifras tabulares.
-- Guía de estilo en `/guia-estilo` (carga perezosa): roles de color, escala tipográfica, botones, campos con etiqueta arriba y error abajo, chips de estado, estados de carga, vacío y error, tarjeta de indicador, tabla de datos y conmutador de tema.
+- Se actualizo el contrato a la v1.1: diales (`MOTION_INTENSITY` de 2 a 3), familias tipograficas, tabla unica de radios, tokens de ritmo, realimentacion tactil, y la adaptacion de la referencia externa con lo que se adopta y lo que se descarta a proposito.
+- Se cambio la tipografia de Roboto a Inter (400, 500 y 600) y JetBrains Mono (400 y 500), autoalojadas. Roboto desaparece del proyecto.
+- Se fijo el vocabulario de forma: etiquetas e insignias en pildora, botones en 8 px, campos en 4 px, tarjetas en 12 px y superficies grandes en 16 px. Los botones dejan de ser pildora.
+- Se añadieron los tokens de ritmo (`--app-page-gutter`, `--app-section-gap`, `--app-card-padding`, `--app-element-gap`) y se sustituyeron los margenes arbitrarios de las pantallas.
+- Toda accion interactiva responde al pulsarse con un hundimiento de 1 px o escala 0.98 y transicion de 140 ms.
+- **Defecto corregido:** los tonos de estado no eran distinguibles. Primero informacion y advertencia compartian `secondary-container`; al separarlos, exito y advertencia quedaron con el mismo color porque la paleta de semilla unica colapsa primario y terciario. Se declaro el unico par semantico de advertencia autorizado y ahora los cinco tonos son cinco colores distintos.
+- Se amplio la guia de estilo de nueve a catorce secciones: vocabulario de forma con muestras reales, elevacion y separacion, ritmo de composicion, estados de boton, familias tipograficas y tonos de estado con etiquetas en español.
 
-**Motivo:** cerrar la base del frontend y dejar el sistema de diseño revisable visualmente antes de construir el armazón y la autenticación, para no fijar pantallas sobre una identidad sin verificar.
+**Motivo:** el sistema ya era plano y de borde fino, pero la tipografia era la generica del sistema, el vocabulario de forma no estaba escrito en ninguna parte y un defecto real de tonos de estado quedaba oculto por una prueba que comprobaba nombres de clase en lugar de colores. El refinamiento ataca la tipografia y el detalle, que es donde estaba la mejora pendiente.
 
 **Decisiones tomadas:**
-- Mecanismo de paleta: se conserva el generador reproducible (`tools/generate-palette.mjs`) porque Angular Material 22 no trae un verde azulado profundo entre sus paletas y el contrato exige derivar todo de una única semilla. La decisión queda documentada en un comentario de `styles.scss`.
-- Densidad compacta global (`-2`) en lugar de por componente: el producto es un back-office de datos densos y el contrato pide `-2` tanto en las vistas de datos como en los campos; las pantallas de bodega reajustarán sus 44 px por encima de esta base cuando existan.
-- Fuentes autoalojadas con rutas estables `/fonts` (assets) y precarga, en vez de dejarlas al empaquetador con nombre con hash: es lo que permite precargarlas sin depender de un hash de compilación. Material Symbols se excluye de la precarga por tamaño.
-- Pruebas con pool de procesos (`forks`): el pool de hilos no arranca dentro del tiempo de espera en este equipo (riesgo R-10 de memoria ajustada).
-- La guía de estilo usa un fixture de dos filas genéricas solo para revisar la tabla; no son datos de negocio y el KPI muestra un formato de muestra, no una cifra.
+- **Inter y JetBrains Mono:** la guia de gusto que rige estas decisiones desaconseja Inter por defecto, pero su excepcion explicita cubre las interfaces neutras al estilo Linear y de accesibilidad critica, y la referencia externa nombra Inter como su sustituta declarada. La excepcion queda registrada en el contrato.
+- **Se conserva el acento verde azulado:** de la referencia externa se aprende el sistema, no la identidad. No se adopta su azul, ni su fondo de rejilla de puntos, ni su tema unico claro.
+- **Radio de botones verificado, no adivinado:** los nombres de los tokens de forma se comprobaron en el SCSS de Material instalado, en el mapa de formas de Material 3 y en el CSS compilado.
+- **Un unico par de tokens semanticos de advertencia:** Material 3 no define rol de advertencia y la paleta de semilla unica hace que primario y terciario sean el mismo color, de modo que cinco tonos distintos no caben en los roles de Material. La excepcion es un unico par ambar, cerrado y documentado.
+- **La distincion de color se mide, no se supone:** queda escrito en el contrato y en la prueba que una suite verde en DOM simulado no prueba color.
 
 **Pruebas ejecutadas (resultados reales):**
-- `npm run lint` → "All files pass linting".
-- `npm test -- --no-watch` → 3 archivos, 10 pruebas, 10 correctas.
-- `npm run build` → correcto. Paquete inicial 338,73 kB (92,08 kB transferidos), por debajo del aviso de 500 kB y del error de 1 MB; ninguna advertencia de presupuesto. El chunk de la guía de estilo pesa 12,09 kB.
+- `npm run lint` -> "All files pass linting"; `npm test` -> 3 archivos, 11 pruebas, todas correctas; `npx ng build --configuration development` -> correcto, con las cinco fuentes nuevas copiadas a `fonts` y sin rastro de Roboto.
+- Pre-flight automatizado sobre el arbol fusionado: cero guiones largos o medios en el codigo, cero radios en pixeles, cero colores literales fuera de la paleta generada y del par de advertencia, una sola sombra (la del ejemplo declarado en la guia) y ninguna referencia a Roboto salvo el texto que lo menciona.
+- Verificacion con navegador real (Thorium): el acceso entra al tablero, las once secciones montan, cero excepciones no capturadas y un unico error de consola, el 401 esperado del arranque sin sesion.
+- Tema medido sobre colores calculados: claro `rgb(247, 250, 248)` y oscuro `rgb(16, 20, 19)`.
+- Contrastes medidos (minimo AA 4.5 en texto y 3.0 en controles): etiqueta 14.72, ayuda 14.72, subtitulo 7.99, borde de campo 3.85 y boton 6.43. Todos cumplen.
+- Tonos de estado medidos: cinco fondos distintos (`rgb(218,229,225)`, `rgb(205,232,225)`, `rgb(118,248,225)`, `rgb(254,243,199)` y `rgb(255,218,214)`), con contraste minimo de 7.22.
+- Ritmo del acceso medido entre elementos completos: etiqueta a campo 4 px, campo a campo 24 px y campo a boton 24 px, con `row-gap` declarado de 24 px. La ayuda queda alineada con el campo con diferencia de 0 px.
+- Guia de estilo: catorce secciones, tabla de radios con cinco muestras reales, elevacion con contraste entre contenedor de borde y capa flotante, barras de ritmo y cinco estados de boton.
+
+**Leccion registrada:** una prueba que comprueba que dos tonos usan clases distintas pasa aunque los dos colores sean identicos. La comprobacion que vale es medir el color calculado en un navegador real. Esa medicion es la que descubrio el defecto.
 
 **Pendientes:**
-- No se pudo hacer la revisión visual en navegador: no hay herramienta de automatización (Playwright/Puppeteer) ni navegador instalado en el entorno. La guía queda servida y compilada para revisión manual.
-- El armazón, los interceptores, el servicio de autenticación, el inicio de sesión y el tablero pertenecen a la unidad siguiente; aquí solo quedaron cableados en las rutas.
-- El aviso de deprecación de Vitest por `poolOptions` quedó resuelto al eliminar la configuración duplicada.
+- La captura de la guia de estilo a pagina completa exige un viewport alto, porque el armazon desplaza dentro de su propio contenedor y `fullPage` recorta.
+- `environment.staging.ts` y `environment.prod.ts` siguen con URLs de ejemplo; los dos riesgos de auto-bloqueo de la Entrada 11 y el arranque del trabajador de Vitest con cache fria siguen abiertos.
+- Sustituir la tipografia y el vocabulario de forma cambio medidas de todas las pantallas: conviene revisar de nuevo cualquier pantalla que se añada en fases posteriores contra la tabla de la seccion 7.
 
-**Nota:** no se tocó el backend en esta unidad. Los cambios no se confirman en Git a la espera de autorización.
+**Nota:** no se toco el backend ni el esquema. La unica dependencia nueva son los paquetes de fuentes autoalojadas. Los cambios no se confirman en Git a la espera de autorizacion.
