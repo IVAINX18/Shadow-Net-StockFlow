@@ -9,8 +9,16 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { filter, map, startWith } from 'rxjs';
+import {
+  NavigationEnd,
+  Router,
+  RouterLink,
+  RouterLinkActive,
+  RouterOutlet,
+  type ActivatedRoute,
+  type ActivatedRouteSnapshot,
+} from '@angular/router';
+import { filter, map } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { NAV_GROUPS, type NavGroup, type NavItem } from './navigation-items';
@@ -72,11 +80,14 @@ export class AppShellComponent {
     })).filter((group) => group.items.length > 0),
   );
 
+  // No calculo las migas al construir el componente: en ese instante la ruta
+  // todavia no esta resuelta y el snapshot puede no existir, lo que lanzaba un
+  // TypeError y dejaba la pantalla en blanco. El primer NavigationEnd llega en
+  // cuanto termina la navegacion y las rellena.
   protected readonly crumbs = toSignal(
     this.router.events.pipe(
       filter((event): event is NavigationEnd => event instanceof NavigationEnd),
       map(() => this.buildCrumbs()),
-      startWith<readonly Crumb[]>(this.buildCrumbs()),
     ),
     { initialValue: [] as readonly Crumb[] },
   );
@@ -116,17 +127,20 @@ export class AppShellComponent {
   }
 
   // Construyo las migas recorriendo el arbol de rutas activo: cada ruta declara
-  // `data.crumb` y su URL se arma con los segmentos acumulados.
+  // `data.crumb` y su URL se arma con los segmentos acumulados. Compruebo el
+  // snapshot porque durante una navegacion en curso puede faltar, y perder una
+  // miga es preferible a tumbar el armazon entero.
   private buildCrumbs(): readonly Crumb[] {
     const crumbs: Crumb[] = [];
-    let route = this.router.routerState.root.firstChild;
+    let route: ActivatedRoute | null = this.router.routerState.root.firstChild;
     let url = '';
 
-    while (route !== null) {
-      const segment = route.snapshot.url.map((part) => part.path).join('/');
+    while (route !== null && route !== undefined) {
+      const snapshot: ActivatedRouteSnapshot | undefined = route.snapshot;
+      const segment = snapshot?.url.map((part) => part.path).join('/') ?? '';
       url = segment.length > 0 ? `${url}/${segment}` : url;
 
-      const crumb = route.snapshot.data['crumb'];
+      const crumb = snapshot?.data['crumb'];
 
       if (typeof crumb === 'string') {
         crumbs.push({ label: crumb, url });
