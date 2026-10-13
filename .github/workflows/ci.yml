@@ -51,7 +51,10 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
-          extensions: mbstring, pdo_mysql, bcmath, intl, zip
+          # gd es dependencia de plataforma de phpoffice/phpspreadsheet, que la
+          # importacion de catalogo usa para leer y generar XLSX (EP-012). Sin
+          # ella, composer install falla en la integracion continua.
+          extensions: mbstring, pdo_mysql, bcmath, intl, zip, gd
           tools: composer:v2
 
       - name: Instalar dependencias

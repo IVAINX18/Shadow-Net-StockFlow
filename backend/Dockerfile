@@ -5,14 +5,17 @@ FROM php:8.4-cli
 # Instalo las extensiones que el proyecto necesita y las utilidades que
 # requiere Composer. Uso --no-install-recommends para mantener la imagen ligera,
 # porque el equipo local tiene memoria ajustada (riesgo R-10 del acta).
+# Incluyo gd porque la importación de catálogo (EP-012) lee y genera XLSX con
+# phpoffice/phpspreadsheet, que la exige como dependencia de plataforma.
 RUN apt-get update && apt-get install -y --no-install-recommends \
         git \
         unzip \
         libzip-dev \
         libicu-dev \
         libonig-dev \
+        libpng-dev \
         default-mysql-client \
-    && docker-php-ext-install -j"$(nproc)" pdo_mysql mbstring bcmath intl zip \
+    && docker-php-ext-install -j"$(nproc)" pdo_mysql mbstring bcmath intl zip gd \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 

@@ -130,6 +130,15 @@ Salvo indicación contraria, todos los endpoints requieren autenticación. La co
 | GET | `/api/v1/categories` | Autenticado | Paginación; filtros `is_active`, `parent_id`; búsqueda `q`; `sort` por `name`, `created_at`. | Colección paginada con jerarquía (`parent_id`). | 401. |
 | POST | `/api/v1/categories` | `catalog.create` | `name` requerido; `parent_id` existente o nulo (sin ciclos); `slug` único si se envía. | `201` con la categoría. | 401, 403, 422. |
 | GET | `/api/v1/categories/{id}` | Autenticado | `id` numérico. | Categoría con hijas y conteo de productos. | 401, 404. |
+
+[DECISIÓN] Notas de la Unidad 1 de la Fase 2 (13/10/2026). Fuente: orden de construcción por unidades (los productos llegan en la Unidad 2).
+- El detalle de la categoría expone hoy sus hijas pero **sin el conteo de productos**: no existe nada que contar hasta que la tabla `products` exista. El conteo se añade en la Unidad 2 sin romper el contrato.
+- La desactivación rechaza hoy la categoría con **subcategorías activas** (409 `ESTADO_INVALIDO`); la comprobación de **productos** se añade en la Unidad 2, cuando esa tabla exista.
+- Las unidades de medida **no tienen endpoints de edición ni borrado**: el contrato no los define y no se inventan. Queda como decisión pendiente si el catálogo los necesita o si las unidades son inmutables tras su creación.
+
+[DECISIÓN] Cierre de la Unidad 2 de la Fase 2 (13/10/2026). Fuente: los dos puntos anteriores.
+- El detalle de la categoría expone desde hoy `products_count` junto a sus hijas: el conteo pendiente queda implementado.
+- La desactivación rechaza desde hoy la categoría con **productos activos** (409 `ESTADO_INVALIDO`), además de la guarda de subcategorías: la comprobación pendiente queda implementada.
 | PUT | `/api/v1/categories/{id}` | `catalog.update` | `name`, `parent_id` sin ciclos, `is_active`. | Categoría actualizada. | 401, 403, 404, 422. |
 | POST | `/api/v1/categories/{id}/deactivate` | `catalog.update` | Rechaza si tiene productos o subcategorías activas. | Categoría desactivada. | 401, 403, 404, 409 con dependientes. |
 
@@ -152,6 +161,12 @@ Salvo indicación contraria, todos los endpoints requieren autenticación. La co
 | POST | `/api/v1/products/{id}/deactivate` | `catalog.update` | Rechaza si tiene movimientos pendientes de cierre según regla de negocio; preserva el kardex. | Producto desactivado. | 401, 403, 404, 409. |
 | GET | `/api/v1/products/{id}/warehouses` | Autenticado (alcance) | `id` numérico. | Configuración `product_warehouse` (`min_stock`, `max_stock`, `reorder_point` como cadenas). | 401, 404. |
 | PUT | `/api/v1/products/{id}/warehouses/{warehouseId}` | `catalog.update` + alcance | `min_stock` decimal como cadena (mínimo 0); `max_stock` y `reorder_point` decimales o nulos, con `max_stock >= min_stock` si ambos se envían. | Configuración actualizada. | 401, 403 sin permiso de almacén, 404, 422. |
+
+[DECISIÓN] Notas de la Unidad 2 de la Fase 2 (13/10/2026). Fuente: orden de construcción por fases (el kardex llega en la Fase 3).
+- La ficha y el listado exponen hoy categoría, unidad y configuración min/max por almacén autorizado, pero **sin cantidades ni costo promedio**: la tabla `inventories` no existe hasta la fase de inventario y no se inventan ceros. Esos campos se añaden cuando el kardex exista, sin romper el contrato.
+- La desactivación permite hoy el apagado porque la tabla de movimientos no existe y no hay nada pendiente que detectar: la comprobación de "movimientos pendientes de cierre" se añade cuando esos documentos existan.
+- El SKU es inmutable en el PUT: cualquier intento de cambio responde 422, aunque el valor nuevo sea único (lectura conservadora del contrato).
+- El PUT de configuración responde 200 tanto al crear la fila como al actualizarla, y los negativos de costo, precio y cantidades se rechazan con 422.
 
 ### 7.8 Documentos de inventario
 
@@ -206,6 +221,17 @@ Todos los endpoints requieren autenticación. La columna «Acceso» indica el pe
 | POST | `/api/v1/imports/initial-stock` | `inventory.create` + alcance | Cuerpo `multipart` con el archivo; cabecera `Idempotency-Key` requerida; genera y confirma el documento de entrada con recálculo de promedio ponderado. | `201` con el documento de entrada confirmado y su resumen de líneas. | 401, 403 SIN_PERMISO, 403 FUERA_DE_ALCANCE, 422 VALIDACION, 409 IDEMPOTENCIA_REPETIDA, 413 si se define límite de tamaño. |
 
 Los errores usan la envoltura de §5: `422 VALIDACION` para archivo o filas inválidas (se usa `413` solo si el límite de tamaño se define como tal), `403 SIN_PERMISO` sin el permiso correspondiente, `403 FUERA_DE_ALCANCE` para almacén fuera de alcance y `409 IDEMPOTENCIA_REPETIDA` ante reenvío con clave ya usada.
+
+[DECISIÓN] Cierre de la Unidad 3 de la Fase 2 (13/10/2026). Fuente: EP-012 y orden de construcción por unidades (la carga inicial de existencias llega en la Fase 3). Fija los números que el contrato pedía sin darlos y dos desvíos conscientes:
+- Plantilla: columnas exactas en este orden - `sku, nombre, categoria, unidad, descripcion, codigo_barras, costo, precio_venta, activo` - con la fila de ejemplo `EXAMPLE-001` marcada como ilustrativa (no debe importarse). La plantilla cubre productos más la categoría y la unidad que referencian; el stock mínimo, máximo y punto de reorden son por almacén y NO forman parte de esta plantilla (los posee la carga inicial de la Fase 3).
+- Límites: formatos `xlsx` y `csv`; tamaño máximo 5 MB; máximo 1000 filas; CSV en UTF-8 decodificable. Lo que exceda o llegue en otro tipo se rechaza con `422 VALIDACION` y sin efectos; nunca se inventa un `413`.
+- Columnas obligatorias: `sku, nombre, categoria, unidad`; el resto son opcionales. Cada error informa fila, campo y motivo en español sin detenerse en la primera fila mala.
+- Por fila: `sku` obligatorio y único dentro del archivo (el SKU existente es actualización, no error); `nombre` obligatorio; `unidad` debe ser el código de una unidad existente - el código desconocido es fila inválida y la importación NUNCA crea unidades (una errata crearía silenciosamente una unidad de medida y corrompería el catálogo, desvío consciente de RF-128 con su motivo); `categoria` se resuelve por nombre y se crea como raíz si no existe (el archivo no trae jerarquía); `codigo_barras` único cuando viene informado; `costo` y `precio_venta` como cadenas decimales de hasta 2 decimales y no negativos; `activo` acepta valores de verdad en español o inglés (`si, sí, yes, verdadero, activo` y sus negaciones, más `true/false/1/0`) y la celda vacía equivale a verdadero.
+- Dry-run (`validate`): responde `200` con el informe por fila y no escribe nada (los conteos antes y después son idénticos).
+- Aplicación (`store`): una sola transacción (si alguna fila falla, no se aplica ninguna y responde `422` con el informe); idempotente por SKU (reimportar actualiza con las columnas del archivo en lugar de duplicar; el SKU es la clave y jamás se modifica); responde `201` con filas creadas, actualizadas, totales y la referencia de auditoría.
+- Auditoría: una entrada por importación con acción `importar_catalogo`, `entity_type` `importacion_catalogo`, `entity_id` nulo y `new_values` con el nombre del archivo y los conteos. El archivo subido NO se guarda en el servidor (el contrato no define staging): solo se lee su contenido temporal y la auditoría conserva el nombre y los conteos, nunca el contenido, las filas ni secretos.
+- Validación compartida (RN-IMP-02): las reglas viven una sola vez en `App\Services\Catalog\CatalogRules` (más las guardas de `ProductService`); los Form Request de captura manual delegan en ella y cada fila del archivo se valida contra las mismas reglas, así que la importación nunca relaja el formulario.
+- Dependencia mínima: `phpoffice/phpspreadsheet` para leer y generar XLSX (el CSV se maneja con funciones nativas de PHP, sin dependencia extra); la imagen del backend añade la extensión `gd` porque la librería la exige como dependencia de plataforma.
 
 ## 8. Ejemplo de confirmación de documento
 

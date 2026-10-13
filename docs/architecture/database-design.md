@@ -97,7 +97,7 @@ Claves foráneas con `ON DELETE RESTRICT` para preservar historia; `ON DELETE CA
 
 ### 5.2 Catálogo
 
-**`categories`** - `id` PK; `parent_id` BIGINT UNSIGNED nulo FK -> categories (RESTRICT); `name` VARCHAR(150) no nulo; `slug` VARCHAR(180); `is_active` BOOLEAN default 1; timestamps. Índice `idx_categories_parent_id`.
+**`categories`** - `id` PK; `parent_id` BIGINT UNSIGNED nulo FK -> categories (RESTRICT); `name` VARCHAR(150) no nulo; `slug` VARCHAR(180) nulo con UNIQUE `uq_categories_slug` (único solo cuando viene informado: MySQL admite varios NULL en una UNIQUE, así que varias categorías sin slug conviven); `is_active` BOOLEAN default 1; timestamps. Índice `idx_categories_parent_id`. [DECISIÓN] La jerarquía se acota a 3 niveles (raíz, hija, nieta) y sin ciclos: ningún `CHECK` de MySQL puede expresarlo, así que lo valida el servicio de catálogo antes de insertar o mover (Unidad 1 de la Fase 2). Fuente: riesgo de ciclos de la Fase 2 en scope-and-milestones.md.
 
 **`units_of_measure`** - `id` PK; `code` VARCHAR(20) UNIQUE (p. ej. `UND`, `KG`, `LT`); `name` VARCHAR(80) no nulo; `allows_decimals` BOOLEAN default 0; timestamps.
 
@@ -119,7 +119,13 @@ Claves foráneas con `ON DELETE RESTRICT` para preservar historia; `ON DELETE CA
 | created_at, updated_at | TIMESTAMP | No | | |
 | deleted_at | TIMESTAMP | Sí | | Borrado lógico. |
 
-Índices: `idx_products_category_id`, `idx_products_is_active`.
+Índices: `idx_products_category_id`, `idx_products_is_active`, `idx_products_name`.
+
+[DECISIÓN] Notas de la Unidad 2 de la Fase 2 (13/10/2026). Fuente: backlog EP-004 y modelo de esta sección.
+- `idx_products_name` no estaba en la lista original de dos índices: lo añado porque el backlog EP-004 pide búsqueda por SKU, nombre y código de barras "con índices", y el nombre parcial es el único de los tres sin índice dedicado (el SKU y el código ya tienen sus UNIQUE, que indexan).
+- `product_warehouse` lleva `created_at` y `updated_at` porque este documento afirma que cada tabla los lleva; no lleva `deleted_at` porque la fila de configuración se borra en cascada con su producto o almacén.
+- El CASCADE de ambas FK de `product_warehouse` es literal de este documento e intencional, a diferencia del RESTRICT del resto del esquema: la configuración no es historia contable, es un parámetro que muere con su dueño.
+- El CHECK de `costing_method` limita a (`promedio_ponderado`,`fifo`): el MVP solo usa el primero y el segundo queda reservado, coherente con la tabla de enumeraciones del §3.
 
 **`product_warehouse`** - `id` PK; `product_id` FK -> products (CASCADE); `warehouse_id` FK -> warehouses (CASCADE); `min_stock` DECIMAL(15,3) default 0; `max_stock` DECIMAL(15,3) nulo; `reorder_point` DECIMAL(15,3) nulo; UNIQUE `uq_product_warehouse (product_id, warehouse_id)`. Define stock mínimo y máximo por almacén.
 
