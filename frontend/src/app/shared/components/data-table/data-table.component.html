@@ -8,7 +8,13 @@
       (retry)="retry.emit()"
     />
   } @else if (rows().length === 0) {
-    <app-empty-state [icon]="emptyIcon()" [title]="emptyTitle()" [message]="emptyMessage()" />
+    <app-empty-state [icon]="emptyIcon()" [title]="emptyTitle()" [message]="emptyMessage()">
+      @if (hasEmptyAction()) {
+        <button mat-flat-button color="primary" type="button" (click)="emptyAction.emit()">
+          {{ emptyActionLabel() }}
+        </button>
+      }
+    </app-empty-state>
   } @else {
     <div class="data-table__scroll">
       <table mat-table [dataSource]="rows()" class="data-table__table">
@@ -55,6 +61,28 @@
                 }
               } @else {
                 {{ column.cell(row) }}
+              }
+            </td>
+          </ng-container>
+        }
+
+        @if (hasActions()) {
+          <ng-container matColumnDef="__actions">
+            <th mat-header-cell *matHeaderCellDef scope="col" class="data-table__actions-head">
+              Acciones
+            </th>
+            <td mat-cell *matCellDef="let row" class="data-table__actions-cell">
+              @for (action of visibleActions(row); track action.id) {
+                <button
+                  mat-icon-button
+                  type="button"
+                  [matTooltip]="action.label"
+                  [attr.aria-label]="action.label"
+                  [disabled]="isDisabled(action, row)"
+                  (click)="action.run(row)"
+                >
+                  <mat-icon aria-hidden="true">{{ action.icon }}</mat-icon>
+                </button>
               }
             </td>
           </ng-container>

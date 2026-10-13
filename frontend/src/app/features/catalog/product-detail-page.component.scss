@@ -1,0 +1,113 @@
+// Ficha y configuracion con los tokens del contrato (design-system.md §8).
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-section-gap);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-element-gap);
+  padding: var(--app-card-padding);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--mat-sys-corner-medium);
+  background: var(--mat-sys-surface-container);
+}
+
+.card__title {
+  margin: 0;
+  font: var(--mat-sys-title-medium);
+  color: var(--mat-sys-on-surface);
+}
+
+.card__note {
+  margin: 0;
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.facts {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.facts__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--app-element-gap);
+  padding-block: var(--app-space-2);
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+
+.facts__row:last-child {
+  border-bottom: 0;
+}
+
+.facts__term {
+  flex: 0 0 180px;
+  font: var(--mat-sys-label-medium);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.facts__value {
+  margin: 0;
+  flex: 1 1 220px;
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface);
+}
+
+.config-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-element-gap);
+  padding-block: var(--app-space-3);
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+
+.config-row:last-child {
+  border-bottom: 0;
+}
+
+.config-row__head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--app-element-gap);
+}
+
+.config-row__name {
+  margin: 0;
+  font: var(--mat-sys-title-small);
+  color: var(--mat-sys-on-surface);
+}
+
+.config-row__code {
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.config-row__fields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--app-element-gap);
+}
+
+.config-row__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-space-1);
+  flex: 1 1 180px;
+}
+
+.config-row__label {
+  font: var(--mat-sys-label-medium);
+  color: var(--mat-sys-on-surface);
+}
+
+.config-row__error {
+  margin: 0;
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-error);
+}

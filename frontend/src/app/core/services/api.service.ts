@@ -45,6 +45,24 @@ export class ApiService {
     return this.http.delete<T>(this.url(path));
   }
 
+  // La descarga de plantillas devuelve binario, no JSON: pido el cuerpo como
+  // Blob para que HttpClient no intente interpretarlo. Los interceptores de
+  // sesion y errores siguen aplicando porque viaja por la misma tuberia.
+  /** Descarga binaria (plantillas de importacion) bajo /api/v1. */
+  public download(path: string, params?: ListParams): Observable<Blob> {
+    return this.http.get(this.url(path), {
+      params: this.toParams(params),
+      responseType: 'blob',
+    });
+  }
+
+  /** POST multipart para la subida de archivos de importacion. */
+  public upload<T>(path: string, file: File, field: string): Observable<T> {
+    const body = new FormData();
+    body.append(field, file, file.name);
+    return this.http.post<T>(this.url(path), body);
+  }
+
   // El sobre de exito de la API envuelve recursos unicos en `data`; expongo este
   // desempaquetado para que los servicios no repitan el acceso a `.data`.
   /** Extrae `data` de una respuesta de recurso unico. */

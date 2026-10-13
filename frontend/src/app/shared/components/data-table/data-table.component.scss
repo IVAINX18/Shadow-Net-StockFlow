@@ -59,6 +59,13 @@
   font-variant-numeric: tabular-nums;
 }
 
+// Los identificadores tecnicos conservan la monoespaciada dentro de la celda:
+// el selector de celda pesa mas que .app-mono global y sin esta regla la
+// familia monoespaciada se perderia (design-system.md §6).
+.data-table__table .mat-mdc-cell.app-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
 // El boton de orden hereda la tipografia del encabezado y anuncia su estado
 // con fondo suave e icono en el acento, no solo con el glifo.
 .data-table__sort {
@@ -117,4 +124,11 @@
   background: transparent;
   border-top: 1px solid var(--mat-sys-outline-variant);
   box-shadow: none;
+}
+
+// La columna de acciones se compacta a la derecha: solo iconos, sin texto.
+.data-table__actions-head,
+.data-table__actions-cell {
+  text-align: end;
+  white-space: nowrap;
 }

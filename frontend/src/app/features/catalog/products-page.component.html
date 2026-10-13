@@ -1,0 +1,67 @@
+<app-page-header
+  title="Productos"
+  subtitle="Catalogo de productos por SKU con su clasificacion."
+>
+  @if (canCreate) {
+    <a mat-stroked-button routerLink="/catalogo/importacion">
+      <mat-icon aria-hidden="true">upload</mat-icon>
+      Importar catalogo
+    </a>
+    <button mat-flat-button color="primary" type="button" (click)="openCreate()">
+      <mat-icon aria-hidden="true">add</mat-icon>
+      Nuevo producto
+    </button>
+  }
+</app-page-header>
+
+@if (notice(); as noticeText) {
+  <p class="notice" role="alert">{{ noticeText }}</p>
+}
+
+<div class="toolbar">
+  <mat-form-field appearance="outline" subscriptSizing="dynamic" class="toolbar__search">
+    <mat-label>Buscar por SKU, nombre o barras</mat-label>
+    <input matInput type="search" [formControl]="searchControl" maxlength="120" />
+    <mat-icon matSuffix aria-hidden="true">search</mat-icon>
+  </mat-form-field>
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Estado</mat-label>
+    <mat-select [value]="activeFilter()" (selectionChange)="onActiveFilter($event.value)">
+      <mat-option [value]="null">Todos</mat-option>
+      <mat-option [value]="true">Activos</mat-option>
+      <mat-option [value]="false">Inactivos</mat-option>
+    </mat-select>
+  </mat-form-field>
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Categoria</mat-label>
+    <mat-select [value]="categoryFilter()" (selectionChange)="onCategoryFilter($event.value)">
+      <mat-option [value]="null">Todas</mat-option>
+      @for (category of categoryDirectory(); track category.id) {
+        <mat-option [value]="category.id">{{ category.name }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+  <button mat-button type="button" (click)="onClearFilters()">Limpiar</button>
+</div>
+
+<app-data-table
+  [columns]="columns"
+  [rows]="rows()"
+  [total]="total()"
+  [page]="page()"
+  [pageSize]="pageSize()"
+  [loading]="loading()"
+  [error]="errorMessage()"
+  [errorId]="errorId()"
+  [sortKey]="sortKey()"
+  [sortDirection]="sortDirection()"
+  [actions]="actions"
+  emptyIcon="inventory_2"
+  emptyTitle="Sin productos"
+  emptyMessage="Todavia no hay productos registrados. Cree el primero o importe el catalogo desde un archivo."
+  [emptyActionLabel]="canCreate ? 'Nuevo producto' : ''"
+  (sortChange)="onSort($event)"
+  (pageChange)="onPage($event)"
+  (retry)="load()"
+  (emptyAction)="openCreate()"
+/>

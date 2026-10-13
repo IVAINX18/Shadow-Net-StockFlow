@@ -42,6 +42,7 @@ export class ErrorService {
           message: envelope.error.message,
           status: error.status,
           details: this.readDetails(envelope),
+          rawDetails: this.readRawDetails(envelope),
           errorId: this.readErrorId(error.error),
         });
       }
@@ -104,6 +105,13 @@ export class ErrorService {
         ? [{ field: detail.field, code: detail.code ?? 'VALIDACION', message: detail.message }]
         : [],
     );
+  }
+
+  // Conservo los detalles crudos tal como llegaron para los informes que no
+  // usan field/message, como el reporte por fila de la importacion de
+  // catalogo (fila/campo/motivo). No cambia lo que ya se filtraba.
+  private readRawDetails(envelope: ApiErrorEnvelope): readonly unknown[] {
+    return [...envelope.error.details];
   }
 
   // Leo el error_id del cuerpo crudo, porque en el 500 el detalle trae solo ese

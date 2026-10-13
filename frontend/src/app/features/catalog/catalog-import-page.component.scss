@@ -1,0 +1,115 @@
+// Pasos de importacion con los tokens del contrato (design-system.md §8).
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-section-gap);
+}
+
+.notice {
+  margin: 0;
+  padding: var(--app-space-3) var(--app-card-padding);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--mat-sys-corner-medium);
+  background: var(--mat-sys-error-container);
+  color: var(--mat-sys-on-error-container);
+  font: var(--mat-sys-body-medium);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-element-gap);
+  padding: var(--app-card-padding);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--mat-sys-corner-medium);
+  background: var(--mat-sys-surface-container);
+}
+
+.card__title {
+  margin: 0;
+  font: var(--mat-sys-title-medium);
+  color: var(--mat-sys-on-surface);
+}
+
+.card__note {
+  margin: 0;
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--app-element-gap);
+}
+
+.card__file {
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+// El input de archivo nativo se oculta y lo presenta un boton con el acento
+// unico; el nombre elegido se lee junto al boton, no dentro de el.
+.file-pick__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+.file-pick__button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--app-space-1);
+  padding: var(--app-space-2) var(--app-space-4);
+  border: 1px solid var(--mat-sys-outline);
+  border-radius: var(--mat-sys-corner-small);
+  color: var(--mat-sys-primary);
+  font: var(--mat-sys-label-large);
+  cursor: pointer;
+}
+
+.file-pick:focus-within .file-pick__button {
+  outline: 2px solid var(--mat-sys-primary);
+  outline-offset: 2px;
+}
+
+.report {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-element-gap);
+}
+
+.facts {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.facts__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--app-element-gap);
+  padding-block: var(--app-space-2);
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+
+.facts__row:last-child {
+  border-bottom: 0;
+}
+
+.facts__term {
+  flex: 0 0 180px;
+  font: var(--mat-sys-label-medium);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.facts__value {
+  margin: 0;
+  flex: 1 1 220px;
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface);
+}

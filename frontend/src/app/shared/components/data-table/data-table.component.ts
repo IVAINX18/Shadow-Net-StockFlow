@@ -1,12 +1,16 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatPaginatorModule, type PageEvent } from '@angular/material/paginator';
+import { MatPaginatorModule, MatPaginatorIntl, type PageEvent } from '@angular/material/paginator';
 import { MatTableModule } from '@angular/material/table';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { EmptyStateComponent } from '../empty-state/empty-state.component';
 import { ErrorStateComponent } from '../error-state/error-state.component';
 import { LoadingSkeletonComponent } from '../loading-skeleton/loading-skeleton.component';
 import { StatusChipComponent } from '../status-chip/status-chip.component';
+import { SpanishPaginatorIntl } from '../../../core/services/spanish-paginator-intl';
 import type {
+  DataTableAction,
   DataTableColumn,
   PageChange,
   SortChange,
@@ -22,10 +26,17 @@ import type {
 @Component({
   selector: 'app-data-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  // El paginador en español se provee aqui y no en la raiz: este componente
+  // solo vive en paginas perezosas y ya trae el modulo del paginador, asi que
+  // traducirlo aqui no mueve ni un byte al paquete inicial (design-system.md
+  // §12 y §14). Cada MatPaginator de la tabla lo consume por inyeccion.
+  providers: [{ provide: MatPaginatorIntl, useClass: SpanishPaginatorIntl }],
   imports: [
     MatTableModule,
     MatPaginatorModule,
     MatIconModule,
+    MatButtonModule,
+    MatTooltipModule,
     EmptyStateComponent,
     ErrorStateComponent,
     LoadingSkeletonComponent,
@@ -61,6 +72,10 @@ export class DataTableComponent<T> {
   public readonly sortKey = input<string | null>(null);
   /** Direccion de orden activa. */
   public readonly sortDirection = input<SortDirection>('asc');
+  /** Acciones por fila. Vacio significa sin columna de acciones. */
+  public readonly actions = input<readonly DataTableAction<T>[]>([]);
+  /** Etiqueta de la accion del estado vacio. Vacia significa sin accion. */
+  public readonly emptyActionLabel = input('');
 
   /** Solicitud de orden. */
   public readonly sortChange = output<SortChange>();
@@ -68,8 +83,15 @@ export class DataTableComponent<T> {
   public readonly pageChange = output<PageChange>();
   /** Solicitud de reintento tras un error. */
   public readonly retry = output<void>();
+  /** Accion del estado vacio (poblar la tabla). */
+  public readonly emptyAction = output<void>();
 
-  protected readonly displayedColumns = computed(() => this.columns().map((column) => column.key));
+  protected readonly hasActions = computed(() => this.actions().length > 0);
+  protected readonly hasEmptyAction = computed(() => this.emptyActionLabel().length > 0);
+  protected readonly displayedColumns = computed(() => {
+    const keys = this.columns().map((column) => column.key);
+    return this.hasActions() ? [...keys, ACTIONS_COLUMN] : keys;
+  });
 
   // Mientras cargo, dibujo solo las filas que caben en pantalla para no generar
   // un esqueleto desproporcionado.
@@ -105,7 +127,20 @@ export class DataTableComponent<T> {
     this.pageChange.emit({ page: event.pageIndex + 1, pageSize: event.pageSize });
   }
 
+  // Acciones visibles para la fila: las ocultas por permiso no se dibujan.
+  protected visibleActions(row: T): readonly DataTableAction<T>[] {
+    return this.actions().filter((action) => action.hidden?.(row) !== true);
+  }
+
+  protected isDisabled(action: DataTableAction<T>, row: T): boolean {
+    return action.disabled?.(row) === true;
+  }
+
   private orderKey(column: DataTableColumn<T>): string {
     return column.sortKey ?? column.key;
   }
 }
+
+// La columna de acciones no pertenece a los datos: usa una clave reservada que
+// ningun campo de la API puede colisionar.
+const ACTIONS_COLUMN = '__actions';

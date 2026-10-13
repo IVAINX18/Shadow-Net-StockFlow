@@ -27,6 +27,25 @@ export interface DataTableColumn<T> {
 /** Direccion de ordenamiento. */
 export type SortDirection = 'asc' | 'desc';
 
+/**
+ * Accion por fila de la tabla. La pagina la define con sus permisos ya
+ * evaluados: hidden oculta y disabled desactiva con su motivo accesible.
+ */
+export interface DataTableAction<T> {
+  /** Identificador estable para el seguimiento de la lista. */
+  readonly id: string;
+  /** Etiqueta visible en la ayuda emergente y el nombre accesible. */
+  readonly label: string;
+  /** Icono de Material Symbols. */
+  readonly icon: string;
+  /** Ejecuta la accion sobre la fila. */
+  readonly run: (row: T) => void;
+  /** Oculta la accion para la fila indicada. */
+  readonly hidden?: (row: T) => boolean;
+  /** Desactiva la accion para la fila indicada. */
+  readonly disabled?: (row: T) => boolean;
+}
+
 /** Cambio de orden solicitado por el usuario. */
 export interface SortChange {
   readonly key: string;

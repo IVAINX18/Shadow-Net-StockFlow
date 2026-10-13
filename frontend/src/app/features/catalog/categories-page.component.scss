@@ -1,0 +1,82 @@
+// Ritmo de la pagina con los tokens del contrato (design-system.md §8): el
+// armazon aporta el medianil, aqui solo separo secciones y bloques.
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-section-gap);
+}
+
+.notice {
+  margin: 0;
+  padding: var(--app-space-3) var(--app-card-padding);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--mat-sys-corner-medium);
+  background: var(--mat-sys-error-container);
+  color: var(--mat-sys-on-error-container);
+  font: var(--mat-sys-body-medium);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-element-gap);
+}
+
+.section__title {
+  margin: 0;
+  font: var(--mat-sys-title-medium);
+  color: var(--mat-sys-on-surface);
+}
+
+.section__note {
+  margin: 0;
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--app-element-gap);
+}
+
+.toolbar__search {
+  min-inline-size: 220px;
+  flex: 1 1 220px;
+}
+
+.unit-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-element-gap);
+  padding: var(--app-card-padding);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--mat-sys-corner-medium);
+  background: var(--mat-sys-surface-container);
+}
+
+.unit-form__banner {
+  margin: 0;
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-error);
+}
+
+.unit-form__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--app-element-gap);
+}
+
+.unit-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-space-1);
+  flex: 1 1 200px;
+}
+
+.unit-form__label {
+  font: var(--mat-sys-label-medium);
+  color: var(--mat-sys-on-surface);
+}

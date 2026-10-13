@@ -1,0 +1,153 @@
+<app-page-header
+  title="Categorias y unidades"
+  subtitle="Jerarquia de categorias y catalogo de unidades de medida."
+>
+  @if (canCreate) {
+    <button mat-flat-button color="primary" type="button" (click)="openCreate()">
+      <mat-icon aria-hidden="true">add</mat-icon>
+      Nueva categoria
+    </button>
+  }
+</app-page-header>
+
+@if (notice(); as noticeText) {
+  <p class="notice" role="alert">{{ noticeText }}</p>
+}
+
+<section class="section" aria-labelledby="categories-heading">
+  <h2 id="categories-heading" class="section__title app-tight">Categorias</h2>
+
+  <div class="toolbar">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="toolbar__search">
+      <mat-label>Buscar por nombre</mat-label>
+      <input matInput type="search" [formControl]="searchControl" maxlength="120" />
+      <mat-icon matSuffix aria-hidden="true">search</mat-icon>
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Estado</mat-label>
+      <mat-select
+        [value]="activeFilter()"
+        (selectionChange)="onActiveFilter($event.value)"
+      >
+        <mat-option [value]="null">Todas</mat-option>
+        <mat-option [value]="true">Activas</mat-option>
+        <mat-option [value]="false">Inactivas</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Categoria padre</mat-label>
+      <mat-select
+        [value]="parentFilter()"
+        (selectionChange)="onParentFilter($event.value)"
+      >
+        <mat-option [value]="null">Todas</mat-option>
+        @for (parent of directory(); track parent.id) {
+          <mat-option [value]="parent.id">{{ parent.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <button mat-button type="button" (click)="onClearFilters()">Limpiar</button>
+  </div>
+
+  <app-data-table
+    [columns]="categoryColumns"
+    [rows]="categoryRows()"
+    [total]="categoryTotal()"
+    [page]="categoryPage()"
+    [pageSize]="categoryPageSize()"
+    [loading]="categoryLoading()"
+    [error]="categoryErrorMessage()"
+    [errorId]="categoryErrorId()"
+    [sortKey]="categorySortKey()"
+    [sortDirection]="categorySortDirection()"
+    [actions]="categoryActions"
+    emptyIcon="category"
+    emptyTitle="Sin categorias"
+    emptyMessage="Todavia no hay categorias registradas. Cree la primera para clasificar el catalogo."
+    [emptyActionLabel]="canCreate ? 'Nueva categoria' : ''"
+    (sortChange)="onCategorySort($event)"
+    (pageChange)="onCategoryPage($event)"
+    (retry)="loadCategories()"
+    (emptyAction)="openCreate()"
+  />
+</section>
+
+<section class="section" aria-labelledby="units-heading">
+  <h2 id="units-heading" class="section__title app-tight">Unidades de medida</h2>
+  <p class="section__note">
+    Las unidades no tienen edicion: el contrato solo define listado, detalle y alta.
+  </p>
+
+  @if (canCreate) {
+    <form class="unit-form" [formGroup]="unitForm" (ngSubmit)="createUnit()" novalidate>
+      @if (unitBanner(); as bannerText) {
+        <p class="unit-form__banner" role="alert">{{ bannerText }}</p>
+      }
+      <div class="unit-form__row">
+        <div class="unit-form__field">
+          <label class="unit-form__label" for="unit-code">Codigo</label>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <input
+              matInput
+              id="unit-code"
+              type="text"
+              formControlName="code"
+              maxlength="20"
+              class="app-mono"
+              required
+            />
+            <mat-hint>Maximo 20 caracteres, unico en el catalogo.</mat-hint>
+            <mat-error>
+              @if (unitForm.controls.code.hasError('backend')) {
+                {{ unitForm.controls.code.getError('backend') }}
+              } @else {
+                El codigo es obligatorio.
+              }
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="unit-form__field">
+          <label class="unit-form__label" for="unit-name">Nombre</label>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <input matInput id="unit-name" type="text" formControlName="name" required />
+            <mat-error>
+              @if (unitForm.controls.name.hasError('backend')) {
+                {{ unitForm.controls.name.getError('backend') }}
+              } @else {
+                El nombre es obligatorio.
+              }
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <mat-checkbox formControlName="allows_decimals">Permite decimales</mat-checkbox>
+        <button
+          mat-flat-button
+          color="primary"
+          type="submit"
+          [disabled]="unitSaving()"
+        >
+          {{ unitSaving() ? 'Creando' : 'Crear unidad' }}
+        </button>
+      </div>
+    </form>
+  }
+
+  <app-data-table
+    [columns]="unitColumns"
+    [rows]="unitRows()"
+    [total]="unitTotal()"
+    [page]="unitPage()"
+    [pageSize]="unitPageSize()"
+    [loading]="unitLoading()"
+    [error]="unitErrorMessage()"
+    [errorId]="unitErrorId()"
+    [sortKey]="unitSortKey()"
+    [sortDirection]="unitSortDirection()"
+    emptyIcon="straighten"
+    emptyTitle="Sin unidades"
+    emptyMessage="No hay unidades de medida registradas."
+    (sortChange)="onUnitSort($event)"
+    (pageChange)="onUnitPage($event)"
+    (retry)="loadUnits()"
+  />
+</section>

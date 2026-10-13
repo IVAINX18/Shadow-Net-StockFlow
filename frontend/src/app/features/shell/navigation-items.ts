@@ -18,9 +18,11 @@ export interface NavGroup {
   readonly items: readonly NavItem[];
 }
 
-// Las once secciones del producto. Solo Dashboard, Almacenes y Usuarios y roles
-// tienen API real hoy; el resto apunta a la pantalla de modulo pendiente, que
-// nombra la fase y los endpoints que faltan, sin simular datos.
+// Las once secciones del producto. Dashboard, Catalogo (productos, categorias y
+// unidades) y Almacenes tienen API real; la importacion de catalogo vive en la
+// ruta /catalogo/importacion sin entrada propia de navegacion y se alcanza
+// desde la pagina de productos. El resto apunta a la pantalla de modulo
+// pendiente, que nombra la fase y los endpoints que faltan, sin simular datos.
 export const NAV_GROUPS: readonly NavGroup[] = [
   {
     label: 'General',
@@ -31,8 +33,8 @@ export const NAV_GROUPS: readonly NavGroup[] = [
   {
     label: 'Catalogo',
     items: [
-      { label: 'Productos', icon: 'inventory_2', route: '/pendiente/productos', permissions: [] },
-      { label: 'Categorias', icon: 'category', route: '/pendiente/categorias', permissions: [] },
+      { label: 'Productos', icon: 'inventory_2', route: '/productos', permissions: [] },
+      { label: 'Categorias', icon: 'category', route: '/categorias', permissions: [] },
       { label: 'Almacenes', icon: 'warehouse', route: '/almacenes', permissions: ['warehouses.view'] },
     ],
   },

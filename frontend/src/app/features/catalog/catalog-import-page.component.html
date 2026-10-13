@@ -1,0 +1,171 @@
+<app-page-header
+  title="Importacion de catalogo"
+  subtitle="Plantilla, validacion previa sin efectos y aplicacion atomica por SKU."
+>
+  <a mat-stroked-button routerLink="/productos">
+    <mat-icon aria-hidden="true">arrow_back</mat-icon>
+    Volver a productos
+  </a>
+</app-page-header>
+
+@if (notice(); as noticeText) {
+  <p class="notice" role="alert">{{ noticeText }}</p>
+}
+
+<section class="card" aria-labelledby="template-heading">
+  <h2 id="template-heading" class="card__title app-tight">1. Descargar la plantilla</h2>
+  <p class="card__note">
+    La plantilla trae las columnas esperadas y una fila de ejemplo que no debe importarse.
+  </p>
+  <div class="card__actions">
+    <button
+      mat-stroked-button
+      type="button"
+      [disabled]="downloading() !== null"
+      (click)="downloadTemplate('xlsx')"
+    >
+      <mat-icon aria-hidden="true">download</mat-icon>
+      {{ downloading() === 'xlsx' ? 'Descargando' : 'Plantilla XLSX' }}
+    </button>
+    <button
+      mat-stroked-button
+      type="button"
+      [disabled]="downloading() !== null"
+      (click)="downloadTemplate('csv')"
+    >
+      <mat-icon aria-hidden="true">download</mat-icon>
+      {{ downloading() === 'csv' ? 'Descargando' : 'Plantilla CSV' }}
+    </button>
+  </div>
+</section>
+
+<section class="card" aria-labelledby="validate-heading">
+  <h2 id="validate-heading" class="card__title app-tight">2. Validar el archivo sin aplicar</h2>
+  <p class="card__note">
+    La validacion previa informa cada fila con su campo y motivo y no modifica ningun dato.
+  </p>
+  <div class="card__actions">
+    <label class="file-pick">
+      <input
+        type="file"
+        accept=".xlsx,.csv"
+        class="file-pick__input"
+        (change)="onFileSelected($event)"
+        aria-label="Elegir archivo de catalogo"
+      />
+      <span class="file-pick__button">
+        <mat-icon aria-hidden="true">attach_file</mat-icon>
+        Elegir archivo
+      </span>
+    </label>
+    <span class="card__file app-mono">{{ fileLabel() }}</span>
+  </div>
+  <div class="card__actions">
+    <button
+      mat-flat-button
+      color="primary"
+      type="button"
+      [disabled]="validating() || selectedFile() === null"
+      (click)="validate()"
+    >
+      <mat-icon aria-hidden="true">fact_check</mat-icon>
+      {{ validating() ? 'Validando' : 'Validar archivo' }}
+    </button>
+  </div>
+
+  @if (report(); as dryRun) {
+    <div class="report">
+      <app-status-chip
+        [label]="dryRun.valida ? 'Archivo valido' : 'Archivo con errores'"
+        [tone]="dryRun.valida ? 'success' : 'error'"
+      />
+      <p class="card__note">
+        {{ dryRun.total_filas }} filas en total: {{ dryRun.filas_validas }} validas y
+        {{ dryRun.filas_invalidas }} invalidas. Archivo: {{ dryRun.archivo }}.
+      </p>
+      @if (invalidIssues().length > 0) {
+        <app-data-table
+          [columns]="issueColumns"
+          [rows]="visibleIssues()"
+          [total]="visibleIssueTotal()"
+          [page]="issuePage()"
+          [pageSize]="issuePageSize()"
+          emptyIcon="check_circle"
+          emptyTitle="Sin errores"
+          emptyMessage="Todas las filas del archivo son validas."
+          (pageChange)="onIssuePage($event)"
+        />
+      } @else {
+        <p class="card__note" role="status">
+          Todas las filas son validas. Puede aplicar el archivo: los SKU existentes se
+          actualizaran y los nuevos se crearan.
+        </p>
+      }
+    </div>
+  }
+</section>
+
+<section class="card" aria-labelledby="apply-heading">
+  <h2 id="apply-heading" class="card__title app-tight">3. Aplicar el archivo</h2>
+  <p class="card__note">
+    La aplicacion es atomica: si alguna fila falla, no se aplica ninguna y se muestra el
+    informe. Reimportar el mismo archivo actualiza por SKU sin duplicar productos.
+  </p>
+  <div class="card__actions">
+    <button
+      mat-flat-button
+      color="primary"
+      type="button"
+      [disabled]="applying() || selectedFile() === null"
+      (click)="apply()"
+    >
+      <mat-icon aria-hidden="true">upload</mat-icon>
+      {{ applying() ? 'Aplicando' : 'Aplicar archivo' }}
+    </button>
+  </div>
+
+  @if (summary(); as result) {
+    <div class="report">
+      <app-status-chip label="Importacion aplicada" tone="success" />
+      <dl class="facts">
+        <div class="facts__row">
+          <dt class="facts__term">Archivo</dt>
+          <dd class="facts__value app-mono">{{ result.archivo }}</dd>
+        </div>
+        <div class="facts__row">
+          <dt class="facts__term">Filas creadas</dt>
+          <dd class="facts__value app-tabular">{{ result.filas_creadas }}</dd>
+        </div>
+        <div class="facts__row">
+          <dt class="facts__term">Filas actualizadas</dt>
+          <dd class="facts__value app-tabular">{{ result.filas_actualizadas }}</dd>
+        </div>
+        <div class="facts__row">
+          <dt class="facts__term">Filas totales</dt>
+          <dd class="facts__value app-tabular">{{ result.filas_totales }}</dd>
+        </div>
+        <div class="facts__row">
+          <dt class="facts__term">Referencia de auditoria</dt>
+          <dd class="facts__value app-mono app-tabular">{{ result.auditoria_id }}</dd>
+        </div>
+      </dl>
+    </div>
+  }
+
+  @if (applyIssues().length > 0) {
+    <div class="report">
+      <app-status-chip label="Nada aplicado: el archivo tiene filas invalidas" tone="error" />
+      <app-data-table
+        [columns]="issueColumns"
+        [rows]="visibleIssues()"
+        [total]="visibleIssueTotal()"
+        [page]="issuePage()"
+        [pageSize]="issuePageSize()"
+        emptyIcon="check_circle"
+        emptyTitle="Sin errores"
+        emptyMessage="No hay filas invalidas."
+        (pageChange)="onIssuePage($event)"
+      />
+    </div>
+  }
+</section>

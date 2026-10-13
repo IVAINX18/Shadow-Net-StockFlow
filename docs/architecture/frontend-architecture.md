@@ -1,6 +1,6 @@
 # Arquitectura del frontend - Shadow-Net StockFlow
 
-**Estado del documento:** v1.0 (planificación). **Fecha:** 10/10/2026. **Autor:** Shadow-Net Technologies.
+**Estado del documento:** v1.1 (catalogo cableado). **Fecha:** 13/10/2026. **Autor:** Shadow-Net Technologies.
 
 Este documento describe la arquitectura de la SPA Angular del ERP Shadow-Net StockFlow: componentes, estado, formularios, servicios, interceptores, rutas y convenciones. La visión del sistema está en [system-architecture.md](./system-architecture.md), las decisiones de versión en [architecture-decisions.md](./architecture-decisions.md) (ADR-006 y ADR-014) y la API que consume en [backend-architecture.md](./backend-architecture.md). El dominio cuyas reglas solo aplica el backend está en [inventory-domain.md](./inventory-domain.md).
 
@@ -39,7 +39,8 @@ frontend/
       features/              Una carpeta por capacidad de negocio.
         auth/
         warehouses/
-        products/
+        catalog/             Categorias, unidades, productos e importacion (Fase 2)
+        products/            (nombre reservado; el catalogo vive en catalog/)
         inventory/           Documentos, confirmación, kardex, existencias
         dashboard/
         reports/
@@ -128,6 +129,12 @@ export const appConfig: ApplicationConfig = {
 [DECISIÓN] Las guardias (`auth.guard`, `role.guard`) mejoran la navegación (ocultan enlaces, redirigen a inicio de sesión o a una página de acceso denegado), pero la autorización real vive en las Policies y Gates del backend. Un usuario sin acceso a un almacén recibe 403 del servidor aunque manipule la URL; las pruebas de autorización del backend lo verifican.
 
 Las rutas de funcionalidad se cargan de forma perezosa desde `app.routes.ts`; el panel, los almacenes, los productos, el inventario y los reportes son rutas hijas con su guardia de navegación correspondiente.
+
+[DECISIÓN] Rutas del catalogo (Fase 2, Frontend F1, 13/10/2026). Fuente: api-design.md §7.5, §7.6, §7.7 y §7.13.
+- `/productos` (lista con filtros, busqueda, orden y paginacion), `/productos/:id` (ficha con el editor de configuracion por almacen) y `/categorias` (pagina "Categorias y unidades" con las dos secciones) reemplazan las rutas de modulo pendiente sin renombrar las etiquetas de navegacion, que siguen siendo "Productos" y "Categorias".
+- `/catalogo/importacion` (plantilla, dry-run y aplicacion) no tiene entrada propia de navegacion y se alcanza desde la pagina de productos; lleva guardia de navegacion `catalog.create` porque sus tres endpoints lo exigen.
+- La tabla compartida (`data-table`) acepta acciones por fila con permiso ya evaluado y accion de estado vacio; las confirmaciones usan el dialogo compartido (`confirm-dialog`), nunca `window.confirm`.
+- Los decimales viajan como cadena en ambos sentidos y se comparan por partes sin pasar por float (`decimal-helpers.ts`); el informe atomico del 422 de importacion (claves fila/campo/motivo) se conserva en `AppError.rawDetails` porque el detalle filtrado por campo no lo representa.
 
 ## 9. Entornos y configuración
 

@@ -1,0 +1,175 @@
+@if (loading()) {
+  <app-page-header title="Producto" subtitle="Cargando la ficha del producto." />
+  <app-loading-skeleton variant="text" [rows]="6" />
+} @else if (error(); as loadError) {
+  <app-page-header title="Producto" subtitle="No se pudo cargar la ficha.">
+    <a mat-stroked-button routerLink="/productos">
+      <mat-icon aria-hidden="true">arrow_back</mat-icon>
+      Volver al listado
+    </a>
+  </app-page-header>
+  <app-error-state [message]="loadError.message" [errorId]="errorId()" (retry)="load()" />
+} @else if (product(); as item) {
+  <app-page-header [title]="item.name" [subtitle]="'SKU ' + item.sku">
+    <a mat-stroked-button routerLink="/productos">
+      <mat-icon aria-hidden="true">arrow_back</mat-icon>
+      Volver al listado
+    </a>
+  </app-page-header>
+
+  <section class="card" aria-labelledby="ficha-heading">
+    <h2 id="ficha-heading" class="card__title app-tight">Ficha del producto</h2>
+    <dl class="facts">
+      <div class="facts__row">
+        <dt class="facts__term">SKU</dt>
+        <dd class="facts__value app-mono">{{ item.sku }}</dd>
+      </div>
+      <div class="facts__row">
+        <dt class="facts__term">Estado</dt>
+        <dd class="facts__value">
+          <app-status-chip
+            [label]="item.is_active ? 'Activo' : 'Inactivo'"
+            [tone]="item.is_active ? 'success' : 'neutral'"
+          />
+        </dd>
+      </div>
+      <div class="facts__row">
+        <dt class="facts__term">Categoria</dt>
+        <dd class="facts__value">{{ item.category?.name ?? 'Sin categoria' }}</dd>
+      </div>
+      <div class="facts__row">
+        <dt class="facts__term">Unidad</dt>
+        <dd class="facts__value">
+          {{ item.unit_of_measure ? item.unit_of_measure.code + ' (' + item.unit_of_measure.name + ')' : 'Sin unidad' }}
+        </dd>
+      </div>
+      <div class="facts__row">
+        <dt class="facts__term">Codigo de barras</dt>
+        <dd class="facts__value app-mono">{{ item.barcode ?? 'Sin codigo' }}</dd>
+      </div>
+      <div class="facts__row">
+        <dt class="facts__term">Descripcion</dt>
+        <dd class="facts__value">{{ item.description ?? 'Sin descripcion' }}</dd>
+      </div>
+      <div class="facts__row">
+        <dt class="facts__term">Costo de referencia</dt>
+        <dd class="facts__value app-mono app-tabular">{{ item.cost_price ?? 'Sin costo' }}</dd>
+      </div>
+      <div class="facts__row">
+        <dt class="facts__term">Precio de venta</dt>
+        <dd class="facts__value app-mono app-tabular">{{ item.sale_price ?? 'Sin precio' }}</dd>
+      </div>
+      <div class="facts__row">
+        <dt class="facts__term">Metodo de costeo</dt>
+        <dd class="facts__value app-mono">{{ item.costing_method }}</dd>
+      </div>
+    </dl>
+    <p class="card__note">
+      La ficha no muestra cantidades: el kardex llega en una fase posterior y no se inventan ceros.
+    </p>
+  </section>
+
+  <section class="card" aria-labelledby="config-heading">
+    <h2 id="config-heading" class="card__title app-tight">Configuracion por almacen</h2>
+    <p class="card__note">
+      Minimo, maximo y punto de reorden de cada almacen visible. Los valores viajan como cadena
+      decimal y el maximo debe ser mayor o igual que el minimo.
+    </p>
+
+    @if (configsLoading()) {
+      <app-loading-skeleton variant="table" [rows]="3" />
+    } @else if (configsErrorMessage(); as configsErrorText) {
+      <app-error-state [message]="configsErrorText" (retry)="load()" />
+    } @else if (configRows().length === 0) {
+      <p class="card__note" role="status">
+        Su cuenta no tiene almacenes visibles para configurar este producto.
+      </p>
+    } @else {
+      @for (row of configRows(); track row.warehouse.id) {
+        <form class="config-row" [formGroup]="row.form" (ngSubmit)="saveRow(row)" novalidate>
+          <div class="config-row__head">
+            <h3 class="config-row__name app-tight">{{ row.warehouse.name }}</h3>
+            <span class="config-row__code app-mono">{{ row.warehouse.code }}</span>
+          </div>
+          @if (row.error(); as rowError) {
+            <p class="config-row__error" role="alert">{{ rowError }}</p>
+          }
+          <div class="config-row__fields">
+            <div class="config-row__field">
+              <label class="config-row__label" [for]="'min-' + row.warehouse.id">Minimo</label>
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <input
+                  matInput
+                  [id]="'min-' + row.warehouse.id"
+                  type="text"
+                  inputmode="decimal"
+                  formControlName="min_stock"
+                  class="app-mono app-tabular"
+                  [disabled]="!canUpdate"
+                />
+                <mat-error>
+                  @if (row.form.controls.min_stock.hasError('decimal')) {
+                    Use una cadena decimal valida con maximo 3 decimales.
+                  }
+                </mat-error>
+              </mat-form-field>
+            </div>
+            <div class="config-row__field">
+              <label class="config-row__label" [for]="'max-' + row.warehouse.id">Maximo (opcional)</label>
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <input
+                  matInput
+                  [id]="'max-' + row.warehouse.id"
+                  type="text"
+                  inputmode="decimal"
+                  formControlName="max_stock"
+                  class="app-mono app-tabular"
+                  [disabled]="!canUpdate"
+                />
+                <mat-error>
+                  @if (row.form.controls.max_stock.hasError('decimal')) {
+                    Use una cadena decimal valida con maximo 3 decimales.
+                  }
+                </mat-error>
+              </mat-form-field>
+            </div>
+            <div class="config-row__field">
+              <label class="config-row__label" [for]="'reorder-' + row.warehouse.id">Punto de reorden (opcional)</label>
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <input
+                  matInput
+                  [id]="'reorder-' + row.warehouse.id"
+                  type="text"
+                  inputmode="decimal"
+                  formControlName="reorder_point"
+                  class="app-mono app-tabular"
+                  [disabled]="!canUpdate"
+                />
+                <mat-error>
+                  @if (row.form.controls.reorder_point.hasError('decimal')) {
+                    Use una cadena decimal valida con maximo 3 decimales.
+                  }
+                </mat-error>
+              </mat-form-field>
+            </div>
+            @if (canUpdate) {
+              <button
+                mat-flat-button
+                color="primary"
+                type="submit"
+                [disabled]="row.saving()"
+              >
+                {{ row.saving() ? 'Guardando' : 'Guardar' }}
+              </button>
+            }
+          </div>
+          @if (row.form.hasError('minMax')) {
+            <p class="config-row__error" role="alert">
+              El maximo debe ser mayor o igual que el minimo.
+            </p>
+          }
+        </form>
+      }
+    }
+  </section>
+}

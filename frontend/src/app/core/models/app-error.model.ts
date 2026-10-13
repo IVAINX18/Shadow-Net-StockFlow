@@ -24,6 +24,12 @@ export class AppError extends Error {
   public readonly status: number;
   /** Detalle por campo (422) o por producto/documento (409). */
   public readonly details: readonly ApiErrorDetail[];
+  /**
+   * Detalles crudos del sobre, sin filtrar. La importacion de catalogo informa
+   * sus filas con las claves fila/campo/motivo en lugar de field/message, asi
+   * que el detalle filtrado por campo no la conserva y se recupera desde aqui.
+   */
+  public readonly rawDetails: readonly unknown[];
   /** Identificador de correlacion del 500, para reportarlo. */
   public readonly errorId: string | null;
 
@@ -33,6 +39,7 @@ export class AppError extends Error {
     message: string;
     status: number;
     details?: readonly ApiErrorDetail[];
+    rawDetails?: readonly unknown[];
     errorId?: string | null;
   }) {
     super(init.message);
@@ -41,6 +48,7 @@ export class AppError extends Error {
     this.code = init.code;
     this.status = init.status;
     this.details = init.details ?? [];
+    this.rawDetails = init.rawDetails ?? [];
     this.errorId = init.errorId ?? null;
   }
 

@@ -58,30 +58,37 @@ export const routes: Routes = [
           import('./shared/components/access-denied/access-denied.component').then((m) => m.AccessDeniedComponent),
       },
       {
-        path: 'pendiente/productos',
+        path: 'productos',
         title: 'Productos | StockFlow',
-        data: {
-          crumb: 'Productos',
-          pageTitle: 'Productos',
-          summary: 'Catalogo de productos por SKU.',
-          phase: 'Fase 2',
-          endpoints: ['GET /api/v1/products', 'POST /api/v1/products'],
-        },
+        data: { crumb: 'Productos' },
         loadComponent: () =>
-          import('./shared/components/module-pending/module-pending.component').then((m) => m.ModulePendingComponent),
+          import('./features/catalog/products-page.component').then((m) => m.ProductsPageComponent),
       },
       {
-        path: 'pendiente/categorias',
-        title: 'Categorias | StockFlow',
-        data: {
-          crumb: 'Categorias',
-          pageTitle: 'Categorias',
-          summary: 'Jerarquia de categorias del catalogo.',
-          phase: 'Fase 2',
-          endpoints: ['GET /api/v1/categories', 'GET /api/v1/units'],
-        },
+        path: 'productos/:id',
+        title: 'Ficha de producto | StockFlow',
+        data: { crumb: 'Ficha de producto' },
         loadComponent: () =>
-          import('./shared/components/module-pending/module-pending.component').then((m) => m.ModulePendingComponent),
+          import('./features/catalog/product-detail-page.component').then(
+            (m) => m.ProductDetailPageComponent,
+          ),
+      },
+      {
+        path: 'categorias',
+        title: 'Categorias y unidades | StockFlow',
+        data: { crumb: 'Categorias' },
+        loadComponent: () =>
+          import('./features/catalog/categories-page.component').then((m) => m.CategoriesPageComponent),
+      },
+      {
+        path: 'catalogo/importacion',
+        title: 'Importacion de catalogo | StockFlow',
+        data: { crumb: 'Importacion de catalogo' },
+        canActivate: [roleGuard(['catalog.create'])],
+        loadComponent: () =>
+          import('./features/catalog/catalog-import-page.component').then(
+            (m) => m.CatalogImportPageComponent,
+          ),
       },
       {
         path: 'pendiente/inventario',
