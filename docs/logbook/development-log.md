@@ -682,3 +682,142 @@ Esta bitácora registra cada unidad de trabajo del proyecto: fecha, fase, archiv
 - Sustituir la tipografia y el vocabulario de forma cambio medidas de todas las pantallas: conviene revisar de nuevo cualquier pantalla que se añada en fases posteriores contra la tabla de la seccion 7.
 
 **Nota:** no se toco el backend ni el esquema. La unica dependencia nueva son los paquetes de fuentes autoalojadas. Los cambios no se confirman en Git a la espera de autorizacion.
+
+---
+
+## Entrada 15 - 13/10/2026 - Fase 2 - Catalogo (Unidad 1 de 4)
+
+**Fase:** Fase 2 - Catalogo (Unidad 1 de 4): categorias jerarquicas, unidades de medida y base de auditoria (EP-003).
+
+**Archivos:** backend/database/migrations/2026_10_13_000008_create_categories_table.php, backend/database/migrations/2026_10_13_000009_create_units_of_measure_table.php, backend/database/migrations/2026_10_13_000010_create_audit_logs_table.php (corregida: created_at con valor por defecto), backend/app/Models/Category.php, backend/app/Models/UnitOfMeasure.php (corregido: tabla explicita units_of_measure), backend/app/Models/AuditLog.php, backend/app/Services/Audit/AuditLogger.php, backend/app/Services/Catalog/CategoryService.php, backend/app/Services/Catalog/UnitOfMeasureService.php (nuevo), backend/app/Http/Requests/Catalog/IndexCategoryRequest.php, StoreCategoryRequest.php, UpdateCategoryRequest.php, IndexUnitOfMeasureRequest.php, StoreUnitOfMeasureRequest.php (nuevos), backend/app/Http/Resources/CategoryResource.php, UnitOfMeasureResource.php (nuevos), backend/app/Http/Controllers/Api/V1/CategoryController.php, UnitOfMeasureController.php (nuevos), backend/routes/api/v1/catalog.php (nuevo), backend/routes/api.php (modificado), backend/database/factories/CategoryFactory.php, UnitOfMeasureFactory.php (nuevos), backend/database/seeders/UnitOfMeasureSeeder.php, backend/database/seeders/DatabaseSeeder.php (modificado), backend/tests/Feature/Catalog/CategoryTest.php (nuevo, 16 pruebas), backend/tests/Feature/Catalog/UnitOfMeasureTest.php (nuevo, 10 pruebas), docs/architecture/database-design.md (5.2), docs/architecture/api-design.md (7.5 y 7.6), esta bitacora.
+
+**Cambios:** migraciones de categories, units_of_measure y audit_logs en el orden del 5.2 con InnoDB, utf8mb4_0900_ai_ci y nombres uq_, idx_ y fk_; modelos con relaciones padre/hijas y casts booleanos; AuditLogger con saneamiento de secretos (C-10); CategoryService con tope de 3 niveles, rechazo de ciclos y guarda de hijas activas; UnitOfMeasureService como punto unico de alta para la futura importacion; semilla idempotente de UND, KG y LT; exactamente los 8 endpoints documentados (lecturas con solo sesion, escrituras con permission:catalog.create o permission:catalog.update, sin slugs nuevos).
+
+**Motivo:** disponer del catalogo maestro que el inventario necesita antes de mover una sola unidad (RF-026 a RF-035, AC-012 a AC-015).
+
+**Pruebas ejecutadas (resultados reales):**
+- `php artisan test` (host, contra MySQL real) -> 102 pruebas, 102 correctas, 559 aserciones; 26 de ellas de esta unidad.
+- `./vendor/bin/pint --test` -> sin diferencias.
+- `podman exec shadow-net-stockflow_backend_1 php artisan migrate --force` -> las 3 migraciones aplicadas en desarrollo; `db:seed --force` -> 3 unidades base presentes.
+- Verificacion por HTTP real contra el contenedor (flujo Sanctum cookie mas CSRF con Origin de la SPA): login 200; crear categoria 201; slug duplicado 422 VALIDACION; ciclo padre-hija 422 VALIDACION; desactivar con subcategoria activa 409 ESTADO_INVALIDO; crear unidad 201; codigo duplicado 422 VALIDACION; listar unidades 200 con las 4 filas. Datos temporales eliminados al terminar (0 categorias, 3 unidades en desarrollo).
+
+**Resultado:** Unidad 1 completada y verificada. Defectos del intento anterior corregidos: audit_logs.created_at era anulable y quedaba en NULL porque el modelo desactiva los timestamps (ahora con valor por defecto); UnitOfMeasure no declaraba su tabla y Eloquent buscaba unit_of_measures (ahora units_of_measure); faltaban las dos factories que los modelos referenciaban.
+
+**Pendientes:** no se siembran categorias iniciales porque el modelo las menciona pero nunca las define; el detalle de categoria omite el conteo de productos y la desactivacion omite la comprobacion de productos hasta la Unidad 2; las unidades no tienen edicion ni borrado porque el contrato no los define (decision pendiente registrada en api-design.md 7.6); la Fase 2 continua con la Unidad 2 (productos). Los cambios no se confirman en Git a la espera de autorizacion.
+
+## Entrada 16 - 13/10/2026 - Fase 2 - Catalogo (Unidad 2 de 4)
+
+**Fase:** Fase 2 - Catalogo (Unidad 2 de 4): productos y configuración por almacén (EP-004), más los dos cierres que la Unidad 1 dejó abiertos.
+
+**Archivos:** backend/database/migrations/2026_10_13_000011_create_products_table.php, backend/database/migrations/2026_10_13_000012_create_product_warehouse_table.php (nuevos), backend/app/Models/Product.php, backend/app/Models/ProductWarehouse.php (nuevos), backend/app/Models/Category.php (modificado: relación products), backend/app/Models/UnitOfMeasure.php (modificado: comentario actualizado), backend/app/Services/Catalog/ProductService.php (nuevo), backend/app/Services/Catalog/CategoryService.php (modificado: comentario), backend/app/Http/Requests/Catalog/StoreProductRequest.php, UpdateProductRequest.php, IndexProductRequest.php, UpdateProductWarehouseRequest.php (nuevos), backend/app/Http/Resources/ProductResource.php, ProductWarehouseResource.php (nuevos), backend/app/Http/Resources/CategoryResource.php (modificado: products_count), backend/app/Http/Controllers/Api/V1/ProductController.php (nuevo), backend/app/Http/Controllers/Api/V1/CategoryController.php (modificado: conteo y guarda de productos), backend/routes/api/v1/catalog.php (modificado: 7 endpoints de productos), backend/database/factories/ProductFactory.php, ProductWarehouseFactory.php (nuevos), backend/tests/Feature/Catalog/ProductTest.php (nuevo, 18 pruebas), docs/architecture/database-design.md (5.2), docs/architecture/api-design.md (7.5 y 7.7), esta bitácora.
+
+**Cambios:** migraciones de products y product_warehouse en el orden del 5.2 con InnoDB, utf8mb4_0900_ai_ci y nombres uq_, idx_ y fk_; modelos con relaciones, SoftDeletes en Product y casts decimal para que montos y cantidades viajen como cadena; ProductService con categoría activa, SKU inmutable y coherencia min/max con bccomp; exactamente los 7 endpoints documentados (lecturas con solo sesión, escrituras de producto con permission:catalog.create o permission:catalog.update, escritura por almacén con alcance verificado contra warehouse_user y 403 FUERA_DE_ALCANCE); cierres de la Unidad 1 (products_count en el detalle y 409 ESTADO_INVALIDO al desactivar con productos activos, con sus dos notas marcadas como implementadas); sin semillas de productos porque el modelo nunca las define.
+
+**Motivo:** disponer del catálogo maestro que el inventario necesita antes de mover una sola unidad (RF-036 a RF-050, AC-016 a AC-022).
+
+**Decisiones aplicadas:** (a) el CASCADE de product_warehouse es literal del modelo e intencional; (b) product_warehouse lleva timestamps porque el modelo afirma que cada tabla los lleva; (c) idx_products_name añadido porque EP-004 pide búsqueda con índices y el nombre era el único campo sin índice; (d) SKU inmutable con 422 ante cualquier cambio; (e) negativos de costo, precio y cantidades rechazados con 422; (f) cantidades y costo promedio omitidos (no invento ceros) hasta que inventories exista; (g) la desactivación permite el apagado porque la tabla de movimientos no existe y no hay nada pendiente que detectar; (h) el PUT por almacén responde 200 al crear y al actualizar; solo ProductWarehouse declara tabla explícita (products coincide con el plural por defecto).
+
+**Pruebas ejecutadas (resultados reales):**
+- `php artisan test` (host, contra MySQL real) -> 120 pruebas, 120 correctas, 715 aserciones; 18 de ellas de esta unidad.
+- `./vendor/bin/pint --test` -> sin diferencias.
+- `podman exec shadow-net-stockflow_backend_1 php artisan migrate --force` -> las 2 migraciones aplicadas en desarrollo.
+- Verificación por HTTP real contra el contenedor (flujo Sanctum cookie más CSRF con Origin de la SPA): login 200; crear producto 201 con decimales como cadena; SKU duplicado 422 VALIDACION; producto con categoría inactiva 422 VALIDACION; listado con q y sort 200 con meta y links; configuración en almacén propio 200; almacén ajeno 403 FUERA_DE_ALCANCE; detalle de categoría con products_count 200; desactivar categoría con productos 409 ESTADO_INVALIDO. Datos temporales eliminados al terminar (0 productos, 0 categorías, 0 almacenes en desarrollo; 8 entradas de auditoría conservadas por ser append-only).
+
+**Resultado:** Unidad 2 completada y verificada. Defectos del primer intento corregidos: el modelo recién creado no traía los valores por defecto de la base (ahora con refresh), bccomp recibía null sin máximo resultante (ahora con guarda) y el PUT por almacén alternaba 201 y 200 según existiera la fila (ahora 200 fijo). Incidencia ajena observada: un test de autorización falló una vez por un nombre faker más largo que la columna roles.name; al repetir pasó y la suite quedó en verde, así que se registra como dato inestable del seeder ajeno, no como defecto de esta unidad.
+
+**Pendientes:** cantidades y costo promedio en la ficha hasta la fase de inventario; comprobación de movimientos pendientes en la desactivación hasta que esos documentos existan; la Fase 2 continúa con la Unidad 3 (importación de catálogo). En desarrollo queda un usuario de evidencia desactivado (evidencia.u2@stockflow.local): no se pudo borrar porque audit_logs lo referencia con RESTRICT y la auditoría es append-only. Los cambios no se confirman en Git a la espera de autorización.
+
+## Entrada 17 - 13/10/2026 - Fase 2 - Catalogo (Unidad 3 de 4)
+
+**Fase:** Fase 2 - Catalogo (Unidad 3 de 4): importación de catálogo con plantilla, dry-run y aplicación atómica idempotente (EP-012).
+
+**Archivos:** backend/composer.json y composer.lock (modificados: phpoffice/phpspreadsheet ^5.10), backend/Dockerfile (modificado: extensión gd), backend/app/Services/Catalog/CatalogRules.php (nuevo: reglas compartidas), backend/app/Services/Catalog/CatalogImportService.php (nuevo), backend/app/Services/Catalog/CatalogImportRowException.php (nuevo), backend/app/Services/Catalog/CategoryService.php (modificado: resolveOrCreateRootByName), backend/app/Services/Catalog/UnitOfMeasureService.php (modificado: findByCode), backend/app/Http/Requests/Catalog/StoreProductRequest.php y UpdateProductRequest.php (modificados: delegan en CatalogRules sin cambiar literales), backend/app/Http/Controllers/Api/V1/CatalogImportController.php (nuevo), backend/routes/api/v1/imports.php (nuevo), backend/routes/api.php (modificado), backend/tests/Feature/Catalog/CatalogImportTest.php (nuevo, 12 pruebas), docs/architecture/api-design.md (7.13), esta bitacora.
+
+**Cambios:** exactamente los 3 endpoints del contrato con permission:catalog.create (plantilla GET con format xlsx|csv y ejemplo EXAMPLE-001, dry-run POST que no escribe, aplicación POST en una transacción); validación compartida extraída a CatalogRules para que la importación aplique las mismas reglas que la captura manual (RN-IMP-02); categorías resueltas por nombre y creadas como raíz, unidades jamás creadas (código desconocido es fila inválida); idempotencia por SKU con actualización de las columnas del archivo; una entrada de auditoría por importación (importar_catalogo / importacion_catalogo, entity_id nulo, nombre del archivo y conteos) sin guardar el fichero en disco; sin tablas, endpoints, permisos ni códigos nuevos.
+
+**Motivo:** cerrar el criterio de salida más exigente de la fase: una importación de 200 productos de prueba se valida, se aplica, queda auditada y es idempotente (RF-126 a RF-132, AC-061 a AC-066 y AC-070, RN-IMP-01, RN-IMP-02, RN-IMP-04, RN-IMP-05, C-10).
+
+**Decisiones aplicadas:** (a) phpoffice/phpspreadsheet como dependencia mínima para XLSX (el CSV usa funciones nativas) más gd en la imagen del backend, que la librería exige; la imagen se reconstruyó y la dependencia se instaló también en el vendor del contenedor; (b) 5 MB y 1000 filas como límites, con rechazo uniforme 422 y nunca 413; (c) CSV en UTF-8 decodificable; (d) unidades no creadas por la importación (desvío consciente de RF-128: una errata crearía una unidad fantasma); (e) el SKU es la clave de idempotencia y jamás se modifica; (f) la auditoría conserva nombre y conteos, nunca contenido ni secretos; (g) database-design.md no necesitó cambios porque audit_logs ya admite entity_id nulo.
+
+**Pruebas ejecutadas (resultados reales):**
+- `php artisan test` (host, contra MySQL real) -> 132 pruebas, 132 correctas, 808 aserciones; 12 de ellas de esta unidad (incluida la importación de 200 productos con reimportación idempotente y auditoría).
+- `./vendor/bin/pint --test` -> sin diferencias.
+- Verificación por HTTP real contra el contenedor (flujo Sanctum cookie más CSRF con Origin de la SPA): plantilla csv 200 con encabezados y EXAMPLE-001; plantilla xlsx 200; dry-run de 2 filas 200 con informe por fila; apply 201 con 2 creadas; re-apply 201 con 0 creadas y 2 actualizadas; archivo con una fila mala 422 VALIDACION con fila, campo y motivo (nombre obligatorio, unidad inexistente, precio negativo) y nada aplicado. Base de desarrollo restaurada al terminar (1 admin, 3 unidades, 0 categorías, 0 productos, 0 configuraciones, 7 auditorías); sesión cerrada con logout 204.
+
+**Resultado:** Unidad 3 completada y verificada. Incidencia real encontrada y corregida: el vendor del contenedor no traía phpspreadsheet y su PHP no tenía gd (la imagen solo instalaba pdo_mysql, mbstring, bcmath, intl y zip), así que la plantilla respondía 500 ERROR_INTERNO; se añadió gd al Dockerfile, se reconstruyó la imagen y se instaló la dependencia dentro del contenedor.
+
+**Pendientes:** la Fase 2 continúa con la Unidad 4; la carga inicial de existencias (plantilla, dry-run y documento de entrada confirmado con Idempotency-Key) pertenece a la Fase 3 y no se tocó. Los cambios no se confirman en Git a la espera de autorización.
+
+**Corrección posterior (13/10/2026, mismo alcance):** Master halló en `ProductService::setWarehouseConfiguration` un fallback con `(float)` para cuando `bccomp` no existiera: violaba por la letra la prohibición de flotante para dinero y cantidades y era una trampa latente (degradación silenciosa a comparación inexacta). Se eliminó: ahora se usa `bccomp` directamente y, si algún día falta la extensión, se lanza `RuntimeException` clara en lugar de degradar. Se revisó el resto del código de la unidad (`(float)`, `floatval`, `(double)`): el único otro flotante es la celda numérica de Excel en `CatalogImportService`, que ya se convierte a cadena decimal exacta y es la fuente legítima. Evidencia: `./vendor/bin/pint --test` sin diferencias y `php artisan test` con 132 pruebas, 132 correctas, 808 aserciones.
+
+## Entrada 18 - 13/10/2026 - Fase 2 - Catalogo (Unidad 4 de 4)
+
+**Fase:** Fase 2 - verificacion de cierre. No añade funcionalidad: comprueba los criterios de salida contra el motor, el codigo y la suite reales.
+
+**Archivos afectados (creados o modificados):**
+- `.github/workflows/ci.yml` (modificado): la lista de extensiones PHP de la integracion continua añade `gd`, con el comentario que explica por que.
+- Esta bitacora.
+
+**Cambios efectuados:**
+- Verificacion independiente de los criterios de salida de la Fase 2, ejecutada por master y no solo reportada por el agente de la unidad.
+- Corregido un defecto de integracion continua que la propia Fase 2 introdujo: `phpoffice/phpspreadsheet` exige `gd` como dependencia de plataforma, la extension se añadio al `Dockerfile` pero no al flujo de CI, de modo que `composer install` habria fallado en la primera ejecucion del pipeline. Se añade `gd` a las extensiones del flujo.
+- Se registra aqui el hallazgo del `(float)` en `ProductService::setWarehouseConfiguration`, detectado al revisar la Unidad 3 y corregido en esa misma entrada.
+
+**Motivo:** la regla de la fase es explicita: ninguna fase se considera cerrada sin cumplir todos sus criterios de salida. Verificarlos con evidencia del motor y no con la palabra del agente es lo que convierte el cierre en un hecho comprobable.
+
+**Pruebas ejecutadas (resultados reales):**
+- `./vendor/bin/pint --test` -> sin diferencias; `php artisan test` -> 132 pruebas, 132 correctas, 808 aserciones, corridas por master sobre la version que se va a confirmar.
+- Criterio de unicidad en el motor, leido de `information_schema`: `uq_products_sku (sku)`, `uq_products_barcode (barcode)`, `uq_categories_slug (slug)`, `uq_product_warehouse (product_id, warehouse_id)`, `uq_units_of_measure_code (code)`.
+- Criterio de precision, leido de `information_schema`: `products.cost_price` y `products.sale_price` en `decimal(18,2)`; `product_warehouse.min_stock`, `max_stock` y `reorder_point` en `decimal(15,3)`; **cero columnas `float` o `double` en toda la base**.
+- Criterio de codigo sin flotantes: barrido de `(float)`, `floatval` y `(double)` en `backend/app`: ninguna coincidencia aplicada a dinero o cantidades; el unico flotante es la celda numerica de Excel, que se convierte a cadena decimal exacta y es la fuente legitima.
+- Criterio de importacion: la prueba "importacion de 200 productos se valida, aplica, audita y es idempotente" existe y pasa (200 creados, reimportacion con 0 creados y 200 actualizados, 200 filas en la base y entrada de auditoria con autor, archivo y conteos).
+- Se recompilo la imagen del backend con `gd` y se confirmo dentro del contenedor que `bcmath` y `gd` estan cargadas.
+
+**Resultado:** cuatro de los seis criterios de salida cumplidos con evidencia del motor o de la suite: unicidad de SKU, unicidad de codigo de barras, precision decimal sin flotantes e importacion de 200 productos auditada e idempotente. Dos quedan con matiz y se declaran sin adornos:
+- **Pruebas en CI:** pasan en local y el flujo ya no rompera por la dependencia de plataforma, pero "verde en CI" exige confirmar y subir los cambios; hasta entonces no se marca.
+- **Producto inactivo sin movimientos nuevos (RN-INV-09):** no es demostrable en la Fase 2 porque la tabla de movimientos de inventario llega con el kardex de la Fase 3. Se propone declararlo criterio de frontera y verificarlo al abrir la Fase 3, en lugar de darlo por cumplido.
+
+**Pendientes:**
+- Confirmar y subir la Fase 2 para que la integracion continua ejecute la suite y cierre el criterio pendiente.
+- Decidir el criterio de frontera RN-INV-09 y, si se aprueba, anotarlo en `docs/planning/scope-and-milestones.md`.
+- El frontend del catalogo (categorias, unidades, productos e importacion) queda pospuesto a la revision de diseno pendiente, para no construir dos veces las mismas pantallas.
+- Siguen abiertos: las URLs de ejemplo de `environment.staging` y `environment.prod`, los dos riesgos de auto-bloqueo de la Entrada 11 y el arranque del trabajador de Vitest con cache fria.
+
+**Nota:** no se toco el backend mas alla del flujo de integracion continua; los cambios de la Fase 2 siguen sin confirmar en Git a la espera de autorizacion.
+
+## Entrada 19 - 13/10/2026 - Fase 2 - Catalogo (Frontend F1)
+
+**Fase:** Fase 2 - Catalogo (Frontend F1): pantallas reales de categorias y unidades, productos con configuracion por almacen e importacion de catalogo, cableadas a la API de la Fase 2.
+
+**Archivos:**
+- Creados: frontend/src/app/core/models/catalog.model.ts (Category, UnitOfMeasure, Product, ProductWarehouseConfig, informes de importacion, readImportRowIssues); frontend/src/app/features/catalog/decimal-helpers.ts, catalog-validators.ts, categories.service.ts, units.service.ts, products.service.ts, catalog-import.service.ts; categories-page.component.ts/html/scss, category-dialog.component.ts, products-page.component.ts/html/scss, product-dialog.component.ts, product-detail-page.component.ts/html/scss, catalog-import-page.component.ts/html/scss; frontend/src/app/shared/components/confirm-dialog/confirm-dialog.component.ts; specs decimal-helpers.spec.ts, catalog-validators.spec.ts, catalog-services.spec.ts, catalog-import.service.spec.ts.
+- Modificados: frontend/src/app/app.routes.ts (rutas /productos, /productos/:id, /categorias y /catalogo/importacion en lugar de los dos pendientes de catalogo); frontend/src/app/features/shell/navigation-items.ts (mismas etiquetas Productos y Categorias apuntando a las rutas reales); frontend/src/app/core/services/api.service.ts (download como Blob y upload multipart); frontend/src/app/core/models/app-error.model.ts y frontend/src/app/core/services/error.service.ts (rawDetails crudos del sobre, aditivo y sin cambiar el filtrado existente); frontend/src/app/shared/components/data-table/ (acciones por fila y accion de estado vacio, ambas opcionales); docs/architecture/frontend-architecture.md (v1.1 con las rutas del catalogo); esta bitacora.
+
+**Cambios:** categorias con filtros por estado y padre, busqueda con espera, orden name|created_at y paginacion, alta y edicion en dialogo con 422 por campo, desactivacion con dialogo y mensaje del 409 tal cual; unidades en la misma pagina con listado, orden code|name y formulario de alta, sin boton de edicion porque el contrato no define ese endpoint; productos con filtros por estado y categoria, busqueda por SKU/nombre/barras, alta y edicion con selectores (SKU deshabilitado en edicion con su explicacion), desactivacion con confirmacion; ficha con categoria, unidad y precios como cadena mas editor por almacen (minimo, maximo, punto de reorden como cadena, maximo mayor o igual que minimo comparado sin float, 403 FUERA_DE_ALCANCE junto a la fila); importacion con descarga XLSX/CSV como Blob, dry-run con informe por fila en tabla (fila, campo, motivo) y aplicacion con resumen de creadas/actualizadas mas referencia de auditoria o informe atomico del 422; acciones visibles solo con catalog.create/catalog.update como ayuda de navegacion; decimales como cadena en ambos sentidos sin parseFloat ni Number sobre dinero o cantidades; copy en español sin tildes inventadas fuera de la convencion del frontend, sin guiones largos y sin cifras inventadas.
+
+**Motivo:** reemplazar los dos pendientes de catalogo por pantallas reales contra la API verificada de la Fase 2 (RF-026 a RF-050, RF-126 a RF-132, AC-012 a AC-022, AC-061 a AC-066), manteniendo etiquetas de navegacion, tokens del contrato visual y componentes compartidos.
+
+**Decisiones aplicadas:** (a) la importacion vive en /catalogo/importacion sin entrada de navegacion y se alcanza desde Productos, con guardia de navegacion catalog.create; (b) AppError conserva los detalles crudos porque el 422 de aplicacion usa fila/campo/motivo y no field/message; (c) data-table gana acciones por fila y accion de vacio como entradas opcionales, sin cambiar las pantallas existentes; (d) la ficha no muestra cantidades ni costo promedio porque el kardex llega en una fase posterior; (e) queda registrada como hueco la falta de edicion/borrado de unidades (el contrato no los define).
+
+**Pruebas ejecutadas (resultados reales, Node 22.23.3):**
+- `npm run lint` -> todos los archivos pasan.
+- `npm test` (Vitest) -> 7 ficheros, 33 pruebas, 33 correctas (22 nuevas del catalogo: ayudas decimales, validadores, servicios con HTTP simulada e informe del 422).
+- `npx ng build --configuration development --output-path /tmp/opencode/spa` -> compilacion correcta; salida total 14M; inicial 1.56 MB; trozos perezosos nuevos: categories-page 56.74 kB, products-page 54.87 kB, product-detail-page 36.92 kB, catalog-import-page 34.54 kB (tamanos sin comprimir en desarrollo).
+- Un fallo intermedio real y corregido: ListParams es de solo lectura y el primer build fallo con TS2540/TS2542; se recompuso con propagacion y el build quedo en verde.
+
+**Resultado:** Frontend F1 del catalogo completado y verificado con lint, pruebas y compilacion en verde. No se toco el backend. Cambios sin confirmar en Git a la espera de autorizacion.
+
+**Pendientes:** verificacion visual en navegador real en tema claro y oscuro y en 1440/1024/768/375 px (la reserva del puerto 4200 la ejecuta el orquestador); contraste AA medido en pantalla y distincion de tonos de estado, que jsdom no puede probar; crear el dialogo de edicion de unidades si el contrato lo define algun dia; probar contra la API real con la base de desarrollo (1 admin, 3 unidades, 0 categorias, 0 productos).
+
+**Correccion 13/10/2026 a la Entrada 19 (Frontend F1), por revision visual en navegador real:** tres hallazgos puntuales, sin rediseno.
+- **Archivos:** frontend/src/app/core/services/spanish-paginator-intl.ts y .spec.ts (nuevos), frontend/src/app/app.config.ts (proveedor global MatPaginatorIntl), frontend/src/app/shared/components/data-table/data-table.component.scss (familia monoespaciada dentro de la celda), frontend/src/app/core/models/catalog.model.ts (slug admite nulo, como la migracion), frontend/src/app/features/catalog/categories-page.component.ts (celda "Sin slug").
+- **Cambios:** (1) paginador en español de raiz con SpanishPaginatorIntl provisto en app.config: etiquetas traducidas y rango "1 a 3 de 3" con miles en es-CO; cubre almacenes, usuarios, roles y catalogo. (2) Causa real del monoespaciado ausente: las banderas `mono` ya estaban en SKU, slug y codigo, pero el selector de celda pesaba mas que `.app-mono` global y la familia se perdia; se fija en la hoja de la tabla, sin otro mecanismo. (3) Slug nulo muestra "Sin slug", como "Sin descripcion" en usuarios.
+- **Pruebas:** `npm run lint` limpio; `npm test` 8 ficheros, 37 pruebas, 37 correctas (4 nuevas del paginador); dev build a /tmp/opencode/spa correcto (inicial 2.48 MB crudo en desarrollo; trozos de catalogo 56.80/54.91/36.92/34.57 kB). Un error intermedio real: en Material 22 `getRangeLabel` es propiedad y el override como metodo falla con TS2425; se redefine como propiedad.
+- **Medicion honesta de peso:** el proveedor global mueve la cadena del paginador al arranque y el inicial de produccion pasa de 342.29 kB a 668.70 kB crudos (transferencia 93.01 a 154.41 kB), con aviso de presupuesto (500 kB) pero sin error (1 MB) y compilacion en verde; el total compilado no crece (14M en ambos), solo cambia el reparto entre inicial y perezosos. Se deja el proveedor global porque el encargo exige la traduccion de raiz y documenta la medicion en lugar de ajustarla a ciegas. El aviso del scss de style-guide es previo y no se toca.
+- **Pendientes:** verificacion visual del paginador en español y del monoespaciado en navegador real por el orquestador; nada mas cambia de la Entrada 19.
+
+**Correccion 13/10/2026 a la Entrada 19, segunda parte (paginador sin costo de arranque):** no se sube el proveedor global.
+- **Medicion que obligo el cambio:** con el proveedor en app.config el inicial de produccion pasaba de 342.29 kB crudos (93.01 kB de transferencia) a 668.70 kB (154.41 kB), con aviso de presupuesto nuevo. Paso 1 agotado sin efecto: todas las importaciones ya usaban entradas secundarias (`@angular/material/paginator`), ningun barril `@angular/material`; el costo venia de referenciar el token en la raiz, que arrastra la cadena del paginador (selector de tamano y capas superpuestas) al arranque.
+- **Decision (paso 2):** el proveedor `MatPaginatorIntl -> SpanishPaginatorIntl` se mueve de app.config al propio `data-table`, que solo vive en paginas perezosas y ya trae el modulo del paginador. Ninguna pantalla sin tablas paga ese peso y el texto en español no cambia.
+- **Medicion final:** inicial de produccion 342.29 kB crudos / 93.01 kB de transferencia, identico a la cifra previa; ningun aviso de presupuesto queda activo salvo el del scss de style-guide, que es previo y no se toca. `npm run lint` limpio; `npm test` 8 ficheros, 37 pruebas, 37 correctas. Un error intermedio real: ruta relativa mal contada al importar el intl desde data-table (TS2307); corregida a `../../../core`.
+- **Pendientes:** los mismos de la correccion anterior; la verificacion visual del paginador en español la hace el orquestador en navegador real.
