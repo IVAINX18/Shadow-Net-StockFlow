@@ -821,3 +821,33 @@ Esta bitácora registra cada unidad de trabajo del proyecto: fecha, fase, archiv
 - **Decision (paso 2):** el proveedor `MatPaginatorIntl -> SpanishPaginatorIntl` se mueve de app.config al propio `data-table`, que solo vive en paginas perezosas y ya trae el modulo del paginador. Ninguna pantalla sin tablas paga ese peso y el texto en español no cambia.
 - **Medicion final:** inicial de produccion 342.29 kB crudos / 93.01 kB de transferencia, identico a la cifra previa; ningun aviso de presupuesto queda activo salvo el del scss de style-guide, que es previo y no se toca. `npm run lint` limpio; `npm test` 8 ficheros, 37 pruebas, 37 correctas. Un error intermedio real: ruta relativa mal contada al importar el intl desde data-table (TS2307); corregida a `../../../core`.
 - **Pendientes:** los mismos de la correccion anterior; la verificacion visual del paginador en español la hace el orquestador en navegador real.
+
+## Entrada 20 - 13/10/2026 - Fase 2 - Subida y cierre de la integracion continua
+
+**Fase:** Fase 2 - cierre. Registra la confirmacion en Git, la ejecucion del pipeline y el cierre del criterio de salida que la Entrada 18 dejo pendiente.
+
+**Archivos afectados (creados o modificados):**
+- Esta bitacora (solo esta entrada).
+
+**Cambios efectuados:**
+- Se confirmaron y subieron los cambios de la Fase 2 en tres commits: la API del catalogo, el frontend del catalogo y la bitacora.
+- Se limpio la base de desarrollo: se borraron los productos y la categoria que la verificacion de la importacion habia dejado; queda con el admin, las tres unidades base y cero filas de catalogo.
+- Se ejecuto la integracion continua y salio en verde.
+
+**Motivo:** la Entrada 18 dejo dos criterios con matiz, "verde en CI" y el criterio de frontera RN-INV-09. El primero se cierra aqui con la ejecucion real del pipeline; el segundo sigue pendiente de decision y se mantiene declarado.
+
+**Pruebas ejecutadas (resultados reales):**
+- Ejecucion 38450882240 de la integracion continua, disparada por el commit 4d0cca7: el trabajo "Backend (Pint + Pest)" en verde en 1m21s, que incluye las 38 pruebas del catalogo y la importacion de 200 productos, y el trabajo "Frontend (build)" en verde en 32s.
+- Compilacion de produccion del frontend: inicial 342,29 kB crudos y 93,01 kB de transferencia, sin avisos del paquete inicial.
+- Verificacion visual en navegador real: el paginador dice "Registros por pagina: 15" y "1 a 3 de 3", el SKU se pinta con JetBrains Mono medido por estilo calculado, la celda sin slug muestra el relleno "Sin slug" y no queda ninguna celda vacia, y la descarga de la plantilla se comprobo en el navegador (6492 bytes, XLSX valido).
+- Base de desarrollo verificada al cerrar: 1 usuario, 3 unidades, 0 categorias y 0 productos.
+
+**Resultado:** cinco de los seis criterios de salida de la Fase 2 quedan cumplidos y verificados, cuatro de ellos con evidencia leida del motor o del pipeline de integracion continua. El sexto, RN-INV-09 (un producto inactivo no admite movimientos nuevos), no es demostrable dentro de la fase porque la tabla de movimientos llega con el kardex de la Fase 3, y se mantiene declarado como criterio de frontera a la espera de decision.
+
+**Pendientes:**
+- Decision sobre el criterio de frontera RN-INV-09 y su anotacion en scope-and-milestones.md si se aprueba.
+- El frontend del catalogo se construyo con el sistema de diseno vigente; su restilizado pertenece a la revision de diseno pendiente.
+- Aviso de presupuesto de la hoja de estilos de la guia de estilo (5,49 kB frente a 4 kB): heredado de la pasada de diseno v1.1, no de la Fase 2, y se resuelve en esa revision.
+- Avisos de obsolescencia del pipeline (acciones que apuntan a Node 20 y aviso de migracion de ubuntu-latest): ruido de infraestructura, no fallos.
+
+**Nota:** los tres commits de la fase se subieron a la rama principal y la bitacora sigue siendo de solo adicion.
