@@ -1,0 +1,67 @@
+// Marco de seccion compartido con los demas bloques de la guia: lo repito aqui
+// en vez de centralizarlo porque no puedo tocar src/styles.scss y cada bloque
+// debe compilar su hoja por debajo de 4 kB. El coste es pequeno y el aspecto
+// queda identico al de la pagina monolitica.
+:host {
+  display: block;
+}
+
+.guide__section + .guide__section {
+  margin-top: var(--app-section-gap);
+}
+
+.guide__title {
+  margin: 0 0 var(--app-space-3);
+  font: var(--mat-sys-title-medium);
+}
+
+.guide__note {
+  margin: 0 0 var(--app-space-3);
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.guide__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--app-space-3);
+}
+
+.guide__kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--app-space-4);
+}
+
+.guide__fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--app-space-4);
+}
+
+.guide__states {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--app-space-4);
+}
+
+.state-box {
+  padding: var(--app-card-padding);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--mat-sys-corner-medium);
+  background: var(--mat-sys-surface-container-low);
+}
+
+.state-box__title {
+  margin: 0 0 var(--app-space-3);
+  font: var(--mat-sys-label-large);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.guide__z {
+  margin: 0;
+  padding-inline-start: var(--app-space-5);
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface-variant);
+}

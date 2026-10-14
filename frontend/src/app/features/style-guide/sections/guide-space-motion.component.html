@@ -1,0 +1,89 @@
+<section class="guide__section" aria-labelledby="elevation-title">
+  <h2 class="guide__title app-tight" id="elevation-title">Elevacion y separacion</h2>
+  <p class="guide__note">
+    El contenedor se define con borde de 1 px, no con sombra. La sombra queda reservada a lo
+    que flota sobre la pagina.
+  </p>
+  <div class="guide__elevation">
+    <div class="elev-demo">
+      <span class="elev-demo__label">Contenedor: borde de 1 px, sin sombra</span>
+      <code class="elev-demo__token app-mono">outline-variant</code>
+    </div>
+    <div class="elev-demo elev-demo--float">
+      <span class="elev-demo__label">Capa flotante: caso reservado (menu o dialogo)</span>
+      <code class="elev-demo__token app-mono">--mat-sys-level3</code>
+    </div>
+  </div>
+</section>
+
+<section class="guide__section" aria-labelledby="rhythm-title">
+  <h2 class="guide__title app-tight" id="rhythm-title">Ritmo de composicion</h2>
+  <p class="guide__note">
+    El espaciado de bloque sale de cuatro tokens. Cada barra mide el valor real del token.
+  </p>
+  <div class="guide__rhythm">
+    @for (row of rhythmTokens(); track row.token) {
+      <div class="rhythm-row">
+        <span class="rhythm-row__meta">
+          <code class="rhythm-row__token app-mono">{{ row.token }}</code>
+          <span class="rhythm-row__use">{{ row.use }} ({{ row.value }})</span>
+        </span>
+        <span class="rhythm-row__bar" [style.width]="'var(' + row.token + ')'"></span>
+      </div>
+    }
+  </div>
+  <h3 class="guide__subtitle app-tight">Escala de espaciado (4 px a 32 px)</h3>
+  <div class="guide__rhythm">
+    @for (row of spaceScale(); track row.token) {
+      <div class="rhythm-row">
+        <span class="rhythm-row__meta">
+          <code class="rhythm-row__token app-mono">{{ row.token }}</code>
+          <span class="rhythm-row__use">{{ row.use }} ({{ row.value }})</span>
+        </span>
+        <span class="rhythm-row__bar" [style.width]="'var(' + row.token + ')'"></span>
+      </div>
+    }
+  </div>
+</section>
+
+<section class="guide__section" aria-labelledby="buttons-title">
+  <h2 class="guide__title app-tight" id="buttons-title">Botones y estados de interaccion</h2>
+  <p class="guide__note">
+    El mismo boton primario en cada estado. Recorre con Tab para verificar el foco visible y
+    manten pulsado para sentir la respuesta tactil.
+  </p>
+  <div class="guide__interaction">
+    <div class="interaction-row">
+      <span class="interaction-row__label">Reposo</span>
+      <button mat-flat-button type="button" (click)="onNoop()">Primario</button>
+    </div>
+    <div class="interaction-row">
+      <span class="interaction-row__label">Hover (pasa el cursor)</span>
+      <button mat-flat-button type="button" (click)="onNoop()">Primario</button>
+    </div>
+    <div class="interaction-row">
+      <span class="interaction-row__label">Foco visible (pulsa Tab hasta llegar)</span>
+      <button mat-flat-button type="button" class="interaction-focus" (click)="onNoop()">
+        Primario
+      </button>
+    </div>
+    <div class="interaction-row">
+      <span class="interaction-row__label">Activo (manten pulsado)</span>
+      <button mat-flat-button type="button" (click)="onNoop()">Primario</button>
+    </div>
+    <div class="interaction-row">
+      <span class="interaction-row__label">Deshabilitado</span>
+      <button mat-flat-button type="button" disabled>Primario</button>
+    </div>
+    <div class="interaction-row">
+      <span class="interaction-row__label">Secundario y texto</span>
+      <span class="interaction-row__group">
+        <button mat-stroked-button type="button" (click)="onNoop()">Secundario</button>
+        <button mat-button type="button" (click)="onNoop()">Texto</button>
+        <button mat-icon-button type="button" aria-label="Icono de ejemplo" (click)="onNoop()">
+          <mat-icon aria-hidden="true">add</mat-icon>
+        </button>
+      </span>
+    </div>
+  </div>
+</section>

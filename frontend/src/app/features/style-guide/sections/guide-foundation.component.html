@@ -1,0 +1,121 @@
+<section class="guide__section" aria-labelledby="color-title">
+  <h2 class="guide__title app-tight" id="color-title">Roles de superficie y acento</h2>
+  <p class="guide__note">
+    Cada celda muestra un rol real del tema. El color vive en su propio bloque y la etiqueta
+    queda sobre la superficie neutra para conservar el contraste.
+  </p>
+  <h3 class="guide__subtitle app-tight">Superficies (5 roles)</h3>
+  <div class="guide__swatches guide__swatches--surface">
+    @for (swatch of surfaceTokens(); track swatch.token) {
+      <div class="swatch">
+        <span class="swatch__color" [style.background]="'var(' + swatch.token + ')'"></span>
+        <span class="swatch__label">{{ swatch.label }}</span>
+        <code class="swatch__token app-mono">{{ swatch.token }}</code>
+      </div>
+    }
+  </div>
+  <h3 class="guide__subtitle app-tight">Acento y semantica (6 roles)</h3>
+  <div class="guide__swatches guide__swatches--accent">
+    @for (swatch of accentTokens(); track swatch.token) {
+      <div class="swatch">
+        <span class="swatch__color" [style.background]="'var(' + swatch.token + ')'"></span>
+        <span class="swatch__label">{{ swatch.label }}</span>
+        <code class="swatch__token app-mono">{{ swatch.token }}</code>
+      </div>
+    }
+  </div>
+</section>
+
+<section class="guide__section" aria-labelledby="type-title">
+  <h2 class="guide__title app-tight" id="type-title">Tipografia</h2>
+  <p class="guide__note">
+    Inter (pesos 400, 500 y 600) para texto y titulares, con tracking cerrado en display,
+    headline y title. JetBrains Mono (pesos 400 y 500) solo para datos tecnicos. Sin Roboto
+    y sin fuentes de CDN: ambas se autoalojan desde el proyecto.
+  </p>
+  <div class="guide__type">
+    @for (item of typography(); track item.token) {
+      <div class="type-row">
+        <span class="type-row__meta">
+          <span class="type-row__label">{{ item.label }}</span>
+          <code class="type-row__token app-mono">{{ item.token }}</code>
+        </span>
+        <span class="type-row__sample" [class.app-tight]="item.tight" [style.font]="item.token">{{
+          item.sample
+        }}</span>
+      </div>
+    }
+    <div class="type-row">
+      <span class="type-row__meta">
+        <span class="type-row__label">Cifras tabulares (cifras de negocio)</span>
+        <code class="type-row__token app-mono">.app-tabular</code>
+      </span>
+      <span class="type-row__sample app-tabular">1.250 &nbsp; {{ decimalSample() }} &nbsp; 98.400</span>
+    </div>
+    <div class="type-row">
+      <span class="type-row__meta">
+        <span class="type-row__label">Cifras proporcionales (comparacion)</span>
+        <code class="type-row__token app-mono">sin .app-tabular</code>
+      </span>
+      <span class="type-row__sample type-row__sample--proportional"
+        >1.250 &nbsp; {{ decimalSample() }} &nbsp; 98.400</span
+      >
+    </div>
+    <div class="type-row">
+      <span class="type-row__meta">
+        <span class="type-row__label">Monoespaciada tecnica</span>
+        <code class="type-row__token app-mono">.app-mono</code>
+      </span>
+      <span class="type-row__sample app-mono">ALM-001 &nbsp; SKU-88412 &nbsp; /api/v1/health</span>
+    </div>
+  </div>
+</section>
+
+<section class="guide__section" aria-labelledby="shape-title">
+  <h2 class="guide__title app-tight" id="shape-title">Vocabulario de forma</h2>
+  <p class="guide__note">
+    Los unicos radios del proyecto. Cada fila muestra el radio aplicado a un elemento real.
+  </p>
+  <table class="shape-table">
+    <thead>
+      <tr>
+        <th scope="col">Elemento</th>
+        <th scope="col">Rol de Material</th>
+        <th scope="col">Valor</th>
+        <th scope="col">Muestra</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Etiquetas, insignias, avatares</td>
+        <td><code class="app-mono">corner-full</code></td>
+        <td>Pildora</td>
+        <td><span class="shape-demo shape-demo--pill">Etiqueta</span></td>
+      </tr>
+      <tr>
+        <td>Botones</td>
+        <td><code class="app-mono">corner-small</code></td>
+        <td>8 px</td>
+        <td><span class="shape-demo shape-demo--button">Boton</span></td>
+      </tr>
+      <tr>
+        <td>Campos de formulario</td>
+        <td><code class="app-mono">corner-extra-small</code></td>
+        <td>4 px</td>
+        <td><span class="shape-demo shape-demo--field">ALM-001</span></td>
+      </tr>
+      <tr>
+        <td>Tarjetas y contenedores</td>
+        <td><code class="app-mono">corner-medium</code></td>
+        <td>12 px</td>
+        <td><span class="shape-demo shape-demo--card">Tarjeta</span></td>
+      </tr>
+      <tr>
+        <td>Superficies grandes</td>
+        <td><code class="app-mono">corner-large</code></td>
+        <td>16 px</td>
+        <td><span class="shape-demo shape-demo--surface">Acceso</span></td>
+      </tr>
+    </tbody>
+  </table>
+</section>

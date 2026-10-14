@@ -1,0 +1,154 @@
+// Marco de seccion compartido con los demas bloques de la guia: lo repito aqui
+// en vez de centralizarlo porque no puedo tocar src/styles.scss y cada bloque
+// debe compilar su hoja por debajo de 4 kB. El coste es pequeno y el aspecto
+// queda identico al de la pagina monolitica.
+:host {
+  display: block;
+}
+
+.guide__section + .guide__section {
+  margin-top: var(--app-section-gap);
+}
+
+.guide__title {
+  margin: 0 0 var(--app-space-3);
+  font: var(--mat-sys-title-medium);
+}
+
+.guide__subtitle {
+  margin: var(--app-space-4) 0 var(--app-space-2);
+  font: var(--mat-sys-label-large);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.guide__note {
+  margin: 0 0 var(--app-space-3);
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.guide__elevation {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--app-space-4);
+}
+
+.elev-demo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-space-1);
+  padding: var(--app-card-padding);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--mat-sys-corner-medium);
+  background: var(--mat-sys-surface-container);
+}
+
+// Unica sombra de la pagina: la del caso reservado, con el token del sistema.
+// Sin ella el ejemplo flotante no se distinguiría del contenedor con borde.
+.elev-demo--float {
+  box-shadow: var(--mat-sys-level3);
+}
+
+.elev-demo__label {
+  font: var(--mat-sys-label-large);
+  color: var(--mat-sys-on-surface);
+}
+
+.elev-demo__token {
+  font-size: 0.72rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.guide__rhythm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-space-2);
+}
+
+.rhythm-row {
+  display: flex;
+  align-items: center;
+  gap: var(--app-space-4);
+  padding-block-end: var(--app-space-2);
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+
+.rhythm-row__meta {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 220px;
+}
+
+.rhythm-row__token {
+  font-size: 0.72rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.rhythm-row__use {
+  font: var(--mat-sys-label-medium);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+// La barra mide el valor real del token, no una ilustracion: lo que se ve es
+// el espaciado que la pantalla vecina aplica.
+.rhythm-row__bar {
+  display: block;
+  block-size: var(--app-space-2);
+  border-radius: var(--mat-sys-corner-full);
+  background: var(--mat-sys-primary);
+}
+
+.guide__interaction {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-space-2);
+}
+
+.interaction-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--app-space-4);
+  padding-block-end: var(--app-space-2);
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+
+.interaction-row__label {
+  min-inline-size: 220px;
+  font: var(--mat-sys-label-medium);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.interaction-row__group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--app-element-gap);
+}
+
+// Muestro el anillo de foco sin esperar al teclado: es el mismo que pinta
+// :focus-visible en styles.scss, asi el revisor lo compara con el real.
+.interaction-focus {
+  outline: 2px solid var(--mat-sys-primary);
+  outline-offset: 2px;
+}
+
+// Respuesta tactil del contrato: hundimiento breve al pulsar, sin animacion
+// decorativa. La duracion cae dentro del rango 120 a 160 ms.
+.guide__interaction .mat-mdc-button,
+.guide__interaction .mat-mdc-icon-button {
+  transition: transform 140ms ease-out;
+}
+
+.guide__interaction .mat-mdc-button:active,
+.guide__interaction .mat-mdc-icon-button:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+@media (max-width: 768px) {
+  .rhythm-row,
+  .interaction-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

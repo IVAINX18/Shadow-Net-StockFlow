@@ -1,64 +1,37 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { FormsModule } from '@angular/forms';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
-import { StatusChipComponent } from '../../shared/components/status-chip/status-chip.component';
 import type { ChipTone } from '../../shared/components/status-chip/status-chip.component';
-import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
-import { ErrorStateComponent } from '../../shared/components/error-state/error-state.component';
-import { LoadingSkeletonComponent } from '../../shared/components/loading-skeleton/loading-skeleton.component';
-import { KpiCardComponent } from '../../shared/components/kpi-card/kpi-card.component';
-import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
 import type { DataTableColumn } from '../../shared/components/data-table/data-table.model';
 import { ThemeService } from '../../core/services/theme.service';
-
-/** Muestra un token de color con su nombre para revision visual. */
-interface TokenSwatch {
-  readonly token: string;
-  readonly label: string;
-}
-
-/** Fila de ritmo o escala: el valor declarado es el que emite el token. */
-interface SpacingRow {
-  readonly token: string;
-  readonly value: string;
-  readonly use: string;
-}
-
-// Fixture de la guia: dos filas genericas que solo existen para revisar la
-// tabla (encabezado, chip de estado, alineacion). No representan datos de
-// negocio; las cifras reales siempre vienen del backend (design-system.md §11).
-interface GuideRow {
-  readonly referencia: string;
-  readonly estado: ChipTone;
-  readonly etiqueta: string;
-}
+import { GuideFoundationComponent } from './sections/guide-foundation.component';
+import { GuideSpaceMotionComponent } from './sections/guide-space-motion.component';
+import { GuidePatternsComponent } from './sections/guide-patterns.component';
+import type {
+  GuideRow,
+  SpacingRow,
+  TokenSwatch,
+  TypeSample,
+  ZScaleEntry,
+} from './sections/style-guide-models';
 
 /**
- * Guia de estilo interna. Renderiza tokens, escala tipografica, botones,
- * campos, chips y los estados de interfaz para revisar el sistema de diseno en
- * el navegador, en ambos temas. No es una pantalla de producto: es la
- * verificacion visual del contrato de diseno.
+ * Guia de estilo interna. Ya no pinta las secciones: compone los tres bloques
+ * tematicos (fundamentos, espacio y movimiento, patrones) y conserva los datos
+ * de muestra para pasarlos como entradas. La pagina renderizada es la misma,
+ * pero cada hoja compila por debajo del presupuesto de 4 kB.
  */
 @Component({
   selector: 'app-style-guide-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    FormsModule,
     MatButtonModule,
-    MatFormFieldModule,
-    MatInputModule,
     MatIconModule,
     PageHeaderComponent,
-    StatusChipComponent,
-    EmptyStateComponent,
-    ErrorStateComponent,
-    LoadingSkeletonComponent,
-    KpiCardComponent,
-    DataTableComponent,
+    GuideFoundationComponent,
+    GuideSpaceMotionComponent,
+    GuidePatternsComponent,
   ],
   templateUrl: './style-guide-page.component.html',
   styleUrl: './style-guide-page.component.scss',
@@ -86,7 +59,7 @@ export class StyleGuidePageComponent {
     { token: '--mat-sys-error-container', label: 'Error container' },
   ];
 
-  protected readonly typography: readonly { token: string; label: string; sample: string; tight: boolean }[] = [
+  protected readonly typography: readonly TypeSample[] = [
     { token: 'var(--mat-sys-display-small)', label: 'Display small', sample: 'StockFlow', tight: true },
     { token: 'var(--mat-sys-headline-small)', label: 'Headline small', sample: 'Resumen de almacen', tight: true },
     { token: 'var(--mat-sys-title-large)', label: 'Title large', sample: 'Movimientos del dia', tight: true },
@@ -130,7 +103,7 @@ export class StyleGuidePageComponent {
     error: 'Error',
   };
 
-  protected readonly zIndexScale: readonly { name: string; value: string }[] = [
+  protected readonly zIndexScale: readonly ZScaleEntry[] = [
     { name: '--app-z-base', value: '0' },
     { name: '--app-z-sticky', value: '100' },
     { name: '--app-z-drawer', value: '200' },
@@ -166,10 +139,5 @@ export class StyleGuidePageComponent {
 
   protected toggleTheme(): void {
     this.themeService.toggle();
-  }
-
-  protected onNoop(): void {
-    // Boton de demostracion: no ejecuta accion para no aparentar una funcion
-    // real en la guia de estilo.
   }
 }

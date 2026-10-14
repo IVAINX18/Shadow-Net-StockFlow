@@ -1,0 +1,93 @@
+<section class="guide__section" aria-labelledby="fields-title">
+  <h2 class="guide__title app-tight" id="fields-title">Campos de formulario</h2>
+  <div class="guide__fields">
+    <mat-form-field appearance="outline">
+      <mat-label>Codigo de almacen</mat-label>
+      <input matInput value="ALM-001" />
+      <mat-hint>Etiqueta arriba, ayuda abajo, error bajo el campo.</mat-hint>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Correo electronico</mat-label>
+      <input matInput value="correo-invalido" />
+      <mat-error>El correo no tiene un formato valido.</mat-error>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Campo deshabilitado</mat-label>
+      <input matInput value="No editable" disabled />
+    </mat-form-field>
+  </div>
+</section>
+
+<section class="guide__section" aria-labelledby="chips-title">
+  <h2 class="guide__title app-tight" id="chips-title">Chips de estado</h2>
+  <div class="guide__row">
+    @for (tone of tones(); track tone) {
+      <app-status-chip [label]="toneLabels()[tone]" [tone]="tone" />
+    }
+  </div>
+</section>
+
+<section class="guide__section" aria-labelledby="kpi-title">
+  <h2 class="guide__title app-tight" id="kpi-title">Tarjeta de indicador</h2>
+  <p class="guide__note">
+    Componente de revision: el valor es un formato de muestra, no una cifra de negocio.
+  </p>
+  <div class="guide__kpis">
+    <app-kpi-card
+      label="Indicador de muestra"
+      value="0"
+      icon="inventory_2"
+      hint="Sin datos de producto"
+    />
+    <app-kpi-card label="Cargando" value="0" icon="sync" [loading]="true" />
+  </div>
+</section>
+
+<section class="guide__section" aria-labelledby="table-title">
+  <h2 class="guide__title app-tight" id="table-title">Tabla de datos</h2>
+  <p class="guide__note">
+    Fixture de ejemplo para revisar encabezados, orden, chip de estado y paginacion.
+  </p>
+  <app-data-table
+    [columns]="guideColumns()"
+    [rows]="guideRows()"
+    [total]="guideRows().length"
+    emptyTitle="Sin registros"
+    emptyMessage="Aqui se explicara que falta y como poblarlo."
+    (sortChange)="onNoop()"
+    (pageChange)="onNoop()"
+  />
+</section>
+
+<section class="guide__section" aria-labelledby="states-title">
+  <h2 class="guide__title app-tight" id="states-title">Estados de interfaz</h2>
+  <div class="guide__states">
+    <div class="state-box">
+      <h3 class="state-box__title">Carga</h3>
+      <app-loading-skeleton variant="table" [rows]="3" />
+    </div>
+    <div class="state-box">
+      <h3 class="state-box__title">Vacio</h3>
+      <app-empty-state
+        icon="inbox"
+        title="Sin datos"
+        message="Aqui se explicara que falta y como poblarlo."
+      />
+    </div>
+    <div class="state-box">
+      <h3 class="state-box__title">Error</h3>
+      <app-error-state message="No se pudieron cargar los datos." (retry)="onNoop()" />
+    </div>
+  </div>
+</section>
+
+<section class="guide__section" aria-labelledby="z-title">
+  <h2 class="guide__title app-tight" id="z-title">Escala de indices de apilamiento</h2>
+  <ul class="guide__z">
+    @for (item of zIndexScale(); track item.name) {
+      <li>
+        <code class="app-mono">{{ item.name }}</code> = {{ item.value }}
+      </li>
+    }
+  </ul>
+</section>
