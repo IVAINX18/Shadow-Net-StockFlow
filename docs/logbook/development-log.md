@@ -851,3 +851,73 @@ Esta bitácora registra cada unidad de trabajo del proyecto: fecha, fase, archiv
 - Avisos de obsolescencia del pipeline (acciones que apuntan a Node 20 y aviso de migracion de ubuntu-latest): ruido de infraestructura, no fallos.
 
 **Nota:** los tres commits de la fase se subieron a la rama principal y la bitacora sigue siendo de solo adicion.
+
+## Entrada 21 - 13/10/2026 - Transversal - Presupuesto de la guia de estilo
+
+**Fase:** Transversal (mantenimiento, fuera de fase; la Fase 2 quedo cerrada en la Entrada 20).
+
+**Archivos:** frontend/src/app/features/style-guide/sections/style-guide-models.ts, guide-foundation.component.ts/.html/.scss, guide-space-motion.component.ts/.html/.scss, guide-patterns.component.ts/.html/.scss (creados); frontend/src/app/features/style-guide/style-guide-page.component.ts/.html/.scss (recompuestos como composicion) y style-guide-page.component.spec.ts (nuevo); esta bitacora (solo esta entrada).
+
+**Cambios:** la pagina /guia-estilo pasa de un componente monolitico a la composicion de tres bloques standalone con OnPush y prefijo app-: app-guide-foundation (color, tipografia y forma), app-guide-space-motion (elevacion, ritmo e interaccion) y app-guide-patterns (campos, chips, tarjeta, tabla, estados y apilamiento). Textos, tokens, clases, estructura semantica (h2 con id y aria-labelledby, tabla semantica de forma, muestras de color con etiqueta en superficie neutra) y datos de muestra quedan identicos; ningun estilo se recorta. El marco de seccion (titulo, nota y separacion) se repite en cada bloque porque no puedo tocar src/styles.scss; la pagina solo repone la separacion entre bloques con el mismo token. El presupuesto de angular.json no se toca.
+
+**Motivo:** la hoja monolitica compilaba 5,49 kB frente al aviso de 4 kB por componente y era el unico aviso que quedaba en la compilacion. El reparto la deja por debajo del limite y facilita la revision de diseno pendiente, que reescribira esta pagina.
+
+**Pruebas:** `npm run lint` limpio; `npm test` 9 ficheros, 40 pruebas, 40 correctas (3 nuevas: titulos de las doce secciones, enlace aria-labelledby e invariantes de muestras); `npx ng build --configuration development --output-path /tmp/opencode/spa` correcto; `npx ng build --configuration production` correcto con inicial 342,29 kB crudos y 92,98 kB de transferencia, y cero avisos de presupuesto (ni inicial ni por componente). Hojas en crudo: pagina 384 B, fundamentos 4242 B, espacio y movimiento 3730 B, patrones 1541 B; el compilador no avisa en ninguna, asi que cada una compila por debajo de 4 kB.
+
+**Resultado:** aviso de presupuesto eliminado por descomposicion, con lint, pruebas y ambas compilaciones en verde. Cambios sin confirmar en Git a la espera de autorizacion. No se toco el backend, la navegacion, las rutas ni los componentes de src/app/shared.
+
+**Pendientes:** verificacion visual en navegador real en tema claro y oscuro por el orquestador (el puerto 4200 quedo libre); contraste AA medido en pantalla, que jsdom no puede probar; la revision de diseno pendiente reescribira esta pagina sobre estos bloques.
+
+**Desviacion declarada:** el encargo habla de catorce secciones y la pagina real tiene doce (las que lista la prueba nueva). No invente ni quite ninguna: conserve exactamente las doce existentes.
+
+## Entrada 22 - 13/10/2026 - Fase 2 - Verificacion independiente del camino XLSX y de los limites
+
+**Fase:** Fase 2 - verificacion adicional. Cierra dos huecos de evidencia que la Entrada 18 no cubria: la importacion por XLSX, que usa una libreria distinta a la del CSV, y el limite de filas, que hasta ahora solo estaban probados por la suite y no por el orquestador contra la API viva.
+
+**Archivos afectados (creados o modificados):**
+- Esta bitacora (solo esta entrada).
+
+**Cambios efectuados:**
+- Se ejecuto la importacion completa con un archivo XLSX sobre la API en marcha, usando la plantilla que el propio sistema genera: simulacro, aplicacion y reaplicacion, con lectura de la auditoria en la base.
+- Se comprobo el limite de filas con un archivo de 1001 filas.
+- Se limpiaron los datos de prueba: la base queda con el admin, las tres unidades base y cero filas de catalogo.
+
+**Motivo:** las pruebas de integracion cubren ambos caminos, pero la regla del proyecto es no dar por verificado lo que no se ha ejecutado uno mismo, y un limite solo se prueba con un archivo que lo exceda de verdad.
+
+**Pruebas ejecutadas (resultados reales):**
+- Plantilla XLSX descargada de la API (6492 bytes) enviada al simulacro: 200, una fila, valida, sku EXAMPLE-001.
+- Aplicacion del XLSX: 201 con una fila creada y referencia de auditoria; reaplicacion: 201 con cero creadas y una actualizada, es decir, idempotencia tambien en el camino XLSX.
+- Archivo CSV de 1001 filas: 422 con codigo VALIDACION y detalle por campo, "El archivo supera el limite de 1000 filas", sin ningun efecto.
+- Estado final de la base: 1 usuario, 3 unidades, 0 categorias y 0 productos.
+
+**Resultado:** el camino XLSX y el limite de filas quedan verificados contra la API viva ademas de por la suite. Ninguna conclusion anterior cambia.
+
+**Pendientes:** los mismos de la Entrada 20, sin cambios.
+
+**Nota:** solo se ejecutaron peticiones reales contra el contenedor; no se toco codigo.
+
+## Entrada 23 - 13/10/2026 - Fase 2 - Criterio de frontera RN-INV-09 aprobado
+
+**Fase:** Fase 2 - cierre definitivo. Registra la decision de Master sobre el sexto criterio de salida.
+
+**Archivos afectados (creados o modificados):**
+- `docs/planning/scope-and-milestones.md` (modificado): el criterio RN-INV-09 sale de los criterios de salida de la Fase 2 y queda declarado como criterio de frontera, con su verificacion asignada a la Fase 3.
+- Esta bitacora.
+
+**Cambios efectuados:**
+- Se retiro de los criterios de salida de la Fase 2 el enunciado "un producto inactivo no admite movimientos nuevos (RN-INV-09)", que no es demostrable dentro de la fase porque el documento de inventario y el kardex se construyen en la Fase 3.
+- Se declaro como criterio de frontera con la fecha y el motivo de la aprobacion, y se traslada a los criterios de salida de la Fase 3 para que no quede huerfano.
+- Se dejo cubierto el escenario de aceptacion AC-018, que comparte la misma dependencia, en lugar de dejar un segundo cabo suelto.
+
+**Motivo:** con la fase ya construida y verificada, el criterio solo podia quedar abierto indefinidamente o trasladarse a donde si es comprobable. Master aprobo el traslado el 13/10/2026, que es la via que la propia especificacion exige para cualquier desvio de la secuencia o de los criterios de salida.
+
+**Pruebas ejecutadas (resultados reales):**
+- Comprobacion de que el criterio no era demostrable dentro de la fase: la tabla de movimientos de inventario no existe y su creacion pertenece a la Fase 3 segun el orden de `docs/architecture/database-design.md` seccion 7.
+- Trazabilidad del enunciado: RN-INV-09 vive en `requirements.md` y lo implementan RF-041, del catalogo, y RF-074, del inventario. El comportamiento verificable, la confirmacion del documento, es el de RF-074 y pertenece a la Fase 3.
+- Verificacion de que AC-018 comparte la dependencia y queda cubierto por la misma frontera.
+
+**Resultado:** la Fase 2 queda con cinco criterios de salida cumplidos y verificados, mas un criterio de frontera trasladado a la Fase 3 con motivo y aprobacion registrados. El traslado no altera ninguna funcionalidad construida: lo que cambia es donde se verifica.
+
+**Pendientes:** la revision de diseno; la confirmacion en Git del reparto de la guia de estilo y de las entradas 21 a 23.
+
+**Nota:** es un cambio en el plan de registro aprobado por Master; no se toco codigo ni comportamiento.

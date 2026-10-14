@@ -4,7 +4,7 @@ Shadow-Net StockFlow es un sistema ERP web de gestión de inventarios y logísti
 
 El núcleo del sistema no es una columna de stock, sino un libro de movimientos (kardex) inmutable: cada operación de inventario se confirma dentro de una transacción atómica, con bloqueo de filas para impedir la sobreventa, idempotencia para evitar duplicados y reversiones trazables para corregir sin borrar.
 
-**Estado actual:** Fase 0 (fundaciones) **completada y verificada**; Fase 1 (autenticación, RBAC y almacenes) **en curso**, con las unidades 1 y 2 terminadas.
+**Estado actual:** Fase 0 (fundaciones), Fase 1 (autenticación, RBAC y almacenes) y Fase 2 (catálogo, con importación) **completadas y verificadas**, con la integración continua en verde. El siguiente paso es la Fase 3 (inventario: documentos, movimientos, kardex, reversos y carga inicial de existencias).
 
 ## Objetivos
 
@@ -95,8 +95,8 @@ cd backend && php artisan test
 | Fase | Alcance | Estado |
 | --- | --- | --- |
 | Fase 0 | Fundaciones: repositorio, contenedores, esqueleto Laravel y Angular, CI | Completada |
-| Fase 1 | Autenticación, RBAC y almacenes | En curso (unidades 1 y 2 completadas) |
-| Fase 2 | Catálogo: categorías, unidades, productos e importación de catálogo | Pendiente |
+| Fase 1 | Autenticación, RBAC y almacenes | Completada |
+| Fase 2 | Catálogo: categorías, unidades, productos e importación de catálogo | Completada |
 | Fase 3 | Inventario: documentos, movimientos, kardex, reversos y carga inicial de existencias | Pendiente |
 | Fases 4 a 7 | Tablero, reportes, auditoría, calidad y despliegue | Pendientes |
 

@@ -157,8 +157,8 @@ Detalle completo en las [decisiones de arquitectura](./architecture/architecture
 
 ## 21. Estado del proyecto y siguiente paso
 
-El proyecto está en fase de planificación. El repositorio contiene únicamente esta especificación en `docs/`, sin código de aplicación, sin `backend/` ni `frontend/` y sin repositorio Git inicializado todavía. La bitácora de esta fase está en [la bitácora](./logbook/development-log.md).
+Las **fases 0, 1 y 2 están completadas y verificadas**. Existen `backend/` (Laravel 13.35 sobre PHP 8.4 con MySQL 8.4) y `frontend/` (Angular 22.2), el entorno se levanta con `podman-compose up -d --build` y la integración continua pasa en la rama principal. Están implementados y probados la autenticación con Sanctum, el RBAC nativo con alcance por almacén, los almacenes, y el catálogo completo con su importación (plantilla en XLSX y CSV, validación previa y aplicación atómica e idempotente por SKU). El detalle unidad por unidad, con sus pruebas y resultados reales, está en [la bitácora](./logbook/development-log.md).
 
-El siguiente paso recomendado es que Master revise y apruebe esta documentación, confirme las decisiones pendientes de la sección 20, y autorice el inicio de la Fase 0 (fundaciones) con la instalación de Composer y MySQL 8.4 LTS (o el uso de podman-compose con Podman), la subida de Node a 22/24 LTS y la inicialización del repositorio Git.
+El siguiente paso es la **Fase 3 (inventario: documentos, movimientos, kardex, reversos y carga inicial de existencias)**, que garantiza la integridad transaccional del libro de movimientos. Su inicio espera la autorización de Master, como el de cada fase.
 
 Índice completo de la documentación en [docs/README.md](./README.md).

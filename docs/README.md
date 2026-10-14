@@ -6,9 +6,9 @@ Este índice es la puerta de entrada a la especificación de Shadow-Net StockFlo
 
 ## Estado del proyecto
 
-El proyecto está en desarrollo. Fecha de esta revisión: 12/10/2026.
+El proyecto está en desarrollo. Fecha de esta revisión: 13/10/2026.
 
-La **Fase 0 (fundaciones)** está completada y verificada: existen `backend/` (Laravel 13.35) y `frontend/` (Angular 22.2), el entorno se levanta con `podman-compose up -d --build` y la integración continua pasa en la rama principal. La **Fase 1 (autenticación, RBAC y almacenes)** está en curso: las unidades 1 (esquema de RBAC y almacenes) y 2 (errores uniformes y autenticación con Sanctum) están terminadas y verificadas. El avance real, unidad por unidad, se registra en la [bitácora](./logbook/development-log.md).
+Las **fases 0, 1 y 2 están completadas y verificadas**. La Fase 0 (fundaciones) dejó `backend/` (Laravel 13.35) y `frontend/` (Angular 22.2), el entorno se levanta con `podman-compose up -d --build` y la integración continua pasa en la rama principal. La Fase 1 entregó la autenticación con Sanctum, el RBAC nativo y los almacenes con alcance por usuario. La Fase 2 entregó el catálogo (categorías jerárquicas, unidades de medida y productos con configuración por almacén) y su importación con plantilla, validación previa y aplicación atómica e idempotente, en la API y en la SPA. El siguiente paso es la Fase 3 (inventario y kardex). El avance real, unidad por unidad, se registra en la [bitácora](./logbook/development-log.md).
 
 ## Tabla de documentos
 
