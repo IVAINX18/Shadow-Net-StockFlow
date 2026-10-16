@@ -3,52 +3,19 @@
 declare(strict_types=1);
 
 use App\Domain\Enums\PermissionSlug;
-use App\Models\Permission;
-use App\Models\Role;
 use App\Models\User;
 use App\Models\Warehouse;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Gate;
-use Laravel\Sanctum\Sanctum;
 
 // Pruebo la autorización contra MySQL real porque el alcance por almacén vive
 // en la tabla pivote warehouse_user y quiero ver el comportamiento del motor
 // definitivo, no el de una base en memoria (estrategia de pruebas del §7).
 uses(RefreshDatabase::class);
 
-// Creo el permiso con el slug exacto del catálogo para poder asignarlo al rol;
-// el slug es la clave que comparan los Gates y el User::hasPermission.
-function permisoMvp(string $slug): Permission
-{
-    return Permission::firstOrCreate(
-        ['slug' => $slug],
-        ['name' => $slug, 'module' => explode('.', $slug)[0]],
-    );
-}
-
-// Concedo capacidades a través de un rol, no por asignación directa, porque así
-// es como el RBAC real otorga permisos y es lo que quiero ejercer en las pruebas.
-function usuarioConPermisos(array $slugs, array $atributos = []): User
-{
-    $user = User::factory()->create(array_merge(['is_active' => true], $atributos));
-
-    $role = Role::factory()->create();
-
-    foreach ($slugs as $slug) {
-        $role->permissions()->attach(permisoMvp($slug));
-    }
-
-    $user->roles()->attach($role);
-
-    return $user->fresh();
-}
-
-// Autentico con el guard de Sanctum porque es el que exige `auth:sanctum`; así
-// `$request->user()` queda disponible para la Policy y el middleware de permiso.
-function actuarComo(User $user): void
-{
-    Sanctum::actingAs($user);
-}
+// Los ayudantes (permisoMvp, usuarioConPermisos, actuarComo) viven en
+// tests/Pest.php porque todos los módulos los usan y deben existir también al
+// correr un módulo aislado.
 
 // AC-005: aunque la SPA oculte la pantalla, la petición directa sin permiso
 // debe rebotar con 403 SIN_PERMISO tanto en el listado como en el detalle.

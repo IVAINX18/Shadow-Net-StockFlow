@@ -3,64 +3,17 @@
 declare(strict_types=1);
 
 use App\Domain\Enums\PermissionSlug;
-use App\Models\Permission;
-use App\Models\Role;
 use App\Models\User;
 use App\Models\Warehouse;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravel\Sanctum\Sanctum;
 
 // Pruebo la escritura contra MySQL real porque la unicidad de `code` y el
 // pivote warehouse_user viven en el motor definitivo (estrategia del §7).
 uses(RefreshDatabase::class);
 
-// Reutilizo los ayudantes de WarehouseAuthorizationTest sin redeclararlos,
-// porque Pest carga todos los archivos y la doble definición sería fatal.
-if (! function_exists('permisoMvp')) {
-    function permisoMvp(string $slug): Permission
-    {
-        return Permission::firstOrCreate(
-            ['slug' => $slug],
-            ['name' => $slug, 'module' => explode('.', $slug)[0]],
-        );
-    }
-}
-
-if (! function_exists('usuarioConPermisos')) {
-    function usuarioConPermisos(array $slugs, array $atributos = []): User
-    {
-        $user = User::factory()->create(array_merge(['is_active' => true], $atributos));
-
-        $role = Role::factory()->create();
-
-        foreach ($slugs as $slug) {
-            $role->permissions()->attach(permisoMvp($slug));
-        }
-
-        $user->roles()->attach($role);
-
-        return $user->fresh();
-    }
-}
-
-if (! function_exists('actuarComo')) {
-    function actuarComo(User $user): void
-    {
-        Sanctum::actingAs($user);
-    }
-}
-
-if (! function_exists('administradorAlmacenes')) {
-    function administradorAlmacenes(): User
-    {
-        return usuarioConPermisos([
-            PermissionSlug::WarehousesView->value,
-            PermissionSlug::WarehousesViewAll->value,
-            PermissionSlug::WarehousesCreate->value,
-            PermissionSlug::WarehousesUpdate->value,
-        ]);
-    }
-}
+// Los ayudantes (permisoMvp, usuarioConPermisos, actuarComo,
+// administradorAlmacenes) viven en tests/Pest.php porque todos los módulos los
+// usan y deben existir también al correr un módulo aislado.
 
 // AC-007: crear con código nuevo y responsable activo deja el almacén
 // consultable; el responsable no obtiene acceso automático (RF-023).

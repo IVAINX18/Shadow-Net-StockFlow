@@ -16,7 +16,10 @@ class RoleFactory extends Factory
     {
         // Genero slugs únicos porque la restricción uq_roles_slug rechaza
         // duplicados y los tests necesitan crear varios roles sin choques.
-        $name = fake()->unique()->jobTitle();
+        // Recorto el cargo a 80 porque Faker genera títulos de hasta 80 y pico
+        // caracteres y la columna roles.name es varchar(80): sin el recorte el
+        // alta falla al azar según el título que toque.
+        $name = mb_substr(fake()->unique()->jobTitle(), 0, 80);
 
         return [
             'name' => $name,

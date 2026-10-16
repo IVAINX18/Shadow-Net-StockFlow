@@ -2,10 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Domain\Enums\PermissionSlug;
 use App\Models\AuditLog;
 use App\Models\Category;
-use App\Models\User;
 use App\Services\Audit\AuditLogger;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -13,15 +11,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 // jerárquica con RESTRICT y la bitácora viven en el motor definitivo.
 uses(RefreshDatabase::class);
 
-if (! function_exists('administradorCatalogo')) {
-    function administradorCatalogo(): User
-    {
-        return usuarioConPermisos([
-            PermissionSlug::CatalogCreate->value,
-            PermissionSlug::CatalogUpdate->value,
-        ]);
-    }
-}
+// El ayudante administradorCatalogo vive en tests/Pest.php porque ProductTest y
+// CatalogImportTest también lo usan y debe existir al correr un módulo aislado.
 
 // RF-026: crear una categoría raíz responde 201 y la deja consultable.
 test('crear categoría raíz responde 201 y queda consultable', function (): void {
