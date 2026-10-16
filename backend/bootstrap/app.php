@@ -1,5 +1,8 @@
 <?php
 
+use App\Exceptions\IdempotencyConflictException;
+use App\Exceptions\InsufficientStockException;
+use App\Exceptions\InvalidDocumentStateException;
 use App\Exceptions\OutsideWarehouseScopeException;
 use App\Http\Errors\ApiErrorResponse;
 use App\Http\Middleware\EnsureAccountIsActive;
@@ -119,6 +122,49 @@ return Application::configure(basePath: dirname(__DIR__))
                 'FUERA_DE_ALCANCE',
                 $e->getMessage(),
                 403
+            );
+        });
+
+        // Los errores de negocio del inventario viajan en excepciones dedicadas
+        // para que el servicio no conozca HTTP: el estado inválido es 409
+        // ESTADO_INVALIDO, el choque de idempotencia 409
+        // IDEMPOTENCIA_REPETIDA y la falta de existencias 409
+        // STOCK_INSUFICIENTE con el detalle por línea, todos de la tabla del
+        // §5.
+        $exceptions->render(function (InvalidDocumentStateException $e, Request $request) {
+            if (! $request->is('api/*')) {
+                return null;
+            }
+
+            return ApiErrorResponse::make(
+                'ESTADO_INVALIDO',
+                $e->getMessage(),
+                409
+            );
+        });
+
+        $exceptions->render(function (IdempotencyConflictException $e, Request $request) {
+            if (! $request->is('api/*')) {
+                return null;
+            }
+
+            return ApiErrorResponse::make(
+                'IDEMPOTENCIA_REPETIDA',
+                $e->getMessage(),
+                409
+            );
+        });
+
+        $exceptions->render(function (InsufficientStockException $e, Request $request) {
+            if (! $request->is('api/*')) {
+                return null;
+            }
+
+            return ApiErrorResponse::make(
+                'STOCK_INSUFICIENTE',
+                $e->getMessage(),
+                409,
+                $e->details()
             );
         });
 
