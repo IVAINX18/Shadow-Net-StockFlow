@@ -18,11 +18,13 @@ export interface NavGroup {
   readonly items: readonly NavItem[];
 }
 
-// Las once secciones del producto. Dashboard, Catalogo (productos, categorias y
-// unidades) y Almacenes tienen API real; la importacion de catalogo vive en la
+// Las doce secciones del producto. Dashboard, Catalogo (productos, categorias y
+// unidades), Almacenes, Inventario (documentos, existencias, kardex y
+// transferencias) tienen API real; la importacion de catalogo vive en la
 // ruta /catalogo/importacion sin entrada propia de navegacion y se alcanza
-// desde la pagina de productos. El resto apunta a la pantalla de modulo
-// pendiente, que nombra la fase y los endpoints que faltan, sin simular datos.
+// desde la pagina de productos. Reportes, Auditoria y Configuracion siguen en
+// la pantalla de modulo pendiente, que nombra la fase y los endpoints que
+// faltan, sin simular datos.
 export const NAV_GROUPS: readonly NavGroup[] = [
   {
     label: 'General',
@@ -41,9 +43,10 @@ export const NAV_GROUPS: readonly NavGroup[] = [
   {
     label: 'Operacion',
     items: [
-      { label: 'Inventario', icon: 'assignment', route: '/pendiente/inventario', permissions: ['inventory.view'] },
-      { label: 'Movimientos', icon: 'swap_vert', route: '/pendiente/movimientos', permissions: ['inventory.view'] },
-      { label: 'Transferencias', icon: 'sync_alt', route: '/pendiente/transferencias', permissions: ['inventory.view'] },
+      { label: 'Inventario', icon: 'assignment', route: '/inventario', permissions: ['inventory.view'] },
+      { label: 'Existencias', icon: 'inventory_2', route: '/existencias', permissions: ['reports.view'] },
+      { label: 'Movimientos', icon: 'swap_vert', route: '/movimientos', permissions: ['inventory.view'] },
+      { label: 'Transferencias', icon: 'sync_alt', route: '/transferencias', permissions: ['inventory.view'] },
     ],
   },
   {

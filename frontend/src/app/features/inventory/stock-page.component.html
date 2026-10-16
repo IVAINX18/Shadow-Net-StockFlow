@@ -1,0 +1,57 @@
+<app-page-header
+  title="Existencias"
+  subtitle="Existencias y valorizacion por producto y almacen."
+/>
+
+@if (totalQuantity() !== null && totalValue() !== null) {
+  <div class="totals">
+    <app-kpi-card
+      label="Existencia total"
+      [value]="totalQuantity() ?? '—'"
+      icon="inventory_2"
+      [loading]="loading()"
+    />
+    <app-kpi-card
+      label="Valor total"
+      [value]="totalValue() ?? '—'"
+      icon="payments"
+      [loading]="loading()"
+    />
+  </div>
+}
+
+<form class="toolbar" [formGroup]="filters" (ngSubmit)="$event.preventDefault()">
+  <mat-form-field appearance="outline" subscriptSizing="dynamic" class="toolbar__id">
+    <mat-label>Almacen (id)</mat-label>
+    <input matInput inputmode="numeric" formControlName="warehouseId" maxlength="10" />
+  </mat-form-field>
+  <mat-form-field appearance="outline" subscriptSizing="dynamic" class="toolbar__id">
+    <mat-label>Categoria (id)</mat-label>
+    <input matInput inputmode="numeric" formControlName="categoryId" maxlength="10" />
+  </mat-form-field>
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Bajo minimo</mat-label>
+    <mat-select [value]="belowMinFilter()" (selectionChange)="onBelowMin($event.value)">
+      <mat-option [value]="null">Todos</mat-option>
+      <mat-option [value]="true">Solo bajo minimo</mat-option>
+      <mat-option [value]="false">Sobre el minimo</mat-option>
+    </mat-select>
+  </mat-form-field>
+  <button mat-button type="button" (click)="onClearFilters()">Limpiar</button>
+</form>
+
+<app-data-table
+  [columns]="columns"
+  [rows]="rows()"
+  [total]="total()"
+  [page]="page()"
+  [pageSize]="pageSize()"
+  [loading]="loading()"
+  [error]="errorMessage()"
+  [errorId]="errorId()"
+  emptyIcon="inventory_2"
+  emptyTitle="Sin existencias"
+  emptyMessage="Todavia no hay movimientos confirmados para estos filtros. Confirme un documento de entrada para poblar las existencias."
+  (pageChange)="onPage($event)"
+  (retry)="load()"
+/>

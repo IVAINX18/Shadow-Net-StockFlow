@@ -1,0 +1,85 @@
+// Ritmo de la pagina con los tokens del contrato (design-system.md §8).
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-section-gap);
+}
+
+.notice {
+  margin: 0;
+  padding: var(--app-space-3) var(--app-card-padding);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--mat-sys-corner-medium);
+  background: var(--mat-sys-error-container);
+  color: var(--mat-sys-on-error-container);
+  font: var(--mat-sys-body-medium);
+}
+
+.section-title {
+  margin: 0 0 var(--app-element-gap);
+  font: var(--mat-sys-title-large);
+  color: var(--mat-sys-on-surface);
+}
+
+.section-note {
+  margin: 0;
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--app-element-gap);
+  padding: var(--app-card-padding);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--mat-sys-corner-medium);
+  background: var(--app-surface-card);
+}
+
+.meta__item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-space-1);
+}
+
+.meta__label {
+  font: var(--mat-sys-label-medium);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.meta__value {
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface);
+}
+
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--mat-sys-corner-medium);
+}
+
+.lines {
+  inline-size: 100%;
+  border-collapse: collapse;
+  font: var(--mat-sys-body-medium);
+}
+
+.lines th,
+.lines td {
+  padding: var(--app-space-2) var(--app-space-3);
+  text-align: start;
+  border-block-end: 1px solid var(--mat-sys-outline-variant);
+}
+
+.lines th {
+  font: var(--mat-sys-label-medium);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.reversal {
+  padding: var(--app-card-padding);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--mat-sys-corner-medium);
+  background: var(--app-surface-paper);
+}

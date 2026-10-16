@@ -1,0 +1,23 @@
+// Ritmo de la pagina con los tokens del contrato (design-system.md §8).
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-section-gap);
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--app-element-gap);
+}
+
+.toolbar__id {
+  max-inline-size: 180px;
+}
+
+.balances {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--app-element-gap);
+}

@@ -158,6 +158,9 @@ final class InventoryRules
             'lines.*.direction.in' => 'La dirección de la línea no es válida.',
             'product_id.required' => 'El producto es obligatorio.',
             'product_id.exists' => 'El producto no es válido.',
+            // Sin este mensaje el campo caía al texto por defecto de Laravel, que
+            // está en inglés: la interfaz lo mostraba tal cual al usuario.
+            'warehouse_id.required' => 'El almacén es obligatorio.',
             'warehouse_id.exists' => 'El almacén no es válido.',
             'category_id.exists' => 'La categoría no es válida.',
             'from.date' => 'La fecha inicial no es válida.',

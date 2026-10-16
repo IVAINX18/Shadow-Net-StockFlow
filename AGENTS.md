@@ -1,9 +1,9 @@
 # PROJECT KNOWLEDGE BASE
 
-**Updated:** 14/10/2026 · **Commit:** 8b97ab7 · **Branch:** main
+**Updated:** 16/10/2026 · **Commit:** 216ac96 · **Branch:** main
 
 ## OVERVIEW
-ERP web de inventarios y logística multi-almacén (Shadow-Net Technologies). Monorepo **documentación-primero**: API Laravel 13 + SPA Angular 22 + MySQL 8.4, entorno reproducible con **Podman**. El núcleo es un libro de movimientos (kardex) transaccional. Las **fases 0, 1 y 2 están completadas y verificadas**: fundaciones, autenticación y RBAC con almacenes, y catálogo con importación. La Fase 3 (inventario: documentos, movimientos, kardex, reversos y carga inicial) es el siguiente paso.
+ERP web de inventarios y logística multi-almacén (Shadow-Net Technologies). Monorepo **documentación-primero**: API Laravel 13 + SPA Angular 22 + MySQL 8.4, entorno reproducible con **Podman**. El núcleo es un libro de movimientos (kardex) transaccional. Las **fases 0, 1, 2 y 3 están completadas y verificadas**: fundaciones, autenticación y RBAC con almacenes, catálogo con importación, e inventario (documentos, movimientos, kardex, reversos y carga inicial). El trabajo pendiente son las fases 4 a 7 (tablero, reportes, auditoría, calidad y despliegue).
 
 ## STRUCTURE
 ```
@@ -39,20 +39,21 @@ Sin indexador (`.codegraph/` vacío) ni LSP de PHP instalado: **centralidad no m
 | Archivo | Rol |
 | --- | --- |
 | `backend/bootstrap/app.php` | Rutas, middleware (`statefulApi`, alias `account.active` / `permission`), mapeo de excepciones al sobre de error |
-| `backend/routes/api.php` → `routes/api/v1/{auth,warehouses,users,roles,catalog,imports}.php` | Rutas v1, un archivo por módulo |
+| `backend/routes/api.php` → `routes/api/v1/*.php` | Rutas v1, un archivo por módulo (auth, almacenes, usuarios, roles, catálogo, importación e inventario) |
 | `backend/app/Domain/Enums/PermissionSlug.php` | **Fuente única** de los 19 permisos |
 | `backend/app/Providers/AppServiceProvider.php` | Un Gate por slug + limitador de login |
 | `backend/app/Policies/{Warehouse,User,Role}Policy.php` | Autorización; Warehouse combina permiso + alcance por almacén |
 | `backend/app/Http/Middleware/{EnsurePermission,EnsureAccountIsActive}.php` | RBAC por ruta y bloqueo de cuenta inactiva |
 | `backend/app/Models/User.php` | `hasPermission()`, `accessibleWarehouseIds()`, `canAccessWarehouse()` |
 | `backend/app/Services/Catalog/` | Servicios de dominio del catálogo; `CatalogRules` es la validación compartida entre la captura manual y la importación |
+| `backend/app/Services/Inventory/` | Servicios de dominio del inventario: documentos transaccionales, movimientos append-only, kardex, reversos y carga inicial |
 | `backend/app/Services/Audit/AuditLogger.php` | Bitácora append-only: acción, entidad, valores anterior y nuevo, autor |
 | `backend/database/seeders/{Permission,Role,DevAdminUser,UnitOfMeasure}Seeder.php` | Semillas de permisos, roles, admin de desarrollo y unidades base |
 | `frontend/src/app/app.config.ts` | Providers de la SPA: HTTP con interceptores de errores y de autenticación, ruteo y zona |
 | `frontend/src/app/core/` | Servicios, modelos tipados, interceptores y guardias |
 | `frontend/src/app/shared/components/` | Componentes compartidos (cabecera, tabla, indicador, estados, chip, diálogo de confirmación) |
 
-Implementado hoy: salud, autenticación y perfil, RBAC completo (usuarios, roles y permisos), almacenes con su alcance por usuario, y todo el catálogo: categorías jerárquicas, unidades de medida, productos con configuración por almacén e importación con plantilla, simulacro y aplicación atómica e idempotente. **Lo que sigue siendo plan son el inventario (documentos, movimientos, kardex, reversos y carga inicial), el tablero con datos reales, los reportes, las exportaciones y las pantallas de auditoría.**
+Implementado hoy: salud, autenticación y perfil, RBAC completo (usuarios, roles y permisos), almacenes con su alcance por usuario, y todo el catálogo: categorías jerárquicas, unidades de medida, productos con configuración por almacén e importación con plantilla, simulacro y aplicación atómica e idempotente, y el núcleo de inventario en el backend (documentos transaccionales, movimientos append-only, kardex, reversos y carga inicial). **Siguen siendo plan el tablero con datos reales, los reportes, las exportaciones y las pantallas de auditoría.**
 
 ## CONVENTIONS
 Solo lo que se desvía del estándar Laravel/Angular; el resto es convencional.
@@ -101,7 +102,7 @@ npm run lint && npm test && npm run build     # lo mismo que corre la CI
 - **Node 22 obligatorio** para el frontend: el `node` del sistema (20.19.2) está EOL y Angular 22 no lo soporta; cargar nvm antes de cualquier comando de `frontend/`.
 - **`--no-reload`** en el `command` del backend de `compose.yaml` es intencional: sin él, `artisan serve` descarta el `DB_HOST=mysql` de la composición y gana el `.env` del host. No quitarlo.
 - **Tablas con nombre explícito:** `units_of_measure` y `product_warehouse` declaran `$table` en su modelo porque la pluralización de Eloquent no coincide con el nombre documentado; el pivote `warehouse_user` se declara explícito en las relaciones de sus dos modelos.
-- **Modelo documentado ≠ migrado:** `database-design.md` describe 16 tablas; hoy existen 21 en la base, de las que 12 son de la aplicación (RBAC, almacenes, catálogo y auditoría) y el resto base de Laravel. Las tablas de inventario siguen siendo plan: no asumirlas.
+- **Modelo documentado ≠ migrado:** `database-design.md` describe 16 tablas; el conteo exacto en la base cambia con cada fase (la Fase 3 añadió las tablas de inventario), así que hay que confirmarlo en `database/migrations/` antes de asumirlo. Los nombres tampoco se asumen: se verifican en su migración.
 - **La SPA está cableada a la API:** entornos por configuración, `HttpClient` con interceptores de errores y de sesión, rutas perezosas con guardias y componentes compartidos. No asumir que sigue siendo andamiaje.
 - **Verificar la SPA en navegador exige servir con `no-store` y respaldo de rutas:** con un estático corriente, los paquetes en caché enmascaran fallos y las rutas profundas devuelven 404. El arnés de verificación vive **fuera del repositorio** y no sobrevive entre sesiones: regenerar la compilación (`ng build --configuration development`) antes de medir.
 - **Bitácora obligatoria y de solo adición** (`docs/logbook/development-log.md`): una entrada por unidad; nunca se reescribe el pasado.

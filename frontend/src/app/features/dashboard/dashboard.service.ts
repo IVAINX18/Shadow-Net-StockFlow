@@ -31,32 +31,10 @@ export interface DashboardIndicators {
 
 // Indicadores que hoy NO tienen API: se listan con su fase y su endpoint futuro
 // en lugar de mostrar cifras, tendencias o graficos inventados
-// (design-system.md §11 y §12).
+// (design-system.md §11 y §12). Ya no figuran los de catalogo ni inventario
+// (productos, kardex, documentos, existencias): esas API existen y las consumen
+// las pantallas de catalogo e inventario, asi que decir que faltan seria falso.
 const PENDING_DEPENDENCIES: readonly PendingDependency[] = [
-  {
-    label: 'Productos activos',
-    phase: 'Fase 2',
-    detail: 'Requiere el catalogo de productos.',
-    endpoint: 'GET /api/v1/products',
-  },
-  {
-    label: 'Existencias por almacen',
-    phase: 'Fase 3',
-    detail: 'Requiere el kardex y las existencias por almacen.',
-    endpoint: 'GET /api/v1/inventory/kardex',
-  },
-  {
-    label: 'Movimientos recientes',
-    phase: 'Fase 3',
-    detail: 'Requiere los documentos de inventario.',
-    endpoint: 'GET /api/v1/inventory-documents',
-  },
-  {
-    label: 'Productos bajo minimo',
-    phase: 'Fase 3',
-    detail: 'Requiere el reporte de existencias y la configuracion min/max.',
-    endpoint: 'GET /api/v1/reports/stock?below_min=true',
-  },
   {
     label: 'Valorizacion del inventario',
     phase: 'Fase 4',

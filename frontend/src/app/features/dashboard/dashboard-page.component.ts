@@ -11,7 +11,7 @@ import { AppError } from '../../core/models/app-error.model';
 /**
  * Tablero. Muestra solo los indicadores que las API reales de la Fase 1
  * soportan (almacenes, usuarios, roles y permisos) y, aparte, tarjetas de
- * dependencia que declaran que indicadores necesitan las fases 2 a 5. No hay
+ * dependencia que declaran que indicadores necesitan las fases 4 y 5. No hay
  * cifras inventadas, ni tendencias, ni graficos de relleno.
  */
 @Component({

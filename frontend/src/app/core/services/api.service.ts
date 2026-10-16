@@ -30,9 +30,9 @@ export class ApiService {
     return this.http.get<PaginatedResponse<T>>(this.url(path), { params: this.toParams(params) });
   }
 
-  /** POST tipado. */
-  public post<T>(path: string, body: unknown): Observable<T> {
-    return this.http.post<T>(this.url(path), body);
+  /** POST tipado, con cabeceras opcionales (p. ej. Idempotency-Key). */
+  public post<T>(path: string, body: unknown, headers?: Record<string, string>): Observable<T> {
+    return this.http.post<T>(this.url(path), body, { headers });
   }
 
   /** PUT tipado. */

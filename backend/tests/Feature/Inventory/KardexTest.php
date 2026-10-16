@@ -134,13 +134,19 @@ test('el kardex exige producto y almacen validos', function (): void {
     $producto = Product::factory()->create();
 
     actuarComo($lector);
+    // La petición trae solo el almacén, así que el campo que falta es el producto.
     $this->getJson("/api/v1/inventory/kardex?warehouse_id={$almacen->id}")
         ->assertUnprocessable()
-        ->assertJsonPath('error.code', 'VALIDACION');
+        ->assertJsonPath('error.code', 'VALIDACION')
+        ->assertJsonPath('error.details.0.message', 'El producto es obligatorio.');
 
+    // Y aquí falta el almacén. Sin mensaje propio, este campo caía al texto por
+    // defecto de Laravel, que está en inglés, y la interfaz lo mostraba tal cual
+    // al usuario: la prueba comprobaba el código de error, no el idioma.
     $this->getJson("/api/v1/inventory/kardex?product_id={$producto->id}")
         ->assertUnprocessable()
-        ->assertJsonPath('error.code', 'VALIDACION');
+        ->assertJsonPath('error.code', 'VALIDACION')
+        ->assertJsonPath('error.details.0.message', 'El almacén es obligatorio.');
 
     $this->getJson("/api/v1/inventory/kardex?product_id=999999&warehouse_id={$almacen->id}")
         ->assertUnprocessable()

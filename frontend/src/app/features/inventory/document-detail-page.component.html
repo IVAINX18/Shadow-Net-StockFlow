@@ -1,0 +1,117 @@
+@if (document(); as doc) {
+  <app-page-header [title]="doc.doc_number" subtitle="Detalle del documento de inventario.">
+    <app-status-chip [label]="statusLabel()" [tone]="statusTone()" />
+    <button mat-stroked-button type="button" (click)="goBack(doc)">
+      <mat-icon aria-hidden="true">arrow_back</mat-icon>
+      Volver
+    </button>
+    @if (canConfirm && doc.status === 'borrador') {
+      <button mat-flat-button color="primary" type="button" [disabled]="acting()" (click)="confirmDocument()">
+        <mat-icon aria-hidden="true">check_circle</mat-icon>
+        Confirmar
+      </button>
+    }
+    @if (canCancel && doc.status === 'borrador') {
+      <button mat-stroked-button type="button" [disabled]="acting()" (click)="cancelDocument()">
+        <mat-icon aria-hidden="true">cancel</mat-icon>
+        Descartar
+      </button>
+    }
+    @if (canReverse && doc.status === 'confirmado') {
+      <button mat-flat-button color="warn" type="button" [disabled]="acting()" (click)="reverseDocument()">
+        <mat-icon aria-hidden="true">history</mat-icon>
+        Revertir
+      </button>
+    }
+  </app-page-header>
+
+  @if (notice(); as noticeText) {
+    <p class="notice" role="alert">{{ noticeText }}</p>
+  }
+
+  <section class="meta" aria-label="Datos del documento">
+    <div class="meta__item"><span class="meta__label">Tipo</span><span class="meta__value">{{ doc.type }}</span></div>
+    <div class="meta__item"><span class="meta__label">Referencia</span><span class="meta__value">{{ doc.reference ?? '—' }}</span></div>
+    <div class="meta__item"><span class="meta__label">Almacen origen</span><span class="meta__value app-tabular">{{ doc.origin_warehouse_id ?? '—' }}</span></div>
+    <div class="meta__item"><span class="meta__label">Almacen destino</span><span class="meta__value app-tabular">{{ doc.destination_warehouse_id ?? '—' }}</span></div>
+    <div class="meta__item"><span class="meta__label">Notas</span><span class="meta__value">{{ doc.notes ?? '—' }}</span></div>
+    <div class="meta__item"><span class="meta__label">Motivo</span><span class="meta__value">{{ doc.reason_code ?? '—' }}</span></div>
+    <div class="meta__item"><span class="meta__label">Confirmado</span><span class="meta__value">{{ doc.confirmed_at ?? 'Sin confirmar' }}</span></div>
+    <div class="meta__item"><span class="meta__label">Creado</span><span class="meta__value">{{ doc.created_at }}</span></div>
+  </section>
+
+  <section aria-label="Lineas del documento">
+    <h2 class="section-title app-tight">Lineas ({{ doc.lines.length }})</h2>
+    @if (doc.lines.length === 0) {
+      <p class="section-note">Este documento no trae lineas.</p>
+    } @else {
+      <div class="table-wrap">
+        <table class="lines">
+          <thead>
+            <tr><th scope="col">Producto</th><th scope="col">Cantidad</th><th scope="col">Costo unitario</th><th scope="col">Total</th></tr>
+          </thead>
+          <tbody>
+            @for (line of doc.lines; track line.id) {
+              <tr>
+                <td class="app-tabular">#{{ line.product_id }}</td>
+                <td class="app-tabular">{{ line.quantity }}</td>
+                <td class="app-tabular">{{ line.unit_cost }}</td>
+                <td class="app-tabular">{{ line.line_total }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+
+  @if (doc.movements !== undefined && doc.movements !== null && doc.movements.length > 0) {
+    <section aria-label="Movimientos generados">
+      <h2 class="section-title app-tight">Movimientos ({{ doc.movements.length }})</h2>
+      <div class="table-wrap">
+        <table class="lines">
+          <thead>
+            <tr><th scope="col">Almacen</th><th scope="col">Direccion</th><th scope="col">Delta</th><th scope="col">Saldo resultante</th></tr>
+          </thead>
+          <tbody>
+            @for (movement of doc.movements; track movement.id) {
+              <tr>
+                <td class="app-tabular">#{{ movement.warehouse_id }}</td>
+                <td>{{ movement.direction }}</td>
+                <td class="app-tabular">{{ movement.quantity_delta }}</td>
+                <td class="app-tabular">{{ movement.balance_after }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+
+  @if (doc.reversal !== undefined && doc.reversal !== null) {
+    <section class="reversal" aria-label="Reversion aplicada">
+      <h2 class="section-title app-tight">Reversion aplicada</h2>
+      <p class="section-note">
+        Documento de reversion {{ doc.reversal.doc_number }}
+        ({{ doc.reversal.type }}, {{ doc.reversal.status }}).
+      </p>
+    </section>
+  }
+
+  @if (doc.status === 'borrador') {
+    <p class="section-note">
+      El alta y la edicion de borradores usan POST y PUT /api/v1/inventory-documents, que existen
+      pero aun no estan cableados en esta pantalla.
+    </p>
+  }
+} @else if (loading()) {
+  <app-page-header title="Documento" subtitle="Detalle del documento de inventario." />
+  <app-loading-skeleton variant="text" [rows]="8" />
+} @else if (errorMessage(); as message) {
+  <app-page-header title="Documento" subtitle="Detalle del documento de inventario." />
+  <app-error-state [message]="message" [errorId]="errorId()" (retry)="load()" />
+  <a mat-stroked-button routerLink="/inventario">
+    <mat-icon aria-hidden="true">arrow_back</mat-icon>
+    Volver al listado
+  </a>
+}

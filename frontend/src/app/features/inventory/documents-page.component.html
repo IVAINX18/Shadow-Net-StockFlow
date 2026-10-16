@@ -1,0 +1,67 @@
+<app-page-header [title]="pageTitle()" [subtitle]="pageSubtitle()" />
+
+@if (notice(); as noticeText) {
+  <p class="notice" role="alert">{{ noticeText }}</p>
+}
+
+<form class="toolbar" [formGroup]="filters" (ngSubmit)="$event.preventDefault()">
+  @if (fixedType() === null) {
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Tipo</mat-label>
+      <mat-select [value]="typeFilter()" (selectionChange)="onTypeFilter($event.value)">
+        <mat-option [value]="null">Todos</mat-option>
+        <mat-option value="entrada">Entrada</mat-option>
+        <mat-option value="salida">Salida</mat-option>
+        <mat-option value="ajuste">Ajuste</mat-option>
+        <mat-option value="transferencia">Transferencia</mat-option>
+      </mat-select>
+    </mat-form-field>
+  }
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Estado</mat-label>
+    <mat-select [value]="statusFilter()" (selectionChange)="onStatusFilter($event.value)">
+      <mat-option [value]="null">Todos</mat-option>
+      <mat-option value="borrador">Borrador</mat-option>
+      <mat-option value="confirmado">Confirmado</mat-option>
+      <mat-option value="revertido">Revertido</mat-option>
+      <mat-option value="descartado">Descartado</mat-option>
+    </mat-select>
+  </mat-form-field>
+  <mat-form-field appearance="outline" subscriptSizing="dynamic" class="toolbar__id">
+    <mat-label>Almacen origen (id)</mat-label>
+    <input matInput inputmode="numeric" formControlName="originWarehouse" maxlength="10" />
+  </mat-form-field>
+  <mat-form-field appearance="outline" subscriptSizing="dynamic" class="toolbar__id">
+    <mat-label>Almacen destino (id)</mat-label>
+    <input matInput inputmode="numeric" formControlName="destinationWarehouse" maxlength="10" />
+  </mat-form-field>
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Desde</mat-label>
+    <input matInput type="date" formControlName="from" />
+  </mat-form-field>
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Hasta</mat-label>
+    <input matInput type="date" formControlName="to" />
+  </mat-form-field>
+  <button mat-button type="button" (click)="onClearFilters()">Limpiar</button>
+</form>
+
+<app-data-table
+  [columns]="columns"
+  [rows]="rows()"
+  [total]="total()"
+  [page]="page()"
+  [pageSize]="pageSize()"
+  [loading]="loading()"
+  [error]="errorMessage()"
+  [errorId]="errorId()"
+  [sortKey]="sortKey()"
+  [sortDirection]="sortDirection()"
+  [actions]="actions()"
+  emptyIcon="assignment"
+  emptyTitle="Sin documentos"
+  emptyMessage="Todavia no hay documentos con estos filtros. Los documentos se crean con POST /api/v1/inventory-documents, que aun no esta cableado en esta pantalla."
+  (sortChange)="onSort($event)"
+  (pageChange)="onPage($event)"
+  (retry)="load()"
+/>

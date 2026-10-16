@@ -91,46 +91,51 @@ export const routes: Routes = [
           ),
       },
       {
-        path: 'pendiente/inventario',
+        path: 'inventario',
         title: 'Inventario | StockFlow',
-        data: {
-          crumb: 'Inventario',
-          pageTitle: 'Inventario',
-          summary: 'Documentos de inventario y existencias.',
-          phase: 'Fase 3',
-          endpoints: ['GET /api/v1/inventory-documents', 'GET /api/v1/inventory/kardex'],
-        },
+        data: { crumb: 'Inventario' },
         canActivate: [roleGuard(['inventory.view'])],
         loadComponent: () =>
-          import('./shared/components/module-pending/module-pending.component').then((m) => m.ModulePendingComponent),
+          import('./features/inventory/documents-page.component').then((m) => m.DocumentsPageComponent),
       },
       {
-        path: 'pendiente/movimientos',
+        path: 'inventario/:uuid',
+        title: 'Documento de inventario | StockFlow',
+        data: { crumb: 'Documento' },
+        canActivate: [roleGuard(['inventory.view'])],
+        loadComponent: () =>
+          import('./features/inventory/document-detail-page.component').then(
+            (m) => m.DocumentDetailPageComponent,
+          ),
+      },
+      {
+        path: 'existencias',
+        title: 'Existencias | StockFlow',
+        data: { crumb: 'Existencias' },
+        canActivate: [roleGuard(['reports.view'])],
+        loadComponent: () =>
+          import('./features/inventory/stock-page.component').then((m) => m.StockPageComponent),
+      },
+      {
+        path: 'movimientos',
         title: 'Movimientos | StockFlow',
-        data: {
-          crumb: 'Movimientos',
-          pageTitle: 'Movimientos',
-          summary: 'Kardex de movimientos por producto y almacen.',
-          phase: 'Fase 3',
-          endpoints: ['GET /api/v1/inventory/kardex', 'GET /api/v1/inventory-documents'],
-        },
+        data: { crumb: 'Movimientos' },
         canActivate: [roleGuard(['inventory.view'])],
         loadComponent: () =>
-          import('./shared/components/module-pending/module-pending.component').then((m) => m.ModulePendingComponent),
+          import('./features/inventory/kardex-page.component').then((m) => m.KardexPageComponent),
       },
       {
-        path: 'pendiente/transferencias',
+        path: 'transferencias',
         title: 'Transferencias | StockFlow',
         data: {
           crumb: 'Transferencias',
+          fixedType: 'transferencia',
           pageTitle: 'Transferencias',
-          summary: 'Traslados atomicos entre almacenes.',
-          phase: 'Fase 3',
-          endpoints: ['POST /api/v1/inventory-documents (type=transferencia)'],
+          pageSubtitle: 'Documentos de traslado atomico entre almacenes (solo lectura).',
         },
         canActivate: [roleGuard(['inventory.view'])],
         loadComponent: () =>
-          import('./shared/components/module-pending/module-pending.component').then((m) => m.ModulePendingComponent),
+          import('./features/inventory/documents-page.component').then((m) => m.DocumentsPageComponent),
       },
       {
         path: 'pendiente/reportes',

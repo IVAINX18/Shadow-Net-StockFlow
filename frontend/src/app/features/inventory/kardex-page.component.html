@@ -1,0 +1,67 @@
+<app-page-header
+  title="Movimientos"
+  subtitle="Kardex por producto y almacen, con el saldo resultante de cada movimiento."
+/>
+
+<form class="toolbar" [formGroup]="queryForm" (ngSubmit)="onQuery()">
+  <mat-form-field appearance="outline" subscriptSizing="dynamic" class="toolbar__id">
+    <mat-label>Producto (id)</mat-label>
+    <input matInput inputmode="numeric" formControlName="productId" maxlength="10" />
+    @if (queryForm.controls.productId.invalid && queryForm.controls.productId.touched) {
+      <mat-error>El producto es obligatorio.</mat-error>
+    }
+  </mat-form-field>
+  <mat-form-field appearance="outline" subscriptSizing="dynamic" class="toolbar__id">
+    <mat-label>Almacen (id)</mat-label>
+    <input matInput inputmode="numeric" formControlName="warehouseId" maxlength="10" />
+    @if (queryForm.controls.warehouseId.invalid && queryForm.controls.warehouseId.touched) {
+      <mat-error>El almacen es obligatorio.</mat-error>
+    }
+  </mat-form-field>
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Desde</mat-label>
+    <input matInput type="date" formControlName="from" />
+  </mat-form-field>
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Hasta</mat-label>
+    <input matInput type="date" formControlName="to" />
+  </mat-form-field>
+  <button mat-flat-button color="primary" type="submit">
+    <mat-icon aria-hidden="true">search</mat-icon>
+    Consultar
+  </button>
+  <button mat-button type="button" (click)="onClear()">Limpiar</button>
+</form>
+
+@if (queried() && initialBalance() !== null && finalBalance() !== null) {
+  <div class="balances">
+    <app-kpi-card
+      label="Saldo inicial del rango"
+      [value]="initialBalance() ?? '—'"
+      icon="first_page"
+      [loading]="loading()"
+    />
+    <app-kpi-card
+      label="Saldo final del rango"
+      [value]="finalBalance() ?? '—'"
+      icon="last_page"
+      [loading]="loading()"
+    />
+  </div>
+}
+
+<app-data-table
+  [columns]="columns"
+  [rows]="rows()"
+  [total]="total()"
+  [page]="page()"
+  [pageSize]="pageSize()"
+  [loading]="loading()"
+  [error]="errorMessage()"
+  [errorId]="errorId()"
+  emptyIcon="swap_vert"
+  emptyTitle="Sin movimientos"
+  emptyMessage="Indique el producto y el almacen para consultar su kardex. Sin movimientos confirmados no hay filas que mostrar."
+  (pageChange)="onPage($event)"
+  (retry)="load()"
+/>
