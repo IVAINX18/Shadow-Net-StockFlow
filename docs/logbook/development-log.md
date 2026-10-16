@@ -1226,3 +1226,19 @@ Esta bitácora registra cada unidad de trabajo del proyecto: fecha, fase, archiv
 **Pendientes:**
 - Confirmacion del propietario sobre la columna `direction`.
 - Decision sobre si la Fase 4 incluye pantallas de inventario en la SPA.
+
+---
+
+## Entrada 32 - 15/10/2026 - Confirmacion del propietario sobre la columna `direction`
+
+**Fase:** Transversal. Registra la decision del propietario sobre el ultimo hueco de especificacion que quedaba abierto en la Fase 3. No modifica codigo.
+
+**Decision confirmada:** la columna `direction` en `inventory_document_lines` queda confirmada. La unidad 2 la anadio para expresar el sentido de un ajuste, que el dominio exige (el apartado de tipos pide que un ajuste aumente o disminuya segun el signo, y el resumen de efectos habla de suma o resta) y que la regla RN-INV-01 impide escribir en la cantidad, porque obliga a que sea siempre positiva y declara que la direccion la determina el tipo de documento. En un ajuste el tipo no basta, porque admite los dos sentidos, y el motivo es una lista cerrada que tampoco expresa sentido: no habia otro lugar donde el signo pudiera vivir.
+
+**Alcance de la decision:** la columna queda como esta, nulable, con restriccion de dos valores y presente solo en ajustes. No se anade marca de tiempo de reversion, segun la correccion de la entrada 26. El modelo de datos y el contrato de API ya la reflejan, de modo que no hay ningun documento que cambiar.
+
+**Pruebas ejecutadas:** ninguna. Esta entrada solo registra una decision.
+
+**Resultado:** la Fase 3 queda sin huecos de especificacion abiertos. El unico asunto de alcance pendiente de decision es si las pantallas de inventario entran en la Fase 4 o en una unidad de frontend previa.
+
+**Nota:** la subida de la sesion (diseno v1.2, Fase 3 completa y documentacion hasta la entrada 31) quedo confirmada el mismo dia, en cuatro commits separados por tema.
