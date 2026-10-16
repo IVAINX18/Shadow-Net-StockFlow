@@ -921,3 +921,308 @@ Esta bitácora registra cada unidad de trabajo del proyecto: fecha, fase, archiv
 **Pendientes:** la revision de diseno; la confirmacion en Git del reparto de la guia de estilo y de las entradas 21 a 23.
 
 **Nota:** es un cambio en el plan de registro aprobado por Master; no se toco codigo ni comportamiento.
+
+---
+
+## Entrada 24 - 15/10/2026 - v1.2 del diseno (palancas 1 a 3) aplicada y verificada
+
+**Fase:** Transversal - v1.2 del diseno (palancas 1 a 3). No abre unidades nuevas ni toca el backend; esta entrada solo registra en el contrato y en la bitacora un cambio ya aplicado y verificado en sesion previa.
+
+**Archivos afectados (modificados):**
+- `docs/architecture/design-system.md` (v1.2): modelo de superficie por tokens, neutros con croma cero, jerarquia tipografica, ritmo de 32 px, sistema de lineas en dos niveles y acento sin cambios.
+- Esta bitacora (solo esta entrada).
+
+**Cambios efectuados:**
+- Modelo de superficie por tokens en `frontend/src/styles.scss`, con los componentes reorientados a ellos: `--app-surface-canvas` (claro `#ffffff`, oscuro la superficie de Material 3) como lienzo de pagina; `--app-surface-card` (claro `#ffffff`, oscuro el contenedor de superficie) para tarjetas; `--app-surface-paper` (claro `#f5f5f5`, oscuro el contenedor bajo de superficie) para zonas secundarias o agrupadas, barra lateral y barras del armazon. Refleja los niveles 0 (lienzo), 1 (papel) y 2 (tarjeta) de la referencia: tarjetas en blanco sobre blanco separadas por linea fina, con el papel para las zonas agrupadas.
+- Regla de neutros con croma cero en `frontend/tools/generate-palette.mjs`: las escalas `neutral` y `neutral-variant` se emiten con croma cero (`TonalPalette.fromHueAndChroma(0, 0)`); primario, secundario, terciario y error siguen saliendo de la semilla `#00695C`. Callejon sin salida, medido: cambiar la semilla por un gris no quita el tinte (una semilla gris entrega `#f8fafa` frente al `#f7faf8` vigente entonces, 2 unidades de diferencia en el canal azul, invisibles); el croma cero es el unico mecanismo que lo elimina. Resultado: grises puros (`98: #f9f9f9`, `50: #777777`, `6: #131313`). Trampa encontrada al hacerlo: la variante neutra con croma 4 y tono 0 sale rosada (`#cfc4c5`), porque el tono 0 se lee calido en CAM16, asi que ahi tambien se usa croma cero.
+- Escala tipografica: titulo de pagina `headline-large` de 32 px; titulo del acceso `headline-medium` de 28 px; titulos de seccion y de tarjeta `title-large` de 22 px; valor de indicador `headline-medium` de 28 px (sin cambios); cuerpo `body-medium` de 14 px. Jerarquia resultante de 32 > 28 > 22 > 16. El peso queda centralizado en `--app-title-weight: 500`, que es el tratamiento de titular de la referencia (Inter en peso 500 con tracking cerrado; `.app-tight` con `-0.02em` es el equivalente existente de su sustituto Satoshi). El titulo de pagina se aplica en un solo lugar, el encabezado compartido de pagina, asi que todas las pantallas lo heredan.
+- Ritmo: `--app-page-gutter` y `--app-section-gap` pasan a 32 px (`--app-space-8`) y bajan a 24 px (`--app-space-6`) por debajo de 768 px; el relleno de tarjeta (16 px) y la separacion entre elementos (8 px) no cambian. La referencia usa 64 px porque es una pagina de promocion; 32 px es la traduccion honesta para un panel de operacion denso.
+- Sistema de lineas en dos niveles con los dos tokens propios de Material 3: decorativa (`outline-variant`, `#c6c6c6` en claro y `#474747` en oscuro, sutil a proposito con 1.71:1 y 2.00:1) y borde de control (`outline`, `#777777` en claro y `#919191` en oscuro, con 4.48:1 y 5.90:1). Nota honesta: antes del cambio el contorno de control media 1.62:1 en claro y 1.99:1 en oscuro y por tanto no alcanzaba el 3:1 de WCAG 1.4.11; era un defecto previo encontrado al medir, no algo que el cambio introdujera.
+
+**Motivo:** el contrato visual debia reflejar lo ya aplicado y medido en la SPA, con los valores reales y los callejones documentados, para que ninguna pantalla futura reinvente superficie, neutros, jerarquia, ritmo o lineas.
+
+**Decisiones tomadas:**
+- El acento queda intacto: el primario se mantiene en `#006b5e` en claro y `#56dbc5` en oscuro, y la accion principal rellena conserva el acento en lugar del relleno casi negro de la referencia, porque la decision esta pendiente del propietario.
+- Las muestras documentadas de la guia de estilo se actualizaron a la escala real, y su spec se dejo intacto porque afirma conteos e invariantes que no cambiaron.
+- Defecto de entorno previo, encontrado y NO corregido: el servicio `frontend` de `compose.yaml` arranca pero no sirve nada en :4200 porque su `node_modules` carece de `@angular/material/icon`; la SPA se ejecuta desde el host con Node 22 hasta que eso se corrija.
+
+**Pruebas ejecutadas (mediciones ya tomadas en la sesion previa; esta entrada no ejecuta ni cita verificacion propia):**
+- `npm run lint` limpio; `npm test` con 40 pruebas en 9 ficheros, todas correctas.
+- Compilacion de produccion: 342,67 kB iniciales, sin avisos de presupuesto.
+- 44 capturas en 1440/1024/768/375 en ambos temas; cero desbordes de titulo a 375 px en las 9 rutas; contrastes medidos sobre estilos calculados reales.
+
+**Resultado:** v1.2 del diseno aplicada, verificada y registrada en el contrato.
+
+**Pendientes:**
+- Decision del propietario sobre el acento.
+- Corregir el servicio `frontend` de `compose.yaml` (falta `@angular/material/icon` en su `node_modules`).
+
+**Nota:** esta entrada solo toca documentacion; no se modifico codigo en ella.
+
+---
+
+## Entrada 25 - 15/10/2026 - Fase 3, unidad 1: esquema de inventario, borradores e idempotencia
+
+**Fase:** Fase 3 (inventario), unidad 1 de 5. Entrega el esquema de datos, el ciclo de vida del borrador y la idempotencia de la creacion. No incluye confirmacion, movimientos, kardex, reversos ni valorizacion: son las unidades 2 y 3.
+
+**Archivos afectados (nuevos):**
+- Migraciones: `2026_10_15_000013_create_inventories_table`, `...000014_create_inventory_documents_table`, `...000015_create_inventory_document_lines_table`, `...000016_create_inventory_movements_table`. Ninguna migracion existente se edito.
+- Dominio: `app/Domain/Enums/InventoryDocumentType.php`, `InventoryDocumentStatus.php`; `app/Models/{Inventory,InventoryDocument,InventoryDocumentLine,InventoryMovement}.php`; `app/Services/Inventory/{InventoryRules,InventoryDocumentService}.php`; `app/Exceptions/{IdempotencyConflictException,InvalidDocumentStateException}.php`; `database/factories/{InventoryDocumentFactory,InventoryDocumentLineFactory}.php`.
+- HTTP: `app/Http/Requests/Inventory/{Store,Update,Index}InventoryDocumentRequest.php`; `app/Http/Resources/{InventoryDocument,InventoryDocumentLine}Resource.php`; `app/Http/Controllers/Api/V1/InventoryDocumentController.php`; `routes/api/v1/inventory.php`.
+- Pruebas: `tests/Feature/Inventory/InventoryDocumentTest.php` (12 pruebas).
+
+**Archivos afectados (modificados):**
+- `routes/api.php` (un `require` mas), `backend/bootstrap/app.php` (mapeo 409 de `ESTADO_INVALIDO` e `IDEMPOTENCIA_REPETIDA`).
+- Infraestructura de pruebas, por defectos hallados al verificar: `tests/Pest.php` (los cinco ayudantes compartidos), `tests/Feature/{Authorization/WarehouseAuthorizationTest, Warehouses/WarehouseWriteTest, Catalog/CategoryTest}.php` (se retiraron las copias duplicadas) y `database/factories/RoleFactory.php`.
+- Esta bitacora (solo esta entrada).
+
+**Cambios efectuados:**
+- Cuatro tablas segun `database-design.md` 5.3: `inventories` (una fila por producto y almacen, `quantity` y `reserved_quantity` `DECIMAL(15,3)`, `average_cost` `DECIMAL(18,6)`); `inventory_documents` (`uuid`, `doc_number`, tipo, estado, almacen de origen y destino, `idempotency_key`, `reason_code`, `confirmed_by`, `confirmed_at`, `reversed_by_id`); `inventory_document_lines` (`quantity` `DECIMAL(15,3)`, `unit_cost` `DECIMAL(18,6)`, `line_total` `DECIMAL(18,2)`); `inventory_movements` (libro append-only, solo `created_at`, listo para la unidad 2 y sin escribir todavia).
+- Endpoints bajo `/api/v1`: listar y leer documentos, crear, actualizar y descartar. La lectura exige `inventory.view` y la escritura `inventory.create`; el alcance por almacen se resuelve en la consulta, nunca en memoria.
+- Idempotencia: cabecera `Idempotency-Key` obligatoria, con `uq_inventory_documents_idempotency_key` como garantia dura. Reintento con el mismo cuerpo canonico (lineas ordenadas por producto y decimales normalizados con `bcadd`) devuelve el documento original con 200; el mismo cuerpo distinto responde 409 `IDEMPOTENCIA_REPETIDA` sin crear nada. En inserciones simultaneas con la misma clave, el perdedor recibe el error 1062 de MySQL, relee al ganador y aplica la misma regla de igual o 409.
+- `doc_number` con formato `{ENT|SAL|AJU|TRA}-AAAA-{id:06d}`, derivado del identificador autoincremental dentro de la transaccion y con un valor provisional `TMP-<uuid>` mientras tanto.
+- `line_total` redondeado a la mitad hacia arriba con `bcadd(bcmul(cantidad, costo, 3), '0.005', 2)`: `bcmul` por si solo trunca y convierte 25,625 en 25,62.
+
+**Motivo:** el kardex es el nucleo del producto y todo lo demas depende de el. La unidad deja los cimientos sin tocar la confirmacion, para que la unidad 2 escriba el libro de movimientos sobre un esquema ya verificado.
+
+**Decisiones tomadas:**
+- `PUT /inventory-documents/{uuid}` anadido por defecto: RF-053 exige editar un borrador y `api-design.md` no definia ruta para ello, asi que el hueco se resolvio por decision razonada y no en silencio. Reemplazo completo del borrador en una transaccion, solo en estado `borrador`; en cualquier otro estado responde 409 `ESTADO_INVALIDO`. `uuid`, `idempotency_key` y `created_by` son inmutables, y `doc_number` se regenera si cambia el tipo para que el prefijo siga siendo coherente.
+- RF-075 preparado sin implementar: la carga acepta `confirm` opcional y la firma del servicio es `create(..., bool $confirm = false)`; hoy `confirm: true` responde 422 y la unidad 2 ramifica ahi hacia el camino transaccional, sin cambiar el contrato.
+- Descartar un borrador se incluyo en el ciclo de vida (usa `inventory.create`, sin efectos sobre existencias).
+- Reglas de validacion asentadas en `InventoryRules`, no en el controlador: `destination_warehouse_id` se rechaza fuera de una transferencia; `reason_code` es obligatorio en un ajuste y se rechaza en el resto; producto repetido en las lineas responde 422; `allows_decimals` de la unidad de medida **no** se aplica en el borrador porque es regla de la confirmacion; el alcance de lectura es origen o destino, y el de escritura exige **todos** los almacenes implicados.
+- Hueco de la especificacion, decidido y no rellenado en silencio: `database-design.md` 5.3 lista `reversed_by_id` pero no `reversed_at`, mientras su apartado 1 da por hecho que el documento lleva ambos. Se implemento exactamente lo que dice 5.3 (sin `reversed_at`) y queda pendiente de decision del propietario.
+
+**Defectos hallados al verificar y corregidos:**
+- Aislamiento de pruebas: las 12 pruebas nuevas fallaban al ejecutarse solas con `Call to undefined function usuarioConPermisos()` porque los ayudantes vivian dentro de otros archivos de prueba. Cualquiera que comprobara el inventario de forma aislada habria visto doce fallos falsos. Los cinco ayudantes compartidos pasaron a `tests/Pest.php`, que Pest carga en toda ejecucion, y se retiraron las copias de los tres archivos que los definian.
+- Prueba intermitente anterior a esta unidad: la fabrica de roles alimentaba `roles.name` (`varchar(80)`) con un titulo de `faker` que puede llegar a 82 caracteres, de modo que la suite fallaba al azar. La fabrica ahora recorta con `mb_substr(..., 0, 80)`. No se toco el esquema ni se aflojo ninguna afirmacion: el esquema es el contrato y la prueba estaba equivocada.
+- Dos fallos propios detectados por las pruebas y corregidos antes de cerrar: el redondeo de `line_total` y **un fallo de autorizacion en el camino de lectura, donde un destino nulo dejaba pasar la comprobacion de alcance**. Este ultimo era un agujero real y se cerro con una condicion mas estricta.
+
+**Pruebas ejecutadas:**
+- `php artisan test tests/Feature/Inventory` en solitario: 12 pruebas, 75 aserciones, correctas.
+- `php artisan test` (suite completa): 144 pruebas, 883 aserciones, correctas.
+- `php artisan test --filter=AC-003` tres veces seguidas: correctas.
+- `./vendor/bin/pint --test`: correcto.
+- Esquema comprobado contra `information_schema`: las cuatro tablas existen, los cuatro unicos que sostienen la regla de negocio estan puestos (`uq_inventories_product_warehouse`, `uq_inventory_documents_doc_number`, `uq_inventory_documents_uuid`, `uq_inventory_documents_idempotency_key`) y **ninguna columna es `float` ni `double`**: todas las cantidades y costos son `DECIMAL`.
+- Las cuatro migraciones aplicadas a la base de desarrollo.
+
+**Resultado:** unidad 1 cerrada y verificada. La base de datos de desarrollo tiene ya el esquema de inventario y la suite queda en verde de forma reproducible.
+
+**Pendientes:**
+- Decidir si el documento lleva `reversed_at` (corregir el documento o anadir la columna en la unidad 2).
+- Confirmar las dos decisiones tomadas por defecto: la ruta de edicion del borrador y el hueco de la confirmacion inmediata.
+- Unidades 2 a 5 de la Fase 3.
+
+---
+
+## Entrada 26 - 15/10/2026 - Correccion del modelo de datos y decisiones confirmadas de la Fase 3
+
+**Fase:** Transversal. Cierra una contradiccion del modelo de datos y registra la confirmacion del propietario sobre dos decisiones que la unidad 1 habia tomado por defecto. No toca codigo.
+
+**Archivos afectados (modificados):**
+- `docs/architecture/database-design.md` (apartado 1, marcas de tiempo).
+- `docs/architecture/api-design.md` (apartado 7.8, se anade la ruta de edicion del borrador).
+- Esta bitacora (solo esta entrada).
+
+**Cambios efectuados:**
+- El apartado 1 de `database-design.md` afirmaba que los documentos anaden `confirmed_at` y `reversed_at`, pero la tabla del apartado 5.3 no define `reversed_at`: rastrea la reversion con `reversed_by_id`. Se corrige el apartado 1 para que coincida con la tabla, que es la que describe la base real: los documentos anaden `confirmed_at`, y la reversion se rastrea con `reversed_by_id`, que apunta al documento compensatorio, cuyo `confirmed_at` lleva el momento. Se opta por no anadir una marca duplicada, para que no pueda divergir.
+- El apartado 7.8 de `api-design.md` incorpora `PUT /api/v1/inventory-documents/{uuid}`, que faltaba en el contrato: RF-053 exige editar un borrador y no habia ruta definida para ello.
+
+**Motivo:** la documentacion es la fuente de verdad y no puede contradecirse a si misma. El hueco lo detecto la unidad 1 al implementar la tabla y se dejo declarado en lugar de rellenarse en silencio, tal como exige el flujo de trabajo.
+
+**Decisiones tomadas:**
+- El propietario confirma la ruta de edicion del borrador (`PUT`), restringida al estado `borrador`; en cualquier otro estado responde 409 `ESTADO_INVALIDO`.
+- El propietario confirma el hueco preparado para la confirmacion inmediata de RF-075: la creacion acepta `confirm` y el mismo servicio transaccional lo resuelve. El apartado 7.8 ya describia ese comportamiento, asi que la implementacion se limita a cumplir el contrato.
+- Se corrige el documento en lugar de anadir la columna: la reversion no necesita marca propia porque el documento compensatorio ya la lleva.
+
+**Pruebas ejecutadas:** ninguna. Esta entrada solo modifica documentacion; no se ejecuto ni se toco codigo.
+
+**Resultado:** la contradiccion queda cerrada y las dos decisiones de la unidad 1 pasan de tomadas por defecto a confirmadas por el propietario.
+
+**Pendientes:**
+- El servicio `frontend` de `compose.yaml` sigue sin servir la SPA en :4200 (vease la entrada 24).
+- Unidades 2 a 5 de la Fase 3.
+
+---
+
+## Entrada 27 - 15/10/2026 - Fase 3, unidad 2: nucleo transaccional
+
+**Fase:** Fase 3 (inventario), unidad 2 de 5. Confirmacion de los cuatro tipos de documento, libro de movimientos, bloqueo ordenado con reintentos, reversos trazables y promedio ponderado. No incluye kardex ni existencias (unidad 3) ni carga inicial (unidad 4).
+
+**Archivos afectados (nuevos):**
+- `database/migrations/2026_10_15_000017_add_direction_to_inventory_document_lines_table.php` (vease la decision del signo del ajuste).
+- `app/Exceptions/InsufficientStockException.php` (transporta el detalle por linea para el 409), `app/Http/Resources/InventoryMovementResource.php` (decimales como cadena), `app/Http/Requests/Inventory/ReverseInventoryDocumentRequest.php` (`reason` obligatorio).
+- `tests/Feature/Inventory/InventoryConfirmationTest.php` (20 pruebas) y `tests/Feature/Inventory/InventoryConcurrencyTest.php` (3 pruebas de concurrencia real con procesos bifurcados).
+
+**Archivos afectados (modificados):**
+- `app/Services/Inventory/InventoryDocumentService.php`: `confirm()`, `reverse()`, el atajo `confirm: true` dentro de la misma transaccion y un motor compartido de efectos.
+- `app/Services/Inventory/InventoryRules.php` (`lines.*.direction`), `InventoryDocumentController.php` (acciones de confirmar y revertir), `routes/api/v1/inventory.php`, `bootstrap/app.php` (409 `STOCK_INSUFICIENTE` con detalle por linea), modelos y recursos de documento, linea y movimiento, `tests/Pest.php` y una prueba semilla de la unidad 1 ajustada al nuevo comportamiento de `confirm: true`.
+- `docs/architecture/database-design.md` (columna `direction` en la tabla de lineas) y `docs/architecture/api-design.md` (`lines[].direction` en la carga y mismas validaciones en la ruta de edicion).
+- Esta bitacora (solo esta entrada).
+
+**Cambios efectuados:**
+- Confirmacion atomica de los cuatro tipos. La entrada suma existencia al costo capturado; la salida descuenta y **nunca permite saldo negativo**; el ajuste aplica una correccion con sentido declarado; la transferencia descuenta en el origen, acredita en el destino y escribe dos movimientos dentro de una sola transaccion, sin estado intermedio visible. El costo que viaja es el promedio del origen, ya bloqueado, y el destino recalcula su ponderado con el.
+- Todo efecto se escribe como movimiento en `inventory_movements` con su saldo resultante. El libro es de solo adicion: nada se actualiza ni se borra.
+- Bloqueo en orden determinista por almacen y producto, ascendente, incluida la pata de destino de la transferencia; el documento se bloquea primero con `FOR UPDATE`, de modo que dos confirmaciones del mismo documento no pueden aplicarse dos veces. Cuando la fila de existencia no existe y hay pata de entrada, se crea rescatando la violacion de la clave unica y releyendo el ganador.
+- Reintento manual acotado: 3 intentos con retroceso de 50 ms por 2 elevado a n-1 mas dispersion, **solo ante interbloqueo**. El error de espera agotada y cualquier fallo de negocio no se reintentan jamas.
+- Reversion: crea un documento espejo ya confirmado (la entrada se vuelve salida, la transferencia se invierte, el ajuste invierte su sentido), espeja los costos de los movimientos originales, marca el original como `revertido` y lo enlaza por `reversed_by_id`, y audita con el motivo dentro de la misma transaccion. La clave derivada `REV-<uuid>` hace idempotente el doble reverso simultaneo: el segundo choca en la clave unica y devuelve el par ya creado. Si no hay existencia para compensar, responde 409 sin parciales automaticos (RF-078).
+- Idempotencia de la confirmacion: documento ya confirmado con la misma clave devuelve 200 con el resultado original; con otra clave responde 409 `ESTADO_INVALIDO` (AC-029).
+- El atajo `confirm: true` exige **ademas** el permiso de confirmar: sin esa guarda, crear con confirmacion inmediata habria evadido el permiso de la ruta `/confirm`.
+
+**Motivo:** el libro de movimientos es el nucleo del producto y la razon de ser del proyecto. La unidad convierte el borrador en efectos reales sobre las existencias sin romper la regla que lo sostiene todo: nada de sobreventa, nada de saldos negativos y nada que se pueda borrar.
+
+**Decisiones tomadas:**
+- **Hueco del signo del ajuste.** Ningun campo persistido expresaba el sentido de la correccion: `quantity` es siempre positiva por restriccion, y el motivo no lo determina (merma y robo frente a inventario fisico son ambiguos). Se anade `direction` por linea, solo en ajustes y con valor por defecto `entrada`; en el resto de tipos responde 422. Se descartaron derivarlo del motivo y usar cantidad con signo, esta ultima porque rompe RN-INV-01, la restriccion de la tabla y lo ya entregado en la unidad 1. La columna queda reflejada en `database-design.md`, asi que el hueco no se relleno en silencio.
+- El ajuste conserva el promedio ponderado, salvo cuando la existencia es cero, donde lo siembra desde el costo de la linea; de otro modo I-07 quedaria violada. El promedio se calcula con 9 decimales intermedios y se trunca a 6.
+- El motivo de la reversion vive en las notas del documento espejo y en la auditoria, porque el esquema no define columna propia; en los ajustes se hereda el `reason_code`.
+- AC-014 y AC-015 se aplican al confirmar: una unidad que no admite decimales con cantidad fraccionaria responde 422.
+
+**Defectos hallados al verificar y corregidos:**
+- La migracion de la nueva columna quedo **pendiente en la base de desarrollo**, de modo que el entorno estaba desincronizado respecto del codigo. La verifique, la aplique y confirme la columna en `information_schema`.
+- Fuga de datos entre archivos de prueba: el archivo de concurrencia no usa `RefreshDatabase` porque necesita procesos bifurcados, y al confirmar documentos dejaba datos que contaminaban los archivos siguientes de la suite. Se anadio limpieza posterior y se comprobo que la suite completa pasa dos veces seguidas.
+
+**Pruebas ejecutadas:**
+- `php artisan test` (suite completa): 167 pruebas, 1076 aserciones, correctas; repetida una segunda vez, igualmente correcta.
+- `php artisan test tests/Feature/Inventory` (aislado): 35 pruebas, 268 aserciones, correctas.
+- Pruebas de concurrencia con procesos bifurcados, ejecutadas tres veces seguidas: 3 de 3 en cada pasada, sin inestabilidad.
+- `./vendor/bin/pint --test`: correcto.
+- Los criterios que la unidad debe dejar alcanzables: la sobreventa concurrente esta cubierta por prueba (10 unidades y dos salidas simultaneas de 8 terminan con exactamente una confirmada y el saldo coherente), y la coherencia entre el libro y las existencias se comprueba por prueba; el recuento de filas divergentes sobre la base completa queda para el cierre de la fase.
+
+**Resultado:** unidad 2 cerrada y verificada. Los documentos ya producen efectos reales, atomicos y trazables, y la base de desarrollo tiene el esquema al dia.
+
+**Pendientes:**
+- Confirmacion del propietario sobre la columna `direction`, que amplia la tabla documentada.
+- Cierre de la Fase 3: consulta de coherencia sobre la base completa sin filas divergentes (unidad 5).
+- Unidades 3 a 5 de la Fase 3.
+
+---
+
+## Entrada 28 - 15/10/2026 - Fase 3, unidad 3: kardex, existencias y bajo minimo
+
+**Fase:** Fase 3 (inventario), unidad 3 de 5. La cara de lectura: kardex, existencias y reporte de faltantes, mas la demostracion de los invariantes. Unidad de solo lectura: no escribe en ninguna tabla.
+
+**Archivos afectados (nuevos):**
+- `app/Services/Inventory/InventoryQueries.php` (las consultas, con el alcance resuelto en SQL), `app/Http/Controllers/Api/V1/KardexController.php`, `app/Http/Controllers/Api/V1/StockReportController.php`, `app/Http/Resources/StockResource.php`, las peticiones de kardex y de reporte, `routes/api/v1/reports.php`.
+- `tests/Feature/Inventory/KardexTest.php`, `tests/Feature/Inventory/InventoryCoherenceTest.php`, `tests/Feature/Reports/StockReportTest.php`.
+
+**Archivos afectados (modificados):** `routes/api/v1/inventory.php` (ruta del kardex) y `app/Services/Inventory/InventoryRules.php` (reglas del reporte).
+
+**Cambios efectuados:**
+- Kardex por producto y almacen, con rango inclusivo en ambos extremos y orden estable por fecha e identificador, que es lo que permite leer un saldo acumulado sin ambiguedad cuando dos movimientos comparten instante.
+- Listado de existencias con sus filtros, y reporte de faltantes contra la configuracion minima por almacen.
+- El filtro `below_min` acepta el literal `true` porque el tablero anuncia el endpoint con `?below_min=true`, y ademas `false`, `1` y `0` por su valor: un cast directo a booleano habria invertido el sentido de `false`, que es exactamente el error que el contrato no puede permitir en un informe de faltantes.
+- Los siete invariantes del dominio quedan demostrados por prueba: la coherencia libro contra existencias (I-02) en su propio archivo, y el resto en el escenario de invariantes.
+
+**Motivo:** el libro de movimientos solo vale si se puede leer, y la fase no se puede cerrar sin demostrar que lo que dice el libro coincide con las existencias materializadas. Por eso la coherencia se comprueba con una consulta real y no con una comprobacion puntual.
+
+**Decisiones tomadas:**
+- Los reportes se separan en su propio grupo de rutas con el permiso `reports.view`, no con el `inventory.view` del kardex: el Auditor lee reportes sin confirmar documentos y el Operador confirma sin ver reportes, de modo que mezclarlos romperia la matriz de seguridad.
+- La prueba de coherencia comprueba las dos direcciones (saldo que no cuadra con el libro y movimientos huerfanos) y **afirma que existen datos** antes de darse por buena, para que no pueda pasar por vacio, que es la forma mas comun de que una prueba de coherencia mienta.
+- Se eligio `Rule::in` sobre el valor literal en lugar de una regla propia, para dejar escrita la lista exacta de entradas aceptadas.
+
+**Pruebas ejecutadas:**
+- `php artisan test` (suite completa): 183 pruebas, 1260 aserciones, correctas.
+- `php artisan test tests/Feature/Inventory tests/Feature/Reports` (aislado): 51 pruebas, 452 aserciones, correctas.
+- `./vendor/bin/pint --test`: correcto.
+- Planes de consulta inspeccionados en la base real: el kardex usa el indice `idx_inventory_movements_kardex` con acceso por rango, y la consulta de coherencia recorre las existencias con busqueda por indice en el libro.
+
+**Resultado:** unidad 3 cerrada y verificada. El nucleo del producto ya se puede leer, y la coherencia entre el libro y las existencias queda demostrada de forma que el cierre de la fase pueda reutilizarla.
+
+**Nota:** esta unidad se produjo en el modelo de reserva despues de que el proveedor devolviera sobrecarga en el modelo titular, y su entrega se escruto mas de lo habitual precisamente por eso. La verificacion descrita es propia y se hizo sobre el resultado final.
+
+**Pendientes:**
+- Confirmacion del propietario sobre la columna `direction` (entrada 27).
+- Unidades 4 y 5 de la Fase 3.
+
+---
+
+## Entrada 29 - 15/10/2026 - Fase 3, unidad 4: carga inicial de existencias
+
+**Fase:** Fase 3 (inventario), unidad 4 de 5. Carga inicial de saldos de apertura.
+
+**Archivos afectados (nuevos):**
+- `app/Services/Inventory/InitialStockImportService.php` (plantilla, simulacro y aplicacion), `app/Services/Inventory/InitialStockImportRowException.php` (error por fila con fila, campo y motivo), `app/Http/Controllers/Api/V1/InitialStockImportController.php`, `tests/Feature/Inventory/InitialStockImportTest.php` (11 pruebas).
+
+**Archivos afectados (modificados):** `routes/api/v1/imports.php` (grupo con el permiso `inventory.create` y las tres rutas) y `tests/Pest.php` (el ayudante `unidadBase` pasa al archivo que Pest carga siempre; vease la entrada 25 para el mismo defecto de aislamiento).
+
+**Cambios efectuados:**
+- Tres rutas segun el contrato: plantilla, simulacro sin efectos y aplicacion con clave de idempotencia obligatoria.
+- **La carga no escribe jamas `inventories.quantity`.** Agrupa las filas por almacen y crea, por cada uno, un documento de `entrada` **ya confirmado** a traves del mismo motor de la unidad 2: los mismos bloqueos ordenados, el mismo promedio ponderado y los mismos movimientos con saldo resultante. Todo el conjunto va envuelto en una transaccion externa, de modo que una carga que toque varios almacenes es atomica o no ocurre.
+- Validacion con la misma disciplina que la importacion de catalogo: 5 MB, 1000 filas, CSV o XLSX, UTF-8, encabezados exactos y archivo vacio rechazado, todo con 422 y sin efectos. Por fila: el SKU debe existir y estar activo, el almacen se identifica por codigo y debe estar activo y en el alcance de quien carga, la cantidad es una cadena decimal de hasta tres decimales y mayor que cero (y fraccionaria solo si la unidad admite decimales), el costo es una cadena de hasta seis decimales y no negativo, y el par producto-almacen repetido dentro del archivo se rechaza.
+- Idempotencia con clave derivada por almacen y comparacion canonica del motor: repetir la carga no duplica nada, y la misma clave con contenido distinto responde 409.
+
+**Motivo:** los saldos de apertura son existencias y, como tales, tienen que entrar por el libro. Si la carga escribiera la existencia directamente, el libro dejaria de explicar el saldo y la coherencia que sostiene toda la fase seria una ficcion. El criterio de cierre pide justamente que la carga inicial deje las existencias iguales a la suma del kardex.
+
+**Decisiones tomadas:**
+- **Un documento de entrada por almacen**, porque un documento admite un solo almacen de origen y el contrato habla del documento en singular; la respuesta devuelve un arreglo de documentos.
+- **Una fila fuera de alcance se rechaza por fila**, no con un 403 global, porque el criterio de aceptacion exige que se rechace la fila. El 403 por alcance queda para el caso de que el permiso se revoque entre el simulacro y la aplicacion, que se revalida dentro de la transaccion.
+- **El costo es obligatorio**, sin valor por omision: adivinar la valorizacion corromperia el promedio ponderado, y el promedio es dato contable.
+- **Archivo vacio devuelve 422**: aceptar una carga de cero filas con su registro de auditoria falsearia la trazabilidad.
+- La idempotencia es por clave y no por contenido: la misma clave con otro archivo responde 409, pero **otra clave con el mismo archivo carga de nuevo**, igual que en los documentos, porque repetir con intencion y clave nueva es una carga distinta.
+
+**Pruebas ejecutadas:**
+- `php artisan test` (suite completa): 194 pruebas, 1353 aserciones, correctas.
+- `php artisan test tests/Feature/Inventory tests/Feature/Reports` (aislado): 62 pruebas, 545 aserciones, correctas.
+- `./vendor/bin/pint --test`: correcto.
+- Comprobado ademas en el codigo: el servicio no escribe la existencia en ningun punto (solo construye la carga y llama al motor de documentos) y existe una prueba especifica de que **la coherencia kardex-saldo sigue intacta despues de una carga inicial**, que opera sobre el saldo cargado y afirma que hay datos antes de darse por buena.
+
+**Resultado:** unidad 4 cerrada y verificada. Los saldos de apertura entran por el libro y la coherencia se mantiene.
+
+**Pendientes:**
+- Confirmacion del propietario sobre la columna `direction` (entrada 27).
+- Unidad 5: cierre de la fase contra sus siete criterios de salida.
+
+---
+
+## Entrada 30 - 15/10/2026 - Cierre de la Fase 3: los siete criterios de salida verificados
+
+**Fase:** Cierre de la Fase 3 (inventario). No anade funcionalidad: comprueba uno por uno los criterios de salida del plan y los deja con evidencia. La verificacion se hizo sobre el resultado final, no sobre reportes de terceros.
+
+**Archivos afectados (modificados):**
+- `backend/tests/Feature/Inventory/InventoryConfirmationTest.php`: una prueba nueva para el criterio de frontera heredado de la Fase 2 (AC-018). Existia el rechazo, pero sin atar el codigo y el mensaje del error de negocio ni la segunda mitad del criterio, y un criterio de salida no se cumple por aproximacion.
+- `docs/planning/scope-and-milestones.md`: la fase queda marcada como completada y verificada.
+- Esta bitacora (solo esta entrada).
+
+**Los siete criterios, con la prueba que los demuestra:**
+1. **Invariantes I-01 a I-07 en integracion, con la coherencia kardex-saldo sin filas divergentes.** `InventoryCoherenceTest` (3 pruebas, 80 aserciones) y la comprobacion de que la suma del kardex iguala el saldo materializado en `InventoryConfirmationTest`. No es vacua: el escenario construye entradas, salidas, transferencias, reversion y ajustes sobre tres productos y dos almacenes, y una tercera prueba **inyecta una deriva por SQL directo y exige que la consulta la detecte**, de modo que el detector demuestra que puede fallar.
+2. **Sobreventa: existencia 10 y dos salidas concurrentes de 8.** `InventoryConcurrencyTest`, con procesos bifurcados reales contra MySQL. Saldo final 2,000, exactamente una operacion confirmada y la perdedora rechazada con error de stock insuficiente.
+3. **Transferencias cruzadas en paralelo sin saldos negativos ni interbloqueos sin resolver.** Mismo archivo: los dos sentidos terminan correctos, y el ayudante falla si un proceso hijo no termina en 60 segundos, de modo que un interbloqueo no puede pasar por exito.
+4. **Doble confirmacion con la misma clave de idempotencia.** Prueba secuencial y concurrente: un solo movimiento y un solo efecto.
+5. **Salida mayor al stock rechazada con error de negocio claro.** 409 con codigo de negocio, documento que sigue en borrador, cero movimientos y saldo intacto.
+6. **Carga inicial igual a la suma del kardex.** `InitialStockImportTest` (11 pruebas, 93 aserciones), mas la comprobacion de coherencia intacta despues de cargar.
+7. **Frontera heredada de la Fase 2: un producto inactivo no admite movimientos nuevos (RN-INV-09 y AC-018).** Se anadio la prueba que ata el rechazo 422 al campo y al mensaje exacto, comprueba que no hay efectos nuevos sobre el saldo ni sobre el libro, y verifica que el kardex del producto inactivo **sigue siendo consultable**, que es la segunda mitad del criterio.
+
+**Pruebas ejecutadas:**
+- `php artisan test` (suite completa): 195 pruebas, 1369 aserciones, correctas.
+- `php artisan test tests/Feature/Inventory tests/Feature/Reports` (aislado): 63 pruebas, 561 aserciones, correctas.
+- La prueba del criterio de frontera ejecutada sola: 1 prueba, 16 aserciones, correcta.
+- `./vendor/bin/pint --test`: correcto.
+
+**Decisiones tomadas:** ningun criterio quedo sin cumplir y no fue necesario tocar codigo de produccion. La unica prueba anadida cubre un criterio que estaba probado a medias, no un defecto.
+
+**Nota operativa (hallazgo de entorno, confirmado dos veces en esta sesion):** dos ejecuciones de `php artisan test` en paralelo colisionan sobre la misma base de pruebas `stockflow_test`, porque `RefreshDatabase` migra y vacia a la vez; los sintomas son errores de tabla inexistente y de clave duplicada que no tienen nada que ver con el codigo y que de hecho enganaron a dos agentes en la misma sesion. Las suites se ejecutan en un solo proceso. Queda anotado tambien en la base de conocimiento.
+
+**Resultado:** Fase 3 cerrada. El nucleo transaccional del producto esta entregado, verificado y documentado, y el criterio de frontera que se movio desde la Fase 2 queda satisfecho.
+
+**Pendientes:**
+- Confirmacion del propietario sobre la columna `direction` (entrada 27).
+- La fase siguiente es la 4 (tablero con datos reales).
+
+---
+
+## Entrada 31 - 15/10/2026 - Reparacion del contenedor de la SPA y evidencia del hueco del ajuste
+
+**Fase:** Transversal. Repara un defecto de entorno que llevaba horas ocultando la SPA y deja por escrito la evidencia del hueco del signo del ajuste, que sigue pendiente de decision. No modifica codigo de la aplicacion.
+
+**Hallazgo y causa raiz:** las entradas 24 y 27 dejaron registrado que el servicio `frontend` de `compose.yaml` arrancaba pero no servia nada en :4200. La causa **no era el Dockerfile**, que si instala las dependencias: la composicion monta un volumen con nombre sobre `frontend/node_modules`, y los volumenes con nombre no se resincronizan mientras existan, de modo que conservan la lista de dependencias del momento en que se crearon. El registro del contenedor lo decia con precision, `Could not resolve "@angular/material/icon"` importado desde `app.config.ts`, y el directorio del paquete estaba ausente del volumen.
+
+**Reparacion:** se elimino el contenedor y el volumen afectado y se recreo el servicio, de modo que el volumen se sembro otra vez desde la imagen. Verificado despues: el paquete esta presente y la SPA responde 200 con su HTML. No se toco ningun otro servicio: MySQL sigue sano y la API responde 200 en su ruta de salud.
+
+**Evidencia del hueco del ajuste (para la decision pendiente):** el dominio pide un signo y no deja escribirlo. El apartado de tipos exige que un ajuste aumente o disminuya **segun el signo**, el resumen de efectos habla de `+cantidad` o `-cantidad`, y sin embargo RN-INV-01 obliga a que la cantidad sea siempre positiva y declara que la direccion la determina el tipo de documento. En un ajuste el tipo no basta, porque admite los dos sentidos. No hay ningun otro lugar donde el signo pueda vivir: el motivo es una lista cerrada que no expresa sentido. La columna `direction` es la resolucion minima del hueco, no una preferencia de implementacion.
+
+**Pruebas ejecutadas:** ninguna del codigo de la aplicacion, porque esta entrada no lo modifica. Del entorno: SPA en 200, API en 200 y MySQL sano.
+
+**Resultado:** la SPA vuelve a servirse desde la composicion, como documenta el proyecto, y la decision sobre `direction` queda apoyada en el propio texto del dominio en lugar de en una impresion.
+
+**Pendientes:**
+- Confirmacion del propietario sobre la columna `direction`.
+- Decision sobre si la Fase 4 incluye pantallas de inventario en la SPA.

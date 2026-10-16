@@ -1,6 +1,6 @@
 # PROJECT KNOWLEDGE BASE
 
-**Updated:** 13/10/2026 · **Commit:** 804f060 · **Branch:** main
+**Updated:** 14/10/2026 · **Commit:** 8b97ab7 · **Branch:** main
 
 ## OVERVIEW
 ERP web de inventarios y logística multi-almacén (Shadow-Net Technologies). Monorepo **documentación-primero**: API Laravel 13 + SPA Angular 22 + MySQL 8.4, entorno reproducible con **Podman**. El núcleo es un libro de movimientos (kardex) transaccional. Las **fases 0, 1 y 2 están completadas y verificadas**: fundaciones, autenticación y RBAC con almacenes, y catálogo con importación. La Fase 3 (inventario: documentos, movimientos, kardex, reversos y carga inicial) es el siguiente paso.
@@ -13,7 +13,7 @@ Shadownet_Stockflow/
 ├── frontend/     # SPA Angular 22, cableada a la API (autenticación, tablero, almacenes, usuarios/roles y catálogo)
 ├── compose.yaml  # Servicios mysql + backend + frontend (podman-compose)
 ├── .env.example  # Variables de la composición (APP_KEY + DB_*)
-└── .github/workflows/ci.yml   # CI: Pint + Pest (MySQL) y build de Angular
+└── .github/workflows/ci.yml   # CI: backend (Pint + Pest contra MySQL) y frontend (ESLint + Vitest + build)
 ```
 
 ## WHERE TO LOOK
@@ -26,7 +26,7 @@ Shadownet_Stockflow/
 | Reglas del núcleo de inventario | `docs/architecture/inventory-domain.md` |
 | Endpoints, paginación y errores | `docs/architecture/api-design.md` |
 | Controles y catálogo de seguridad | `docs/architecture/security-design.md` |
-| Identidad visual de la SPA | `docs/architecture/design-system.md` |
+| Identidad visual de la SPA | `docs/architecture/design-system.md` (contrato vigente) y `DESIGN.md` en la raíz (referencia de diseño) |
 | Cómo probar | `docs/development/testing-strategy.md` |
 | Cómo reportar avance | `docs/development/development-workflow.md` + `docs/logbook/development-log.md` |
 | Fases y orden de trabajo | `docs/planning/scope-and-milestones.md`, `backlog.md` |
@@ -62,6 +62,8 @@ Solo lo que se desvía del estándar Laravel/Angular; el resto es convencional.
 - **Nombres canónicos sin sinónimos:** `/api/v1`; tipos `entrada|salida|ajuste|transferencia`; estados `borrador|confirmado|revertido|descartado`; sobre de error `{error:{code,message,details}}` con códigos en mayúsculas (`NO_AUTENTICADO`, `FUERA_DE_ALCANCE`, …).
 - **Pruebas contra MySQL 8.4 real, nunca SQLite** (`backend/phpunit.xml` fija `stockflow_test`).
 - Los decimales viajan como **cadenas** JSON, nunca flotantes.
+- **La paleta del tema es generada, no se edita a mano:** `frontend/tools/generate-palette.mjs` deriva `src/styles/_palette.scss` de **una sola semilla** (`themeFromSourceColor`) con `npm run palette:generate`. Cambiar un color es cambiar la semilla y regenerar; lo que se escriba en el SCSS generado se pierde en la siguiente regeneración. El guion empaqueta con esbuild porque `@material/material-color-utilities` publica ESM **sin extensiones** y el resolutor de Node lo rechaza: importarla directamente desde un script propio falla, hay que pasar por esbuild igual que el guion.
+- **Los neutros de Material 3 nunca son grises puros:** `themeFromSourceColor` fija un croma mínimo, así que cambiar la semilla solo cambia el *tono* del tinte, no lo elimina. Para un fondo neutro hay que emitir `neutral` y `neutral-variant` con croma cero (`TonalPalette.fromHueAndChroma(0, 0)`). Además, la superficie de M3 vive en el tono 98 (casi blanco), no en el 100: el blanco puro es una desviación explícita del sistema.
 
 ## ANTI-PATTERNS (THIS PROJECT)
 - **Nunca `docker` / `docker compose`**: el entorno canónico es **Podman** (`podman-compose`, `compose.yaml`). No se usa el demonio de Docker.
@@ -101,6 +103,9 @@ npm run lint && npm test && npm run build     # lo mismo que corre la CI
 - **Tablas con nombre explícito:** `units_of_measure` y `product_warehouse` declaran `$table` en su modelo porque la pluralización de Eloquent no coincide con el nombre documentado; el pivote `warehouse_user` se declara explícito en las relaciones de sus dos modelos.
 - **Modelo documentado ≠ migrado:** `database-design.md` describe 16 tablas; hoy existen 21 en la base, de las que 12 son de la aplicación (RBAC, almacenes, catálogo y auditoría) y el resto base de Laravel. Las tablas de inventario siguen siendo plan: no asumirlas.
 - **La SPA está cableada a la API:** entornos por configuración, `HttpClient` con interceptores de errores y de sesión, rutas perezosas con guardias y componentes compartidos. No asumir que sigue siendo andamiaje.
+- **Verificar la SPA en navegador exige servir con `no-store` y respaldo de rutas:** con un estático corriente, los paquetes en caché enmascaran fallos y las rutas profundas devuelven 404. El arnés de verificación vive **fuera del repositorio** y no sobrevive entre sesiones: regenerar la compilación (`ng build --configuration development`) antes de medir.
 - **Bitácora obligatoria y de solo adición** (`docs/logbook/development-log.md`): una entrada por unidad; nunca se reescribe el pasado.
 - **Deriva conocida docs ↔ código:** ADR-006 figura como decisión de entorno pendiente de confirmación aunque Node 22 ya está instalado y la CI lo usa. Corregir al tocar ese documento.
-- `backend/AGENTS.md` y `backend/CLAUDE.md` eran plantillas autogeneradas de Laravel Boost (pedían PHP 8.5 e instalar Boost); fueron sustituidas por esta base de conocimiento.
+- `backend/AGENTS.md` y `backend/CLAUDE.md` eran plantillas autogeneradas de Laravel Boost (pedían PHP 8.5 e instalar Boost); hoy `backend/AGENTS.md` es la base de conocimiento real y `backend/CLAUDE.md` solo un puntero a ella.
+- **Nunca dos suites de pruebas a la vez:** dos ejecuciones simultáneas de `php artisan test` colisionan sobre la misma base `stockflow_test`, porque `RefreshDatabase` migra y vacía al mismo tiempo. Los síntomas (tabla inexistente, clave duplicada) parecen fallos del código y no lo son; engañaron a dos agentes en una misma sesión. Una sola suite por vez.
+- **Si la SPA no sirve en :4200, el problema es el volumen de dependencias, no el Dockerfile:** `compose.yaml` monta un volumen con nombre sobre `frontend/node_modules` y los volúmenes con nombre **no se resincronizan** mientras existan, así que conservan la lista de dependencias de cuando se crearon. El contenedor registra `Could not resolve "@angular/material/icon"` y el paquete no está en el volumen. Se repara eliminando el contenedor y el volumen `frontend-node-modules` y recreando el servicio, para que el volumen se siembre otra vez desde la imagen; el Dockerfile está bien y no hay que tocarlo.

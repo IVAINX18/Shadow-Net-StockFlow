@@ -12,7 +12,7 @@ Este documento define el modelo físico de datos del MVP sobre MySQL 8.4 LTS con
 - **Nombres:** tablas en snake_case plural; columnas en snake_case; claves foráneas `<entidad_singular>_id`; índices `idx_<tabla>_<columnas>`; claves únicas `uq_<tabla>_<columnas>`; claves foráneas `fk_<tabla>_<referencia>`.
 - **Clave primaria:** `BIGINT UNSIGNED AUTO_INCREMENT` en todas las tablas internas (clustered index de InnoDB, eficiente en joins).
 - **Identificador público:** las tablas expuestas en la API añaden una columna pública estable además del id interno: `inventory_documents.uuid` (`CHAR(36)`, único). El id interno nunca se usa como identificador en URL de documentos.
-- **Marcas de tiempo:** cada tabla lleva `created_at` y `updated_at`; los documentos añaden `confirmed_at` y `reversed_at`.
+- **Marcas de tiempo:** cada tabla lleva `created_at` y `updated_at`; los documentos añaden `confirmed_at`. La reversión no añade una marca propia: se rastrea con `reversed_by_id`, que apunta al documento compensatorio, y el momento lo lleva el `confirmed_at` de ese documento (apartado 5.3). No se duplica el dato para que no pueda divergir de él.
 - **Dinero y cantidades:** siempre `DECIMAL`; nunca tipos de punto flotante.
 
 ## 2. Tipos numéricos
@@ -179,6 +179,7 @@ Restricción única `uq_inventories_product_warehouse (product_id, warehouse_id)
 | quantity | DECIMAL(15,3) | No | CHECK `quantity > 0` | Siempre positiva. |
 | unit_cost | DECIMAL(18,6) | No | default 0 | Costo capturado o vigente. |
 | line_total | DECIMAL(18,2) | No | default 0 | `quantity * unit_cost` redondeado. |
+| direction | VARCHAR(10) | Sí | CHECK (`direction` IS NULL OR `direction` IN (`entrada`,`salida`)) | Solo en ajustes. `quantity` es siempre positiva (RN-INV-01) y el motivo no expresa signo, así que el sentido de la corrección se declara aquí, por línea; en cualquier otro tipo queda nulo. [DECISIÓN] |
 
 Índices: `idx_inventory_document_lines_document (document_id)`, `idx_inventory_document_lines_product (product_id)`.
 

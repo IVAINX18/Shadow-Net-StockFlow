@@ -59,6 +59,8 @@ Duración: [ESTIMACIÓN] 3 semanas. Fuente: juicio del equipo de planificación.
 
 ### Fase 3. Inventario (documentos, movimientos, kardex y reversos)
 
+**Estado:** completada y verificada el 15/10/2026. Los siete criterios de salida se comprobaron uno por uno con evidencia cruda y sin pruebas vacías; el detalle está en la [bitácora](../logbook/development-log.md), entradas 25 a 30.
+
 Duración: [ESTIMACIÓN] 4 semanas. Fuente: juicio del equipo de planificación. Es la fase más exigente del proyecto y no admite atajos.
 
 - **Objetivo:** garantizar la integridad transaccional del inventario: transferencias atómicas, ningún saldo negativo, idempotencia y correcciones trazables mediante reversión.
