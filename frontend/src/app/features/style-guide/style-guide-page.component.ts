@@ -61,9 +61,10 @@ export class StyleGuidePageComponent {
 
   protected readonly typography: readonly TypeSample[] = [
     { token: 'var(--mat-sys-display-small)', label: 'Display small', sample: 'StockFlow', tight: true },
-    { token: 'var(--mat-sys-headline-small)', label: 'Headline small', sample: 'Resumen de almacen', tight: true },
-    { token: 'var(--mat-sys-title-large)', label: 'Title large', sample: 'Movimientos del dia', tight: true },
-    { token: 'var(--mat-sys-title-medium)', label: 'Title medium', sample: 'Kardex por producto', tight: true },
+    { token: 'var(--mat-sys-headline-large)', label: 'Headline large · titulo de pagina (32)', sample: 'Resumen de almacen', tight: true },
+    { token: 'var(--mat-sys-headline-medium)', label: 'Headline medium · titulo de acceso (28)', sample: 'Shadow-Net StockFlow', tight: true },
+    { token: 'var(--mat-sys-title-large)', label: 'Title large · titulo de seccion (22)', sample: 'Movimientos del dia', tight: true },
+    { token: 'var(--mat-sys-title-medium)', label: 'Title medium · titulo de tarjeta (16)', sample: 'Kardex por producto', tight: true },
     { token: 'var(--mat-sys-body-large)', label: 'Body large', sample: 'Texto general de la interfaz.', tight: false },
     { token: 'var(--mat-sys-body-medium)', label: 'Body medium', sample: 'Texto de apoyo y descripciones.', tight: false },
     { token: 'var(--mat-sys-label-large)', label: 'Label large', sample: 'ETIQUETA DE CAMPO', tight: false },
@@ -73,8 +74,8 @@ export class StyleGuidePageComponent {
   // Ritmo de composicion del contrato (§8): los valores son los que declaran
   // los tokens, asi que la pagina los muestra sin inventar ninguno.
   protected readonly rhythmTokens: readonly SpacingRow[] = [
-    { token: '--app-page-gutter', value: '24 px', use: 'Margen interior del area de contenido' },
-    { token: '--app-section-gap', value: '24 px', use: 'Separacion entre bloques de una pantalla' },
+    { token: '--app-page-gutter', value: '32 px', use: 'Margen interior del area de contenido' },
+    { token: '--app-section-gap', value: '32 px', use: 'Separacion entre bloques de una pantalla' },
     { token: '--app-card-padding', value: '16 px', use: 'Relleno interior de tarjetas y contenedores' },
     { token: '--app-element-gap', value: '8 px', use: 'Separacion entre elementos de un mismo bloque' },
   ];

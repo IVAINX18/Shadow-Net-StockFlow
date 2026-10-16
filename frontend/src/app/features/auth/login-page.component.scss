@@ -4,13 +4,13 @@
   justify-content: center;
   min-block-size: 100dvh;
   padding: var(--app-page-gutter);
-  background: var(--mat-sys-surface);
+  background: var(--app-surface-canvas);
 }
 
 .login__card {
   inline-size: min(420px, 100%);
   padding: var(--app-card-padding);
-  background: var(--mat-sys-surface-container);
+  background: var(--app-surface-card);
   border: 1px solid var(--mat-sys-outline-variant);
   border-radius: var(--mat-sys-corner-large);
 }
@@ -29,7 +29,10 @@
 
 .login__title {
   margin: 0;
-  font: var(--mat-sys-title-large);
+  // Titulo de acceso a 28 px con el mismo tratamiento display que el titulo
+  // de pagina: queda entre la pagina (32) y la seccion (22).
+  font: var(--mat-sys-headline-medium);
+  font-weight: var(--app-title-weight);
 }
 
 .login__subtitle {

@@ -34,7 +34,11 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
     .page-header__title {
       margin: 0;
-      font: var(--mat-sys-headline-small);
+      // Titulo de pagina a 32 px con tratamiento display (peso del token y
+      // tracking de .app-tight): desde aqui suben todos los titulos de las
+      // pantallas sin editar ninguna.
+      font: var(--mat-sys-headline-large);
+      font-weight: var(--app-title-weight);
       color: var(--mat-sys-on-surface);
     }
 

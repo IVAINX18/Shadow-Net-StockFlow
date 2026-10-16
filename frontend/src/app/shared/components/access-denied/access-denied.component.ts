@@ -45,7 +45,9 @@ import { RouterLink } from '@angular/router';
 
     .denied__title {
       margin: 0;
-      font: var(--mat-sys-headline-small);
+      // Pantalla completa: titulo de pagina a 32 px con tratamiento display.
+      font: var(--mat-sys-headline-large);
+      font-weight: var(--app-title-weight);
     }
 
     .denied__message {

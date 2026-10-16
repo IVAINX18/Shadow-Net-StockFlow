@@ -24,7 +24,8 @@
 
 .section__title {
   margin: 0;
-  font: var(--mat-sys-title-medium);
+  // Titulo de seccion a 22 px: un paso por encima del titulo de tarjeta (16).
+  font: var(--mat-sys-title-large);
   color: var(--mat-sys-on-surface);
 }
 
@@ -53,7 +54,7 @@
   padding: var(--app-card-padding);
   border: 1px solid var(--mat-sys-outline-variant);
   border-radius: var(--mat-sys-corner-medium);
-  background: var(--mat-sys-surface-container);
+  background: var(--app-surface-card);
 }
 
 .unit-form__banner {

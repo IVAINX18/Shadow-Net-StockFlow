@@ -54,7 +54,7 @@ import { PageHeaderComponent } from '../page-header/page-header.component';
       align-items: flex-start;
       padding: var(--app-card-padding);
       border-radius: var(--mat-sys-corner-medium);
-      background: var(--mat-sys-surface-container);
+      background: var(--app-surface-paper);
       border: 1px solid var(--mat-sys-outline-variant);
     }
 

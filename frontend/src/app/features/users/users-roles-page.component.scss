@@ -17,6 +17,7 @@
 
 .section__title {
   margin: 0;
-  font: var(--mat-sys-title-medium);
+  // Titulo de seccion a 22 px: un paso por encima del titulo de tarjeta (16).
+  font: var(--mat-sys-title-large);
   color: var(--mat-sys-on-surface);
 }

@@ -10,6 +10,7 @@ import {
   argbFromHex,
   hexFromArgb,
   themeFromSourceColor,
+  TonalPalette,
 } from '@material/material-color-utilities';
 
 const SEED = '#00695C';
@@ -38,8 +39,15 @@ const NEUTRAL_TONES = [...new Set([...TONES, 4, 6, 12, 17, 22, 24, 87, 92, 94, 9
 const primary = toTones(theme.palettes.primary);
 const secondary = toTones(theme.palettes.secondary);
 const tertiary = toTones(theme.palettes.tertiary);
-const neutral = toTones(theme.palettes.neutral, NEUTRAL_TONES);
-const neutralVariant = toTones(theme.palettes.neutralVariant);
+// Emito los neutros con croma cero: Material 3 fija un croma minimo en sus
+// escalas neutras y ese minimo arrastra el tinte verde de la semilla al lienzo
+// (hoy el canvas sale verdoso). Una semilla gris no sirve porque solo desplaza
+// el matiz del tinte; con croma cero el gris es acromatico de verdad. La
+// variante neutra tambien va a cero porque con croma 4 y matiz 0 el CAM16 la
+// devuelve rosada y los bordes se verian calidos. El primario no se toca.
+const neutralGrey = TonalPalette.fromHueAndChroma(0, 0);
+const neutral = toTones(neutralGrey, NEUTRAL_TONES);
+const neutralVariant = toTones(neutralGrey);
 const error = toTones(theme.palettes.error);
 
 const content = `// Archivo generado por tools/generate-palette.mjs. No editar a mano.

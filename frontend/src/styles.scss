@@ -96,9 +96,9 @@
   // Ritmo de composicion por tokens (design-system.md §8): separaciones de
   // bloque derivadas de la escala de 4 px, nunca margenes improvisados.
   // Margen interior del area de contenido.
-  --app-page-gutter: 24px;
+  --app-page-gutter: var(--app-space-8);
   // Separacion entre bloques de una pantalla.
-  --app-section-gap: 24px;
+  --app-section-gap: var(--app-space-8);
   // Relleno interior de tarjetas y contenedores.
   --app-card-padding: 16px;
   // Separacion entre elementos de un mismo bloque.
@@ -111,6 +111,21 @@
   // light-dark() para no crear una segunda rama de tema.
   --app-status-warning-container: light-dark(#fef3c7, #4a3208);
   --app-status-on-warning-container: light-dark(#78350f, #fde68a);
+
+  // Superficies del modelo Dub (DESIGN.md, tabla Surfaces): el lienzo es
+  // blanco puro, la tarjeta es blanca sobre blanco separada por hairline y el
+  // papel agrupa lo secundario. Los neutros ya salen acromaticos de la
+  // paleta (croma cero), asi que el blanco del brazo claro es exacto, no
+  // aproximado. El brazo oscuro conserva el rol M3 para no romper el tema
+  // oscuro; no hay bloque oscuro separado.
+  --app-surface-canvas: light-dark(#ffffff, var(--mat-sys-surface));
+  --app-surface-card: light-dark(#ffffff, var(--mat-sys-surface-container));
+  --app-surface-paper: light-dark(#f5f5f5, var(--mat-sys-surface-container-low));
+
+  // Peso display de DESIGN.md (Inter 500 con tracking cerrado para los
+  // titulares grandes): lo declaro una vez para no repetir el literal en
+  // cada titular. El tracking ya lo aporta .app-tight.
+  --app-title-weight: 500;
 
   // Escala unica de indices de apilamiento del proyecto (design-system.md §14).
   --app-z-base: 0;
@@ -179,11 +194,23 @@ body {
 
 body {
   margin: 0;
-  background: var(--mat-sys-surface);
+  // El lienzo Dub es blanco puro en claro y el surface M3 en oscuro: lo subo
+  // aqui para que ninguna pantalla tenga que ensuciarse con el valor.
+  background: var(--app-surface-canvas);
   color: var(--mat-sys-on-surface);
   font: var(--mat-sys-body-medium);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+// Por debajo de 768 px el ritmo de 32 px aprieta demasiado, asi que bajo los
+// dos tokens de composicion a 24 px. Al ser tokens, todas las pantallas y el
+// armazon responden sin tocar ningun componente.
+@media (max-width: 767.98px) {
+  :root {
+    --app-page-gutter: var(--app-space-6);
+    --app-section-gap: var(--app-space-6);
+  }
 }
 
 // Respeto la preferencia de movimiento reducido del sistema (design-system.md

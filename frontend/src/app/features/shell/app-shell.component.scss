@@ -3,12 +3,14 @@
 // corrige design-system.md §15.
 .shell {
   block-size: 100dvh;
-  background: var(--mat-sys-surface);
+  background: var(--app-surface-canvas);
 }
 
 .shell__sidenav {
   inline-size: 268px;
-  background: var(--mat-sys-surface-container-low);
+  // Cromo secundario: papel Dub en claro para agrupar la navegacion sin
+  // competir con las tarjetas blancas del contenido.
+  background: var(--app-surface-paper);
   border-right: 1px solid var(--mat-sys-outline-variant);
 }
 
@@ -74,7 +76,7 @@
 }
 
 .shell__content {
-  background: var(--mat-sys-surface);
+  background: var(--app-surface-canvas);
 }
 
 // Barra separada con una linea fina, nunca con sombra; altura fija de 64 px
@@ -85,7 +87,7 @@
   z-index: var(--app-z-appbar);
   block-size: 64px;
   gap: var(--app-element-gap);
-  background: var(--mat-sys-surface-container);
+  background: var(--app-surface-card);
   border-bottom: 1px solid var(--mat-sys-outline-variant);
   box-shadow: none;
   white-space: nowrap;

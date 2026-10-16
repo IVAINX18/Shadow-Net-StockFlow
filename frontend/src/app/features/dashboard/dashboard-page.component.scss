@@ -7,7 +7,8 @@
 
 .dashboard__title {
   margin: 0 0 var(--app-space-3);
-  font: var(--mat-sys-title-medium);
+  // Titulo de seccion a 22 px: un paso por encima del titulo de tarjeta (16).
+  font: var(--mat-sys-title-large);
   color: var(--mat-sys-on-surface);
 }
 
@@ -40,7 +41,7 @@
   padding: var(--app-card-padding);
   border: 1px dashed var(--mat-sys-outline-variant);
   border-radius: var(--mat-sys-corner-medium);
-  background: var(--mat-sys-surface-container-low);
+  background: var(--app-surface-paper);
 }
 
 .dependency__head {

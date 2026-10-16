@@ -1,10 +1,12 @@
 # Sistema de diseno - Shadow-Net StockFlow
 
-**Estado del documento:** v1.1 (refinamiento de gusto visual). **Fecha:** 13/10/2026. **Autor:** Shadow-Net Technologies.
+**Estado del documento:** v1.2 (modelo de superficie, neutros, tipografia, ritmo y lineas). **Fecha:** 15/10/2026. **Autor:** Shadow-Net Technologies.
 
 Este documento es la **fuente unica** de la identidad visual de la SPA: sistema de componentes, tokens, temas, tipografia, color, forma, densidad, estados de interfaz y la lista de verificacion que una pantalla debe pasar antes de darse por terminada. La arquitectura de la SPA (carpetas, estado, interceptores, rutas) esta en [frontend-architecture.md](./frontend-architecture.md); los requisitos de accesibilidad en [../planning/non-functional-requirements.md](../planning/non-functional-requirements.md) (RNF-024, RNF-025, RNF-026); los contratos de presentacion de datos en [api-design.md](./api-design.md).
 
 **Cambios de la v1.1 respecto de la v1.0:** tipografia (seccion 6), vocabulario de forma y realimentacion tactil (seccion 7), ritmo de espaciado por tokens (seccion 8), `MOTION_INTENSITY` de 2 a 3 (seccion 1), adaptacion de la referencia de gusto externa (seccion 15) y casillas nuevas de verificacion (seccion 16).
+
+**Cambios de la v1.2 respecto de la v1.1:** modelo de superficie por tokens (seccion 3), neutros con croma cero (seccion 4), jerarquia tipografica (seccion 6), ritmo de 32 px (seccion 8), sistema de lineas en dos niveles (secciones 7 y 13) y acento sin cambios, pendiente del propietario (seccion 15). Verificacion de la unidad, ya medida en sesion previa y registrada en la bitacora: lint limpio, 40 pruebas en 9 ficheros en verde, compilacion de produccion de 342,67 kB iniciales sin avisos de presupuesto, 44 capturas en 1440/1024/768/375 en ambos temas, cero desbordes de titulo a 375 px en las 9 rutas y contrastes medidos sobre estilos calculados reales.
 
 ## 1. Lectura de diseno y alcance
 
@@ -49,6 +51,16 @@ Reglas de uso de la jerarquia de superficie:
 | `primary` / `on-primary` | Acento unico, acciones principales y estado activo de la navegacion. |
 | `error`, `tertiary`, `secondary` y sus variantes | Solo estado semantico (error, advertencia, exito, informacion). Nunca decoracion. |
 
+[DECISION] **Modelo de superficie por tokens.** Los componentes no apuntan a los roles de Material directamente, sino a tres propiedades declaradas en `frontend/src/styles.scss`:
+
+| Token | Tema claro | Tema oscuro | Nivel y uso |
+| --- | --- | --- | --- |
+| `--app-surface-canvas` | `#ffffff` | `surface` | Nivel 0: el lienzo de la pagina. |
+| `--app-surface-paper` | `#f5f5f5` | `surface-container-low` | Nivel 1: zonas secundarias o agrupadas, barra lateral y barras de herramientas del armazon. |
+| `--app-surface-card` | `#ffffff` | `surface-container` | Nivel 2: tarjetas. |
+
+El modelo refleja los niveles 0 (lienzo), 1 (papel) y 2 (tarjeta) de la referencia: tarjetas en blanco sobre blanco separadas por linea fina, con el papel para las zonas agrupadas.
+
 ## 4. Color
 
 [DECISION] **Semilla de paleta: verde azulado profundo.** Material 3 deriva de esa unica semilla toda la paleta tonal y asigna los roles semanticos, de modo que el proyecto no mantiene una lista de colores a mano.
@@ -60,6 +72,10 @@ Reglas de uso de la jerarquia de superficie:
 - El color nunca es el unico portador de informacion (ver seccion 13).
 - **Cinco tonos de estado, cinco colores distintos.** Neutral, informativo, exito, advertencia y error deben poder distinguirse entre si por color, ademas de por texto e icono. La distincion se mide sobre los colores reales en pantalla, no se supone a partir del nombre de la clase.
 - Todo contraste se verifica sobre los valores reales de los tokens, en tema claro y en tema oscuro.
+
+[DECISION] **Neutros con croma cero.** `frontend/tools/generate-palette.mjs` emite las escalas `neutral` y `neutral-variant` con **croma cero** (`TonalPalette.fromHueAndChroma(0, 0)`); primario, secundario, terciario y error siguen derivandose de la semilla de marca `#00695C`.
+
+Motivo medido: Material 3 impone un croma minimo a sus escalas de neutros, asi que los neutros heredaban el tinte verde de la semilla. Cambiar la semilla por un gris no lo corrige, medido: una semilla gris entrega `#f8fafa` frente al `#f7faf8` vigente entonces, 2 unidades de diferencia en el canal azul, invisibles. El croma cero es el unico mecanismo que elimina el tinte. Resultado: grises puros (`98: #f9f9f9`, `50: #777777`, `6: #131313`). Trampa encontrada al hacerlo: la variante neutra con croma 4 y tono 0 sale rosada (`#cfc4c5`), porque el tono 0 se lee calido en CAM16, asi que ahi tambien hay que usar croma cero.
 
 ## 5. Temas claro y oscuro
 
@@ -76,6 +92,8 @@ Reglas de uso de la jerarquia de superficie:
 Motivos: la referencia de gusto del repositorio (`DESIGN.md`, seccion Tipografia) declara Inter con peso medio y tracking cerrado como sustituta de su titular, y una monoespaciada para los metadatos tecnicos; es la palanca de mayor mejora visual por unidad de riesgo en un rediseno. La guia de gusto que rige estas decisiones desaconseja Inter por defecto, pero admite la excepcion explicita para interfaces neutras al estilo Linear y de accesibilidad critica, que es exactamente este caso; la excepcion queda registrada aqui y en la bitacora.
 
 - Se usa la escala tipografica de Material 3; no se inventan tamanos fuera de ella.
+- **Jerarquia aplicada:** titulo de pagina `headline-large` de 32 px; titulo del acceso `headline-medium` de 28 px; titulos de seccion y de tarjeta `title-large` de 22 px; valor de indicador `headline-medium` de 28 px (sin cambios); cuerpo `body-medium` de 14 px. Jerarquia resultante de 32 > 28 > 22 > 16.
+- **Peso del titular centralizado en `--app-title-weight: 500`**, que es el tratamiento de titular de la referencia (Inter en peso 500 con tracking cerrado; `.app-tight` con `-0.02em` es el equivalente existente de su sustituto Satoshi). El titulo de pagina se aplica en un solo lugar, el encabezado compartido de pagina, asi que todas las pantallas lo heredan.
 - **Titulares con tracking cerrado:** los roles `display`, `headline` y `title` se componen con `letter-spacing: -0.02em` mediante la utilidad `.app-tight`; el peso medio (no negrita) es lo que da caracter sin gritar.
 - **Numeros tabulares activados** en toda celda numerica, en los valores de las tarjetas de indicadores y en las columnas de cantidades, costos y valores: es lo que permite comparar cifras en vertical.
 - La monoespaciada se reserva a datos tecnicos: codigos de almacen, claves de documento, SKU, rutas de endpoint. No se usa para texto corrido.
@@ -98,6 +116,15 @@ Motivos: la referencia de gusto del repositorio (`DESIGN.md`, seccion Tipografia
 
 [DECISION] **El contenedor se define con borde, no con sombra.** La elevacion esta prohibida como decoracion: un bloque se separa con un borde de 1 px (`outline-variant`) o con espacio en blanco. La sombra se reserva a lo que de verdad flota sobre la pagina (menu, dialogo, capa superpuesta) y va entintada con el tono del fondo, nunca negro puro sobre fondo claro.
 
+[DECISION] **Sistema de lineas en dos niveles.** La linea decorativa y el borde de control se separan y usan los dos tokens propios de Material 3, que ya traen el significado correcto:
+
+| Uso | Token | Tema claro | Tema oscuro |
+| --- | --- | --- | --- |
+| Decorativa (bordes de tarjeta, divisores) | `outline-variant` | `#c6c6c6` | `#474747` |
+| Borde de control (campos, botones, casillas) | `outline` | `#777777` | `#919191` |
+
+La decorativa es sutil a proposito (1.71:1 en claro y 2.00:1 en oscuro); el borde de control alcanza 4.48:1 en claro y 5.90:1 en oscuro, medidos sobre estilos calculados reales. Requisito explicito: el borde de un control debe alcanzar 3:1 (WCAG 1.4.11), porque puede ser lo unico que identifica al control. Nota honesta: antes de este cambio el contorno de control media 1.62:1 en claro y 1.99:1 en oscuro y por tanto no cumplia; era un defecto previo encontrado al medir, no algo que este cambio introdujera.
+
 [DECISION] **Realimentacion fisica al pulsar.** Toda accion interactiva responde al pulsarse con un hundimiento de 1 px o una escala de 0.98, y su transicion dura entre 120 y 160 ms. No hay ninguna animacion que no comunique un cambio de estado.
 
 - La separacion por defecto entre filas y bloques es un divisor de 1 px (`outline-variant`) o espacio en blanco, no una tarjeta.
@@ -111,11 +138,13 @@ Motivos: la referencia de gusto del repositorio (`DESIGN.md`, seccion Tipografia
 
 | Token | Valor | Uso |
 | --- | --- | --- |
-| `--app-page-gutter` | 24 px (32 px en escritorio) | Margen interior del area de contenido. |
-| `--app-section-gap` | 24 px | Separacion entre bloques de una pantalla. |
+| `--app-page-gutter` | 32 px (24 px por debajo de 768 px) | Margen interior del area de contenido. |
+| `--app-section-gap` | 32 px (24 px por debajo de 768 px) | Separacion entre bloques de una pantalla. |
 | `--app-card-padding` | 16 px | Relleno interior de tarjetas y contenedores. |
 | `--app-element-gap` | 8 px | Separacion entre elementos de un mismo bloque. |
 | `--app-space-1` a `--app-space-8` | 4 a 32 px | Escala general de la seccion. |
+
+`--app-page-gutter` y `--app-section-gap` son ahora 32 px (`--app-space-8`) y bajan a 24 px (`--app-space-6`) por debajo de 768 px; el relleno de tarjeta (16 px) y la separacion entre elementos (8 px) no cambian. La referencia usa 64 px porque es una pagina de promocion; 32 px es la traduccion honesta para un panel de operacion denso.
 
 [DECISION] En las pantallas de operacion de bodega se mantienen **objetivos tactiles de al menos 44 px** y la densidad compacta no se aplica: ahi mandan RNF-024 y la accesibilidad por encima de la densidad.
 
@@ -165,7 +194,7 @@ Reglas que la interfaz no puede romper porque el contrato de la API ya las fijo 
 
 RNF-025 exige **WCAG 2.1 nivel AA**. Se verifica:
 
-- Contraste de texto y de controles en ambos temas.
+- Contraste de texto y de controles en ambos temas; el borde de un control debe alcanzar 3:1 segun WCAG 1.4.11 (ver seccion 7).
 - Foco visible en todos los elementos interactivos y orden de tabulacion coherente.
 - Navegacion completa por teclado, incluidas tablas, menus y dialogos.
 - Etiquetas accesibles y mensajes de error asociados a su campo.
@@ -215,6 +244,7 @@ El repositorio incorpora `DESIGN.md` como referencia de gusto de una interfaz de
 | Realimentacion fisica al pulsar | Se adopta (seccion 7). |
 | Superficies planas, blanco sobre blanco, separadas por linea fina | Se adopta mediante los roles de superficie. |
 | El azul electrico de la referencia | **No se adopta:** la marca conserva su semilla verde azulada. Se aprende el sistema, no la identidad. |
+| El relleno casi negro de la accion principal | **No se adopta:** el primario se mantiene en `#006b5e` en claro y `#56dbc5` en oscuro, y la accion principal rellena conserva el acento en lugar del relleno casi negro de la referencia. La decision queda pendiente del propietario. |
 | Fondo de rejilla de puntos | **No se adopta:** es textura decorativa sin funcion operativa. |
 | Interfaz solo en tema claro | **No se adopta:** el proyecto mantiene tema claro y oscuro (seccion 5). |
 | Reglas de pagina de promocion (hero, marquesinas, rejillas bento, fotografia generada) | **No se adoptan:** la propia guia de gusto las declara fuera de alcance para paneles de administracion, y este documento las excluye en la seccion 1. |

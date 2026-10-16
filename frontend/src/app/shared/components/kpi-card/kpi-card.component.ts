@@ -34,7 +34,7 @@ import { MatIconModule } from '@angular/material/icon';
       gap: var(--app-element-gap);
       padding: var(--app-card-padding);
       border-radius: var(--mat-sys-corner-medium);
-      background: var(--mat-sys-surface-container);
+      background: var(--app-surface-card);
       border: 1px solid var(--mat-sys-outline-variant);
     }
 
